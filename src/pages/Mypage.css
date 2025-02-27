@@ -1,0 +1,18 @@
+.mypage-container {
+  display: flex;
+}
+
+.sidebar {
+  width: 200px; /* 사이드바의 너비 */
+  padding: 10px;
+}
+
+.content {
+  flex: 1; /* 남은 공간을 차지 */
+  padding: 20px;
+}
+
+.active {
+  background-color: #007bff; /* 활성화된 메뉴 배경색 */
+  color: white; /* 활성화된 메뉴 텍스트 색상 */
+}
