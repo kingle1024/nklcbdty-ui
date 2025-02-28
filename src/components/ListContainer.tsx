@@ -18,15 +18,26 @@ interface Job_mst {
 const ListContainer: React.FC = () => {
   const [products, setProducts] = useState<Job_mst[]>([]);
   const [company, setCompany] = useState<string>('NAVER');
+  const [cache, setCache] = useState<{ [key: string]: Job_mst[] }>({});
 
   useEffect(() => {
     const fetchData = async () => {
+      // 캐시에서 데이터가 있는지 확인
+      if (cache[company]) {
+        setProducts(cache[company]); // 캐시에서 데이터 가져오기
+        return;
+      }
+
       try {
         const response: AxiosResponse<Job_mst[]> = await axios.get<Job_mst[]>(`${API_URL}/api/list`, {
           params: { company },
         });
         if (Array.isArray(response.data)) {
           setProducts(response.data);
+          setCache((prevCache) => ({
+            ...prevCache,
+            [company]: response.data, // 캐시에 저장
+          }));
         } else {
           console.error('Unexpected response format:', response.data);
         }
