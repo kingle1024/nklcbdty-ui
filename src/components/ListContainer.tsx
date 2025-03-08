@@ -15,14 +15,21 @@ interface Job_mst {
   jobDetailLink: string;
 }
 
-const ListContainer: React.FC = () => {
+interface ListContainerProps {
+  filters: {
+    employmentType: string;
+    careerPeriod: string;
+    categories: string[]; // 배열로 수정
+  };
+}
+
+const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
   const [products, setProducts] = useState<Job_mst[]>([]);
   const [company, setCompany] = useState<string>('NAVER');
   const [cache, setCache] = useState<{ [key: string]: Job_mst[] }>({});
 
   useEffect(() => {
     const fetchData = async () => {
-      // 캐시에서 데이터가 있는지 확인
       if (cache[company]) {
         setProducts(cache[company]); // 캐시에서 데이터 가져오기
         return;
@@ -52,16 +59,24 @@ const ListContainer: React.FC = () => {
     setCompany(selectedCompany);
   };
 
-  const companies:any = {
+  const companies: { [key: string]: string } = {
     NAVER: '네이버',
     KAKAO: '카카오',
     LINE: '라인',
     COUPANG: '쿠팡',
-    BAEMIN: '배달의민족', 
+    BAEMIN: '배달의민족',
     DAANGN: '당근마켓',
     TOSS: '토스',
     YANOLJA: '야놀자',
   };
+
+  // 필터링 로직
+  const filteredProducts = products.filter((item) => {
+    const matchesEmploymentType = filters.employmentType ? item.empTypeCdNm === filters.employmentType : true;
+    const matchesCareerPeriod = filters.careerPeriod ? item.subJobCdNm === filters.careerPeriod : true;
+    const matchesCategory = filters.categories.length > 0 ? filters.categories.includes(item.classCdNm) : true; // 배열로 수정
+    return matchesEmploymentType && matchesCareerPeriod && matchesCategory;
+  });
 
   return (
     <div className="container">
@@ -82,8 +97,8 @@ const ListContainer: React.FC = () => {
         </div>
 
         <ul>
-          {products.length > 0 ? (
-            products.map((item: Job_mst) => (
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((item: Job_mst) => (
               <li key={item.annoId}>
                 <a href={item.jobDetailLink} target="_blank" rel="noopener noreferrer">{item.annoSubject}</a>
               </li>
