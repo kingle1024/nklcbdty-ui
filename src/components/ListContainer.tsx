@@ -74,7 +74,7 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
   const filteredProducts = products.filter((item) => {
     const matchesEmploymentType = filters.employmentType ? item.empTypeCdNm === filters.employmentType : true;
     const matchesCareerPeriod = filters.careerPeriod ? item.subJobCdNm === filters.careerPeriod : true;
-    const matchesCategory = filters.categories.length > 0 ? filters.categories.includes(item.classCdNm) : true; // 배열로 수정
+    const matchesCategory = filters.categories.length > 0 ? filters.categories.includes(item.subJobCdNm) : true; // 배열로 수정
     return matchesEmploymentType && matchesCareerPeriod && matchesCategory;
   });
 
