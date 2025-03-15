@@ -19,7 +19,9 @@ interface ListContainerProps {
   filters: {
     employmentType: string;
     careerPeriod: string;
-    categories: string[]; // 배열로 수정
+    engineering: string[]; // Engineering 필터 추가
+    support: string[];
+    dba: string[];
   };
 }
 
@@ -75,8 +77,13 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
   const filteredProducts = products.filter((item) => {
     const matchesEmploymentType = filters.employmentType ? item.empTypeCdNm === filters.employmentType : true;
     const matchesCareerPeriod = filters.careerPeriod ? item.subJobCdNm === filters.careerPeriod : true;
-    const matchesCategory = filters.categories.length > 0 ? filters.categories.includes(item.subJobCdNm) : true; // 배열로 수정
-    return matchesEmploymentType && matchesCareerPeriod && matchesCategory;
+    
+    // 카테고리 필터링
+    const matchesCategory = filters.engineering.includes(item.subJobCdNm) || 
+                            filters.support.includes(item.subJobCdNm) || 
+                            filters.dba.includes(item.subJobCdNm);
+
+    return matchesEmploymentType && matchesCareerPeriod && (filters.engineering.length || filters.support.length || filters.dba.length ? matchesCategory : true);
   });
 
   return (
