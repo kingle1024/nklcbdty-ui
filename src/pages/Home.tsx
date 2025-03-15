@@ -7,7 +7,7 @@ import './Home.css';
 // 카테고리 목록
 const categoriesData = [
   {
-    title: 'Engineering', // 사용자에게 표시될 제목
+    title: 'Engineering',
     categories: [
       'Backend',
       'Frontend',
@@ -16,25 +16,19 @@ const categoriesData = [
       'Full Stack',
       'App',
       'Engineering',
-      'DBA', // DBA 추가
+      'DBA',
     ],
-    visible: true // 기본적으로 펼쳐짐
+    visible: true,
   },
   {
     title: 'Support',
-    categories: [
-      'Business',
-      'etc'
-    ],
-    visible: false // 기본적으로 접힘
+    categories: ['Business', 'etc'],
+    visible: false,
   },
   {
-    title: 'DBA', // DBA 카테고리 추가
-    categories: [
-      'Data Engineering',
-      'Data Analysis'
-    ],
-    visible: false // 기본적으로 접힘
+    title: 'DBA',
+    categories: ['Data Engineering', 'Data Analysis'],
+    visible: false,
   },
 ];
 
@@ -43,18 +37,18 @@ interface Filters {
   employmentType: string;
   careerPeriod: string;
   categories: string[]; // 모든 카테고리를 포함하는 필드 추가
-  engineering: string[]; // Engineering 카테고리 필드
+  engineering: string[];
   support: string[];
   dba: string[];
 }
 
 // CategorySection Props 타입 정의
 interface CategorySectionProps {
-  title: string; // title을 string으로 변경
+  title: string;
   categories: string[];
   showCategories: boolean;
   toggleCategories: () => void;
-  filters: Filters; // 필터 타입으로 변경
+  filters: Filters;
   handleFilterChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -64,22 +58,25 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   showCategories,
   toggleCategories,
   filters,
-  handleFilterChange
+  handleFilterChange,
 }) => (
   <div>
-    <span onClick={toggleCategories} style={{ cursor: 'pointer', color: '#007bff', fontWeight: 'bold' }}>
-      {title} {/* title을 그대로 표시 */}
+    <span
+      onClick={toggleCategories}
+      style={{ cursor: 'pointer', color: '#007bff', fontWeight: 'bold' }}
+    >
+      {title}
     </span>
     {showCategories && (
       <div className="category-list">
-        {categories.map(category => (
+        {categories.map((category) => (
           <div key={category}>
             <input
               type="checkbox"
               id={category}
               value={category}
-              name={title} // 필터 이름으로 title 사용
-              checked={filters[title.toLowerCase() as keyof Filters]?.includes(category) || false} // 체크 상태
+              name={title.toLowerCase()} // 필터 이름으로 title 소문자 사용
+              checked={filters[title.toLowerCase() as keyof Filters]?.includes(category) || false}
               onChange={handleFilterChange}
             />
             <label htmlFor={category}>{category}</label>
@@ -96,9 +93,9 @@ const Home: React.FC = () => {
     employmentType: '',
     careerPeriod: '',
     categories: [], // 기본적으로 모든 카테고리 체크 해제
-    engineering: [], // Engineering 필터 초기화
+    engineering: [],
     support: [],
-    dba: [] // DBA 카테고리 초기화
+    dba: [],
   });
 
   // State to manage the visibility of categories
@@ -113,31 +110,31 @@ const Home: React.FC = () => {
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked, name } = event.target;
 
-    setFilters(prevFilters => {
-      const currentCategories = prevFilters[name.toLowerCase() as keyof Filters] as string[]; // currentCategories를 string[]로 강제 변환
+    setFilters((prevFilters) => {
+      const currentCategories = prevFilters[name.toLowerCase() as keyof Filters] as string[];
       const newCategories = checked
         ? [...currentCategories, value] // 체크된 경우 추가
-        : currentCategories.filter(category => category !== value); // 체크 해제된 경우 제거
+        : currentCategories.filter((category) => category !== value); // 체크 해제된 경우 제거
 
       return {
         ...prevFilters,
-        [name.toLowerCase() as keyof Filters]: newCategories // 동적으로 업데이트
+        [name.toLowerCase() as keyof Filters]: newCategories, // 동적으로 업데이트
       };
     });
   };
 
   // Toggle function for category visibility
   const toggleCategories = (title: string) => {
-    setVisibleCategories(prev => ({
+    setVisibleCategories((prev) => ({
       ...prev,
-      [title]: !prev[title]
+      [title]: !prev[title],
     }));
   };
 
   return (
     <IonPage>
       <Helmet>
-        <title>네카라쿠배당토야 공고</title>                
+        <title>네카라쿠배당토야 공고</title>
       </Helmet>
       <IonHeader>
         <IonToolbar>
@@ -149,7 +146,7 @@ const Home: React.FC = () => {
           <aside className="left-aside">
             <h2>필터</h2>
             <form>
-              {categoriesData.map(categoryData => (
+              {categoriesData.map((categoryData) => (
                 <CategorySection
                   key={categoryData.title}
                   title={categoryData.title} // 필터 제목으로 사용
