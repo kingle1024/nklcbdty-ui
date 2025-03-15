@@ -60,6 +60,7 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
   };
 
   const companies: { [key: string]: string } = {
+    ALL: '전체',
     NAVER: '네이버',
     KAKAO: '카카오',
     LINE: '라인',
