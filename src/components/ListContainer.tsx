@@ -19,7 +19,7 @@ interface ListContainerProps {
   filters: {
     employmentType: string;
     careerPeriod: string;
-    engineering: string[]; // Engineering 필터 추가
+    engineering: string[];
     support: string[];
     dba: string[];
   };
@@ -33,7 +33,7 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
   useEffect(() => {
     const fetchData = async () => {
       if (cache[company]) {
-        setProducts(cache[company]); // 캐시에서 데이터 가져오기
+        setProducts(cache[company]);
         return;
       }
 
@@ -41,11 +41,12 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
         const response: AxiosResponse<Job_mst[]> = await axios.get<Job_mst[]>(`${API_URL}/api/list`, {
           params: { company },
         });
+
         if (Array.isArray(response.data)) {
           setProducts(response.data);
           setCache((prevCache) => ({
             ...prevCache,
-            [company]: response.data, // 캐시에 저장
+            [company]: response.data,
           }));
         } else {
           console.error('Unexpected response format:', response.data);
@@ -73,12 +74,10 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
     YANOLJA: '야놀자',
   };
 
-  // 필터링 로직
   const filteredProducts = products.filter((item) => {
     const matchesEmploymentType = filters.employmentType ? item.empTypeCdNm === filters.employmentType : true;
     const matchesCareerPeriod = filters.careerPeriod ? item.subJobCdNm === filters.careerPeriod : true;
-    
-    // 카테고리 필터링
+
     const matchesCategory = filters.engineering.includes(item.subJobCdNm) || 
                             filters.support.includes(item.subJobCdNm) || 
                             filters.dba.includes(item.subJobCdNm);
@@ -99,22 +98,26 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
               onClick={() => handleCompanyChange(comp)} 
               color={company === comp ? 'primary' : 'medium'}
             >
-              {companies[comp]} {/* 매핑된 회사 이름 사용 */}
+              {companies[comp]}
             </IonButton>
           ))}
         </div>
 
-        <ul>
+        <div className="card-container"> {/* 카드 컨테이너 추가 */}
           {filteredProducts.length > 0 ? (
             filteredProducts.map((item: Job_mst) => (
-              <li key={item.annoId}>
-                <a href={item.jobDetailLink} target="_blank" rel="noopener noreferrer">{item.annoSubject}</a>
-              </li>
+              <div className="job-card" key={item.annoId}>
+                <h3>{item.annoSubject}</h3>
+                <p>{item.sysCompanyCdNm} | {item.subJobCdNm}</p>
+                <a href={item.jobDetailLink} target="_blank" rel="noopener noreferrer">
+                  자세히 보기
+                </a>
+              </div>
             ))
           ) : (
-            <li>데이터가 없습니다.</li>
+            <div>데이터가 없습니다.</div>
           )}
-        </ul>
+        </div>
       </div>
     </div>
   );
