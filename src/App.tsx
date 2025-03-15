@@ -3,7 +3,6 @@ import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import Home from './pages/Home';
-import Detail from './pages/Detail';
 import { AuthProvider } from './common/AuthContextType';
 
 /* Core CSS required for Ionic components to work properly */
@@ -25,7 +24,6 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import Mypage from './pages/Mypage';
 import LikeList from './components/LikeList';
-import AddCourseContainer from './components/AddCourseContainer';
 import Email from './pages/EmailInquiry';
 
 setupIonicReact();
