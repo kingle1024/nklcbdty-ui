@@ -9,27 +9,35 @@ const categoriesData = [
   {
     title: 'Engineering',
     categories: [
-      'Backend',
-      'Frontend',
       'Infra',
+      'Backend',
+      'Frontend',      
       'QA',
       'Full Stack',
       'App',
-      'Engineering',
-      'DBA',
     ],
     visible: true,
+  },
+  {
+    title: 'DBA',
+    categories: [
+      'Data Analysis', 
+      'Data Engineering',
+      'ML',
+      'Data Managing',
+    ],
+    visible: false,
+  },
+  {
+    title: 'Security',
+    categories: ['Security', 'Security Engineering'],
+    visible: false,
   },
   {
     title: 'Support',
     categories: ['Business', 'etc'],
     visible: false,
-  },
-  {
-    title: 'DBA',
-    categories: ['Data Engineering', 'Data Analysis'],
-    visible: false,
-  },
+  },  
 ];
 
 // 필터 타입 정의
@@ -39,6 +47,7 @@ interface Filters {
   engineering: string[];
   support: string[];
   dba: string[];
+  security: string[];
 }
 
 // CategorySection Props 타입 정의
@@ -93,7 +102,8 @@ const Home: React.FC = () => {
     careerPeriod: '',
     engineering: [], // Engineering 필터 초기화
     support: [],
-    dba: [],
+    security: [],
+    dba: [],    
   });
 
   // State to manage the visibility of categories

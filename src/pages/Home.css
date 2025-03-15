@@ -13,7 +13,7 @@
 }
 
 .left-aside, .right-aside {
-  width: 200px; /* 사이드바 너비 */
+  width: 230px; /* 사이드바 너비 */
   padding: 20px;
   background-color: #f4f4f4; /* 사이드바 배경색 */
   border-radius: 8px; /* 모서리 둥글게 */
@@ -45,6 +45,5 @@ label {
   cursor: pointer; /* 커서 포인터로 변경 */
 }
 .category-list {
-  margin-top: 10px;
-  padding-left: 20px; /* 왼쪽 여백 추가 */
+  margin-top: 10px;  
 }
