@@ -36,7 +36,6 @@ const categoriesData = [
 interface Filters {
   employmentType: string;
   careerPeriod: string;
-  categories: string[]; // 모든 카테고리를 포함하는 필드 추가
   engineering: string[];
   support: string[];
   dba: string[];
@@ -92,8 +91,7 @@ const Home: React.FC = () => {
   const [filters, setFilters] = useState<Filters>({
     employmentType: '',
     careerPeriod: '',
-    categories: [], // 기본적으로 모든 카테고리 체크 해제
-    engineering: [],
+    engineering: [], // Engineering 필터 초기화
     support: [],
     dba: [],
   });
