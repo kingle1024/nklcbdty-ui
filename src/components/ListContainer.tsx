@@ -6,12 +6,13 @@ import { IonButton } from '@ionic/react';
 
 interface Job_mst {
   id: number | null;
+  companyCd: string;
   annoId: number;
   classCdNm: string;
   empTypeCdNm: string;
   annoSubject: string;
   subJobCdNm: string;
-  sysCompanyCdNm: string;
+  sysCompanyCdNm: string | null; // null 가능성 추가
   jobDetailLink: string;
 }
 
@@ -74,6 +75,18 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
     YANOLJA: '야놀자',
   };
 
+  const companyColors: { [key: string]: string } = {
+    NAVER: '#1EC800', // 네이버
+    KAKAO: '#FFEB00', // 카카오
+    LINE: '#00B700', // 라인
+    COUPANG: '', // 쿠팡
+    BAEMIN: '#48D1CC', // 배달의 민족
+    DAANGN: '#EB8717', // 당근마켓
+    TOSS: '#3182F7', // 토스
+    YANOLJA: '#F5A3B8', // 야놀자
+    ALL: 'transparent', // 전체
+  };
+
   const filteredProducts = products.filter((item) => {
     const matchesEmploymentType = filters.employmentType ? item.empTypeCdNm === filters.employmentType : true;
     const matchesCareerPeriod = filters.careerPeriod ? item.subJobCdNm === filters.careerPeriod : true;
@@ -103,17 +116,29 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
           ))}
         </div>
 
-        <div className="card-container"> {/* 카드 컨테이너 추가 */}
+        <div className="card-container">
           {filteredProducts.length > 0 ? (
-            filteredProducts.map((item: Job_mst) => (
-              <div className="job-card" key={item.annoId}>
-                <h3>{item.annoSubject}</h3>
-                <p>{item.sysCompanyCdNm} | {item.subJobCdNm}</p>
-                <a href={item.jobDetailLink} target="_blank" rel="noopener noreferrer">
-                  자세히 보기
-                </a>
-              </div>
-            ))
+            filteredProducts.map((item: Job_mst) => {
+              // 회사 이름을 포함하는지 확인
+              const companyKey = Object.keys(companyColors).find(key => 
+                item.companyCd && item.companyCd.toUpperCase().includes(key.toUpperCase())
+              );
+              const backgroundColor = companyKey ? companyColors[companyKey] : 'white'; // 기본 흰색
+
+              return (
+                <div
+                  className="job-card"
+                  key={item.annoId}
+                  style={{ backgroundColor }} // 회사에 맞는 배경색 설정
+                >
+                  <h3>{item.annoSubject}</h3>
+                  <p>{item.sysCompanyCdNm} | {item.subJobCdNm}</p>
+                  <a href={item.jobDetailLink} target="_blank" rel="noopener noreferrer">
+                    자세히 보기
+                  </a>
+                </div>
+              );
+            })
           ) : (
             <div>데이터가 없습니다.</div>
           )}
