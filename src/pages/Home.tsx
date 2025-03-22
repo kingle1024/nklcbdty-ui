@@ -147,6 +147,13 @@ const Home: React.FC = () => {
           </aside>
         </div>
       </IonContent>
+      <IonFooter>
+        <IonToolbar>
+          <IonText className="footer-text">
+            &copy; 2025 네카라쿠배당토야.
+          </IonText>
+        </IonToolbar>
+      </IonFooter>
     </IonPage>
   );
 };
