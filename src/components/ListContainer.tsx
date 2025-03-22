@@ -3,6 +3,7 @@ import axios, { AxiosResponse } from 'axios';
 import API_URL from "../config";
 import './ListContainer.css';
 import { IonButton } from '@ionic/react';
+import { Filters } from '../pages/Home';
 
 interface Job_mst {
   id: number | null;
@@ -17,13 +18,7 @@ interface Job_mst {
 }
 
 interface ListContainerProps {
-  filters: {
-    employmentType: string;
-    careerPeriod: string;
-    engineering: string[];
-    support: string[];
-    dba: string[];
-  };
+  filters: Filters; // Filters 타입 사용
 }
 
 const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
@@ -76,26 +71,28 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
   };
 
   const companyColors: { [key: string]: string } = {
-    NAVER: '#1EC800', // 네이버
-    KAKAO: '#FFEB00', // 카카오
-    LINE: '#00B700', // 라인
-    COUPANG: '', // 쿠팡
-    BAEMIN: '#48D1CC', // 배달의 민족
-    DAANGN: '#EB8717', // 당근마켓
-    TOSS: '#3182F7', // 토스
-    YANOLJA: '#F5A3B8', // 야놀자
-    ALL: 'transparent', // 전체
+    NAVER: '#1EC800',
+    KAKAO: '#FFEB00',
+    LINE: '#00B700',
+    COUPANG: '',
+    BAEMIN: '#48D1CC',
+    DAANGN: '#EB8717',
+    TOSS: '#3182F7',
+    YANOLJA: '#F5A3B8',
+    ALL: 'transparent',
   };
 
   const filteredProducts = products.filter((item) => {
     const matchesEmploymentType = filters.employmentType ? item.empTypeCdNm === filters.employmentType : true;
     const matchesCareerPeriod = filters.careerPeriod ? item.subJobCdNm === filters.careerPeriod : true;
-
-    const matchesCategory = filters.engineering.includes(item.subJobCdNm) || 
-                            filters.support.includes(item.subJobCdNm) || 
-                            filters.dba.includes(item.subJobCdNm);
-
-    return matchesEmploymentType && matchesCareerPeriod && (filters.engineering.length || filters.support.length || filters.dba.length ? matchesCategory : true);
+  
+    // 모든 카테고리를 하나의 배열로 통합
+    const allCategories = Object.values(filters.categories).flat();
+  
+    // 카테고리 일치 여부 확인
+    const matchesCategory = allCategories.length ? allCategories.includes(item.subJobCdNm) : true;
+  
+    return matchesEmploymentType && matchesCareerPeriod && matchesCategory;
   });
 
   return (
@@ -119,7 +116,6 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
         <div className="card-container">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((item: Job_mst) => {
-              // 회사 이름을 포함하는지 확인
               const companyKey = Object.keys(companyColors).find(key => 
                 item.companyCd && item.companyCd.toUpperCase().includes(key.toUpperCase())
               );
