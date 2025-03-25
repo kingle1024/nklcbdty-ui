@@ -97,6 +97,9 @@ const Home: React.FC = () => {
     <IonPage>
       <Helmet>
         <title>네카라쿠배당토야 공고</title>
+        <meta name="description" content="네카라쿠배당토야 공고 페이지입니다." />
+        <meta name="keywords" content="네카라쿠배당토야 채용 공고" />
+        <meta name="author" content="네카라쿠배당토야 팀" />
       </Helmet>
       <IonHeader>
         <IonToolbar>
