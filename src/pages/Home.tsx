@@ -4,6 +4,8 @@ import API_URL from "../config";
 import { IonContent, IonFooter, IonHeader, IonPage, IonText, IonTitle, IonToolbar } from '@ionic/react';
 import ListContainer from '../components/ListContainer';
 import { Helmet } from 'react-helmet';
+import { Swiper, SwiperSlide } from 'swiper/react'; // Swiper와 SwiperSlide만 가져오기
+import 'swiper/swiper-bundle.css'; // Swiper CSS import
 import './Home.css';
 
 // 필터 타입 정의
@@ -107,9 +109,20 @@ const Home: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
+      <Swiper
+        spaceBetween={30}
+        pagination={{
+          clickable: true,
+        }}
+        navigation={true} // navigation 속성 추가
+        className="mySwiper"
+      >
+        <SwiperSlide><img src="https://static.toss.im/career-resource/2025_Securities.png" alt="Slide 1" /></SwiperSlide>
+        <SwiperSlide><img src="https://static.toss.im/career-resource/0321__786_160_place.png" alt="Slide 2" /></SwiperSlide>
+      </Swiper>
         <div className="container">
           <aside className="left-aside">
-            <h2>필터</h2>
+            <h2>직군</h2>
             <form>
               {categoriesData.map((categoryData) => {
                 // visible 상태 초기화
@@ -150,10 +163,10 @@ const Home: React.FC = () => {
           <main className="content">
             <ListContainer filters={filters} />
           </main>
-          <aside className="right-aside">
+          {/* <aside className="right-aside">
             <h2>광고</h2>
             <p>여기에 광고 내용이 들어갑니다.</p>
-          </aside>
+          </aside> */}
         </div>
       </IonContent>
       <IonFooter>
