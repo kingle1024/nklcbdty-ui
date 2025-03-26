@@ -98,8 +98,6 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
   return (
     <div className="container">
       <div className="announcement-section">
-        <h1>공고 목록</h1>
-        
         <div className="button-section">         
           {Object.keys(companies).map((comp) => (
             <IonButton 
