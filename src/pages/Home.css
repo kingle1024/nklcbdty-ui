@@ -48,7 +48,7 @@ label {
   margin-top: 10px;  
 }
 .mySwiper {
-  width: 50%; /* Swiper의 너비를 100%로 설정 */
+  width: 49%; /* Swiper의 너비를 100%로 설정 */
   height: auto; /* 자동 높이 설정 */
 }
 

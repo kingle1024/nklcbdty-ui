@@ -5,6 +5,7 @@ import { IonContent, IonFooter, IonHeader, IonPage, IonText, IonTitle, IonToolba
 import ListContainer from '../components/ListContainer';
 import { Helmet } from 'react-helmet';
 import { Swiper, SwiperSlide } from 'swiper/react'; // Swiper와 SwiperSlide만 가져오기
+import { Autoplay, Navigation, Pagination } from 'swiper/modules'; // 필요한 모듈 import
 import 'swiper/swiper-bundle.css'; // Swiper CSS import
 import './Home.css';
 
@@ -110,12 +111,17 @@ const Home: React.FC = () => {
       </IonHeader>
       <IonContent fullscreen>
       <Swiper
-        spaceBetween={30}
-        pagination={{
-          clickable: true,
-        }}
-        navigation={true} // navigation 속성 추가
-        className="mySwiper"
+          modules={[Navigation, Pagination, Autoplay]} // 모듈 추가
+          spaceBetween={30}
+          pagination={{
+            clickable: true,
+          }}
+          navigation={true}
+          autoplay={{
+            delay: 3000,
+            disableOnInteraction: false,
+          }}
+          className="mySwiper"
       >
         <SwiperSlide><img src="https://static.toss.im/career-resource/2025_Securities.png" alt="Slide 1" /></SwiperSlide>
         <SwiperSlide><img src="https://static.toss.im/career-resource/0321__786_160_place.png" alt="Slide 2" /></SwiperSlide>
