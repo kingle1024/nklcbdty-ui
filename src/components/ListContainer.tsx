@@ -13,12 +13,12 @@ interface Job_mst {
   empTypeCdNm: string;
   annoSubject: string;
   subJobCdNm: string;
-  sysCompanyCdNm: string | null; // null 가능성 추가
+  sysCompanyCdNm: string | null;
   jobDetailLink: string;
 }
 
 interface ListContainerProps {
-  filters: Filters; // Filters 타입 사용
+  filters: Filters;
 }
 
 const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
@@ -85,13 +85,10 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
   const filteredProducts = products.filter((item) => {
     const matchesEmploymentType = filters.employmentType ? item.empTypeCdNm === filters.employmentType : true;
     const matchesCareerPeriod = filters.careerPeriod ? item.subJobCdNm === filters.careerPeriod : true;
-  
-    // 모든 카테고리를 하나의 배열로 통합
+
     const allCategories = Object.values(filters.categories).flat();
-  
-    // 카테고리 일치 여부 확인
     const matchesCategory = allCategories.length ? allCategories.includes(item.subJobCdNm) : true;
-  
+
     return matchesEmploymentType && matchesCareerPeriod && matchesCategory;
   });
 
@@ -117,19 +114,19 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
               const companyKey = Object.keys(companyColors).find(key => 
                 item.companyCd && item.companyCd.toUpperCase().includes(key.toUpperCase())
               );
-              const backgroundColor = companyKey ? companyColors[companyKey] : 'white'; // 기본 흰색
+              const backgroundColor = companyKey ? companyColors[companyKey] : 'white';
 
               return (
-                <div
-                  className="job-card"
-                  key={item.id}
-                  style={{ backgroundColor }} // 회사에 맞는 배경색 설정
-                >
-                  <h3>{item.annoSubject}</h3>
-                  <p>{item.sysCompanyCdNm} | {item.subJobCdNm}</p>
-                  <a href={item.jobDetailLink} target="_blank" rel="noopener noreferrer">
-                    자세히 보기
-                  </a>
+                <div className="job-card" key={item.id} style={{ display: 'flex'}}>
+                  <div className="left-area" style={{ backgroundColor }}>
+                  </div>
+                  <div className="right-area">
+                    <h3>{item.annoSubject}</h3>
+                    <p>{item.sysCompanyCdNm} | {item.subJobCdNm}</p>
+                    <a href={item.jobDetailLink} target="_blank" rel="noopener noreferrer">
+                      자세히 보기
+                    </a>
+                  </div>
                 </div>
               );
             })

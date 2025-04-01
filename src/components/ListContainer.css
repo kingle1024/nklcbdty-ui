@@ -1,8 +1,8 @@
 .badge {
-    background-color: rgba(255, 255, 255, 0.652);
-    color: black; /* 글자 색상 */
-    padding: 5px 10px;
-    border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.652);
+  color: black; /* 글자 색상 */
+  padding: 5px 10px;
+  border-radius: 5px;
 }
 
 li {
@@ -23,11 +23,27 @@ li {
 
 .job-card {
   border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 16px;
+  border-radius: 8px; /* 모서리 둥글게 유지 */
+  padding: 0; /* 패딩 제거하여 꽉 차게 */
   margin: 8px 0; /* 위아래 여백 추가 */
   width: 100%; /* 카드의 너비를 100%로 설정 */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex; /* 카드 내부에서 왼쪽과 오른쪽 정렬 */
+}
+
+.left-area {
+  background-color: #f0f0f0; /* 배경색 */
+  padding: 10px;
+  width: 10%; /* 왼쪽 영역 너비 */
+  border-top-left-radius: 8px; /* 모서리 둥글게 */
+  border-bottom-left-radius: 8px; /* 모서리 둥글게 */
+}
+
+.right-area {
+  width: 90%; /* 오른쪽 영역 너비 */
+  padding: 16px; /* 오른쪽 영역 패딩 추가 */
+  border-top-right-radius: 8px; /* 모서리 둥글게 */
+  border-bottom-right-radius: 8px; /* 모서리 둥글게 */
 }
 
 .job-card h3 {
