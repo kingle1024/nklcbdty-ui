@@ -1,3 +1,4 @@
+/* ListContainer.css */
 .badge {
   background-color: rgba(255, 255, 255, 0.652);
   color: black; /* 글자 색상 */
@@ -11,8 +12,13 @@ li {
 
 .button-section {
   display: flex;
-  gap: 10px; /* 버튼 간의 간격 */
+  flex-wrap: wrap; /* 버튼이 화면 크기에 맞춰 줄바꿈 가능 */  
   margin-bottom: 20px; /* 버튼 아래 여백 */
+}
+
+.button-section IonButton {
+  flex: 1 1 45%; /* 버튼을 2개씩 줄 바꿈하고, 최대 너비를 45%로 설정 */
+  min-width: 100px; /* 최소 너비 설정 */
 }
 
 .card-container {
@@ -58,4 +64,32 @@ li {
 .job-card a {
   color: #007bff;
   text-decoration: none;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .button-section {
+    flex-direction: row; /* 모바일에서 가로 방향으로 나열 */
+    justify-content: space-between; /* 버튼 사이의 공간을 균등하게 분배 */
+    gap: 1px; /* 버튼 간의 간격 줄이기 */
+    margin-bottom: -20px;
+  }
+
+  .left-area {
+    width: 10%; /* 모바일에서 왼쪽 영역 너비 조정 */
+  }
+
+  .right-area {
+    width: 90%; /* 모바일에서 오른쪽 영역 너비 조정 */
+  }
+}
+
+@media (min-width: 769px) {
+  .left-area {
+    width: 10%; /* 데스크탑에서 왼쪽 영역 고정 너비 */
+  }
+
+  .right-area {
+    width: 90%; /* 데스크탑에서 오른쪽 영역 고정 너비 */
+  }
 }
