@@ -122,7 +122,7 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
               return (
                 <div
                   className="job-card"
-                  key={item.annoId}
+                  key={item.id}
                   style={{ backgroundColor }} // 회사에 맞는 배경색 설정
                 >
                   <h3>{item.annoSubject}</h3>
