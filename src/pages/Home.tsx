@@ -123,8 +123,16 @@ const Home: React.FC = () => {
           }}
           className="mySwiper"
       >
-        <SwiperSlide><img src="https://static.toss.im/career-resource/2025_Securities.png" alt="Slide 1" /></SwiperSlide>
-        <SwiperSlide><img src="https://static.toss.im/career-resource/0321__786_160_place.png" alt="Slide 2" /></SwiperSlide>
+        <SwiperSlide>
+          <a href="https://toss.im/career/jobs?company=%ED%86%A0%EC%8A%A4%EC%A6%9D%EA%B6%8C" target="_blank" rel="noopener noreferrer">
+            <img src="https://static.toss.im/career-resource/2025_Securities.png" alt="Slide 1" />
+          </a>
+        </SwiperSlide>
+        <SwiperSlide>
+          <a href="https://toss.im/career/jobs?company=%ED%86%A0%EC%8A%A4%ED%94%8C%EB%A0%88%EC%9D%B4%EC%8A%A4" target="_blank" rel="noopener noreferrer">
+            <img src="https://static.toss.im/career-resource/0321__786_160_place.png" alt="Slide 2" />
+          </a>
+        </SwiperSlide>
       </Swiper>
         <div className="container">
           <aside className="left-aside">
