@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import API_URL from "../config";
 import './ListContainer.css';
-import { IonButton } from '@ionic/react';
+import { IonButton, IonSearchbar } from '@ionic/react';
 import { Filters } from '../pages/Home';
 
 interface Job_mst {
@@ -25,6 +25,7 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
   const [products, setProducts] = useState<Job_mst[]>([]);
   const [company, setCompany] = useState<string>('NAVER');
   const [cache, setCache] = useState<{ [key: string]: Job_mst[] }>({});
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -89,12 +90,26 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
     const allCategories = Object.values(filters.categories).flat();
     const matchesCategory = allCategories.length ? allCategories.includes(item.subJobCdNm) : true;
 
-    return matchesEmploymentType && matchesCareerPeriod && matchesCategory;
+    const searchText = searchQuery.toLowerCase();
+    const matchesSearch = searchQuery === '' || 
+      item.annoSubject.toLowerCase().includes(searchText) ||
+      (item.sysCompanyCdNm && item.sysCompanyCdNm.toLowerCase().includes(searchText)) ||
+      item.subJobCdNm.toLowerCase().includes(searchText);
+
+    return matchesEmploymentType && matchesCareerPeriod && matchesCategory && matchesSearch;
   });
 
   return (
     <div className="container">
       <div className="announcement-section">
+        <div className="search-section">
+          <IonSearchbar
+            value={searchQuery}
+            onIonInput={(e) => setSearchQuery(e.detail.value || '')}
+            placeholder="채용공고 검색"
+            className="custom-searchbar"
+          />
+        </div>
         <div className="button-section">         
           {Object.keys(companies).map((comp) => (
             <IonButton 
@@ -131,7 +146,16 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
               );
             })
           ) : (
-            <div>데이터가 없습니다.</div>
+            // <div className="no-data-message">
+            //   <div className="left-area">
+            //   데이터가 없습니다.
+            //   </div>
+            //   <div className="right-area">
+            //     </div>
+            // </div>
+            <div className="no-data-message">
+              데이터가 없습니다.
+            </div>
           )}
         </div>
       </div>

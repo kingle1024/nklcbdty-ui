@@ -93,3 +93,24 @@ li {
     width: 90%; /* 데스크탑에서 오른쪽 영역 고정 너비 */
   }
 }
+
+.search-section {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.custom-searchbar {
+  --background: #ffffff;
+  --border-radius: 8px;
+  --box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --placeholder-color: #666;
+  --icon-color: #666;
+  max-width: 100%;
+}
+
+.no-data-message {
+  text-align: center;
+  font-size: 18px;
+  color: #666;
+  padding: 20px;
+}
