@@ -15,6 +15,7 @@ interface Job_mst {
   subJobCdNm: string;
   sysCompanyCdNm: string | null;
   jobDetailLink: string;
+  endDate: string;
 }
 
 interface ListContainerProps {
@@ -137,7 +138,9 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
                   </div>
                   <div className="right-area">
                     <h3>{item.annoSubject}</h3>
-                    <p>{item.sysCompanyCdNm} | {item.subJobCdNm}</p>
+                    <p>{item.sysCompanyCdNm} | {item.subJobCdNm}
+                    {item.endDate ? ` | ~${item.endDate}` : ''}
+                    </p>
                     <a href={item.jobDetailLink} target="_blank" rel="noopener noreferrer">
                       자세히 보기
                     </a>
@@ -146,13 +149,6 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
               );
             })
           ) : (
-            // <div className="no-data-message">
-            //   <div className="left-area">
-            //   데이터가 없습니다.
-            //   </div>
-            //   <div className="right-area">
-            //     </div>
-            // </div>
             <div className="no-data-message">
               데이터가 없습니다.
             </div>
