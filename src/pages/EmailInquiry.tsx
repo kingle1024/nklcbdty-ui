@@ -62,7 +62,7 @@ const EmailInquiry: React.FC = () => {
   return (
     <IonPage>
       <Helmet>
-        <title>이메일 문의</title>
+        <title>문의 및 건의사항</title>
         <meta name="google-adsense-account" content="ca-pub-9366813459634197" />      
         <meta charSet="utf-8" />        
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -72,7 +72,7 @@ const EmailInquiry: React.FC = () => {
       <IonContent>
       <div className="mypage-container">
           <div className="content">
-            <h2>이메일 문의</h2>
+            <h2>문의 및 건의사항</h2>
             <IonList>
               <IonItem>
                 <IonLabel position="stacked">답변 받을 이메일</IonLabel>
