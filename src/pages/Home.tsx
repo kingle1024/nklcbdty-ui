@@ -113,7 +113,7 @@ const Home: React.FC = () => {
         <IonToolbar>
           <IonTitle>네카라쿠배당토야</IonTitle>
           <IonButtons slot='end'>
-            <IonButton routerLink="/email">이메일 문의</IonButton>
+            <IonButton routerLink="/email">문의 및 건의사항</IonButton>
         </IonButtons>
         </IonToolbar>
       </IonHeader>
