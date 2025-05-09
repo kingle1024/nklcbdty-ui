@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import API_URL from "../config";
-import { IonContent, IonFooter, IonHeader, IonPage, IonText, IonTitle, IonToolbar } from '@ionic/react';
+import { IonButton, IonButtons, IonContent, IonFooter, IonHeader, IonPage, IonText, IonTitle, IonToolbar } from '@ionic/react';
 import ListContainer from '../components/ListContainer';
 import { Helmet } from 'react-helmet';
 import { Swiper, SwiperSlide } from 'swiper/react'; // Swiper와 SwiperSlide만 가져오기
@@ -112,6 +112,9 @@ const Home: React.FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonTitle>네카라쿠배당토야</IonTitle>
+          <IonButtons slot='end'>
+            <IonButton routerLink="/email">이메일 문의</IonButton>
+        </IonButtons>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
