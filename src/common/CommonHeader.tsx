@@ -18,14 +18,14 @@ const CommonHeader: React.FC = () => {
         <IonTitle onClick={handleTitleClick} style={{ cursor: 'pointer' }}>네카라쿠배당토야</IonTitle>
         <IonButtons slot='end'>
           <IonButton routerLink="/email">문의 및 건의사항</IonButton>
-          {/* {isLoggedIn ? (
+          {isLoggedIn ? (
             <>
               <IonButton routerLink="/mypage">마이페이지</IonButton>
               <IonButton onClick={logout}>로그아웃</IonButton>
             </>
           ) : (
             <KakaoLoginButton /> // 로그인하지 않은 경우 카카오 로그인 버튼 표시
-          )} */}
+          )}
         </IonButtons>
       </IonToolbar>
     </IonHeader>
