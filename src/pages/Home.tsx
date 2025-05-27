@@ -8,6 +8,7 @@ import { Swiper, SwiperSlide } from 'swiper/react'; // Swiper와 SwiperSlide만 
 import { Autoplay, Navigation, Pagination } from 'swiper/modules'; // 필요한 모듈 import
 import 'swiper/swiper-bundle.css'; // Swiper CSS import
 import './Home.css';
+import CommonHeader from '../common/CommonHeader';
 
 // 필터 타입 정의
 export interface Filters {
@@ -109,14 +110,7 @@ const Home: React.FC = () => {
   네카라쿠배 공고, 블록체인 개발자 채용, AI 스타트업 채용, IT 대기업 채용" />
         <meta name="author" content="네카라쿠배당토야 팀" />
       </Helmet>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>네카라쿠배당토야</IonTitle>
-          <IonButtons slot='end'>
-            <IonButton routerLink="/email">문의 및 건의사항</IonButton>
-        </IonButtons>
-        </IonToolbar>
-      </IonHeader>
+      <CommonHeader />
       <IonContent fullscreen>
       <Swiper
           modules={[Navigation, Pagination, Autoplay]} // 모듈 추가
