@@ -27,20 +27,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab }) => {
         >
           내 정보
         </IonItem>
-        <IonItem
-          button
-          onClick={() => handleTabClick('likes')}
-          className={activeTab === 'likes' ? 'active' : ''}
-        >
-          좋아요 목록
-        </IonItem>
-        <IonItem
-          button
-          onClick={() => handleTabClick('addCourse')}
-          className={activeTab === 'addCourse' ? 'active' : ''}
-        >
-          데이트 코스 등록
-        </IonItem>
       </IonList>
     </div>
   );
