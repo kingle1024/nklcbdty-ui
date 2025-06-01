@@ -73,6 +73,7 @@ const EmailInquiry: React.FC = () => {
       <div className="mypage-container">
           <div className="content">
             <h2>문의 및 건의사항</h2>
+            <h4>불편했던 경험이나 필요한 기능을 공유해 주시면 개선해 드려요.</h4>
             <IonList>
               <IonItem>
                 <IonLabel position="stacked">답변 받을 이메일</IonLabel>
