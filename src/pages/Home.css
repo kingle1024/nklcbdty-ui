@@ -79,6 +79,7 @@ label {
   }
   .container {
     margin-top: -6px; /* Swiper와 container 사이의 간격 조정 */    
+    justify-content: flex-start;
   }
   .left-aside {
     display: none; /* 모바일에서는 기본적으로 숨김 */
