@@ -23,7 +23,6 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import Mypage from './pages/Mypage';
-import LikeList from './components/LikeList';
 import Email from './pages/EmailInquiry';
 
 setupIonicReact();
@@ -37,7 +36,6 @@ const App: React.FC = () => {
           <IonRouterOutlet>
             <Route path='/home' component={Home} exact={true} />
             <Route path='/mypage' component={Mypage} exact={true} />
-            <Route path='/mypage/likes' component={LikeList} exact={true} />
             <Route path='/email' component={Email} exact={true} />
             <Route exact path='/' render={() => <Redirect to='/home' />} />          
           </IonRouterOutlet>
