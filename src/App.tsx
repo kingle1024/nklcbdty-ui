@@ -23,7 +23,6 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import Mypage from './pages/Mypage';
-import LikeList from './components/LikeList';
 import Email from './pages/EmailInquiry';
 
 setupIonicReact();
