@@ -114,19 +114,20 @@ const Mypage: React.FC = () => {
           selectedJobRoles: selectedJobRoles
         };
 
-        // await fetchWithToken(`${API_URL}/api/user/settings`, {
-        //     method: 'POST', // 또는 PUT 등 적절한 HTTP 메서드 사용
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify(savePayload),
-        // });
-
-        alert('설정이 저장되었습니다.');
-
+        const result = await fetchWithToken(
+          `${API_URL}/api/user/settings`, 
+          'POST', 
+          JSON.stringify(savePayload)
+        );
+        
+        if (result) {
+          alert('설정이 저장되었습니다.');
+        } else {
+          alert('설정 저장에 실패했습니다.');  
+        }
     } catch (error) {
         console.error('설정 저장 실패:', error);
-        alert('설정 저장에 실패했습니다.'); // 사용자에게 알림
+        alert('설정 저장에 실패했습니다.');
     }
   };
 
