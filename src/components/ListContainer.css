@@ -1,4 +1,13 @@
 /* ListContainer.css */
+.announcement-section {
+  /* width: 680px; */ /* 고정 너비 대신 */
+  width: 100%; /* 부모 너비를 따르되 */
+  max-width: 680px; /* 최대 너비를 680px로 제한 */
+  /* 필요하다면 가운데 정렬 */
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .badge {
   background-color: rgba(255, 255, 255, 0.652);
   color: black; /* 글자 색상 */
