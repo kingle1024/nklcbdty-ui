@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { 
   IonPage, 
@@ -31,6 +31,12 @@ const Mypage: React.FC = () => {
   const [availableJobRoles, setAvailableJobRoles] = useState<any>([]); // 객체 배열로 변경
   const [isLoading, setIsLoading] = useState(true);
   const { fetchWithToken } = UseTokenRefresh();
+  const validateEmail = (email: string): boolean => {
+    // 간단한 이메일 정규 표현식
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+  const emailInputRef = useRef<HTMLIonInputElement | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -106,6 +112,14 @@ const Mypage: React.FC = () => {
       selectedCompanys,
       selectedJobRoles
     });
+
+    if (!validateEmail(emailAddress)) {
+      alert('유효한 이메일 주소를 입력해주세요.');
+      if (emailInputRef.current) {
+        emailInputRef.current.setFocus(); // Ionic Input의 setFocus() 메서드 사용
+      }
+      return; // 유효성 검사 실패 시 함수 종료
+    }
 
     try {
         const savePayload = {
