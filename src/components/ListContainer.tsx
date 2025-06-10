@@ -100,6 +100,31 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
     return matchesEmploymentType && matchesCareerPeriod && matchesCategory && matchesSearch;
   });
 
+  const handleClick = async (
+    event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, 
+    annoId: number | string,
+    annoSubject: string,
+  ) => {
+    // console.log(annoSubject);
+    // const href = event.currentTarget.href;
+
+    // console.log(event);
+    // console.log(href);
+    
+    try {
+      const apiUrl = `${API_URL}/api/log/job_history?anno_id=${annoId}&anno_subject=${encodeURIComponent(annoSubject)}`;      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',          
+        },
+      });
+    } catch (error) {
+      // 네트워크 오류 등 예외 발생 시 처리
+      console.error('API 호출 중 오류 발생:', error);
+    }
+  };
+
   return (
     <div className="container">
       <div className="announcement-section">
@@ -141,7 +166,12 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
                     <p>{item.sysCompanyCdNm} | {item.subJobCdNm}
                     {item.endDate ? ` | ~${item.endDate}` : ''}
                     </p>
-                    <a href={item.jobDetailLink} target="_blank" rel="noopener noreferrer">
+                    <a 
+                      href={item.jobDetailLink} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      onClick={(event) => handleClick(event, item.annoId, item.annoSubject)}
+                    >
                       자세히 보기
                     </a>
                   </div>
