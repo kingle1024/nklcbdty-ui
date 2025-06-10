@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /home
+Allow: /sitemap.xml
+Sitemap: https://nklcb.co.kr/sitemap.xml
