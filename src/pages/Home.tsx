@@ -109,6 +109,7 @@ const Home: React.FC = () => {
   네카라쿠배 인턴 채용, IT 기업 인턴십, 원격 근무 채용, 재택 근무 가능 채용, 2025 개발자 채용, IT 채용 트렌드, 네카라쿠배 채용 공고,
   네카라쿠배 공고, 블록체인 개발자 채용, AI 스타트업 채용, IT 대기업 채용" />
         <meta name="author" content="네카라쿠배당토야 팀" />
+        <meta property="og:image" content="https://nklcb.co.kr//images/my-og-image.jpg" />
       </Helmet>
       <CommonHeader />
       <IonContent fullscreen>
