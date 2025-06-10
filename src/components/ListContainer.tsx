@@ -105,11 +105,6 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
     annoId: number | string,
     annoSubject: string,
   ) => {
-    // console.log(annoSubject);
-    // const href = event.currentTarget.href;
-
-    // console.log(event);
-    // console.log(href);
     
     try {
       const apiUrl = `${API_URL}/api/log/job_history?anno_id=${annoId}&anno_subject=${encodeURIComponent(annoSubject)}`;      
