@@ -100,8 +100,9 @@ const Home: React.FC = () => {
   return (
     <IonPage>
       <Helmet>
-        <title>네카라쿠배 공고</title>
-        <meta name="description" content="네카라쿠배 공고 페이지" />
+        <title>네카라쿠배 채용</title>
+        <meta name="description" content="네카라쿠배 채용, 네이버 채용, 카카오 채용, 라인 채용, 쿠팡 채용, 우아한형제들 채용, 당근 채용,토스 채용, 
+  프론트엔드 채용, 백엔드 채용, 풀스택 개발자 채용, 모바일 개발자 채용" />
         <meta name="keywords" content="네카라쿠배 채용, 네이버 채용, 카카오 채용, 라인 채용, 쿠팡 채용, 우아한형제들 채용, 당근 채용,토스 채용, 
   프론트엔드 채용, 백엔드 채용, 풀스택 개발자 채용, 모바일 개발자 채용, UI/UX 디자이너 채용,
   그래픽 디자이너 채용, 데이터 분석가 채용, AI 엔지니어 채용, 머신러닝 엔지니어 채용, 서비스 기획 채용,
