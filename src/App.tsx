@@ -34,10 +34,9 @@ const App: React.FC = () => {
       <AuthProvider>
         <IonReactRouter>
           <IonRouterOutlet>
-            <Route path='/home' component={Home} exact={true} />
+            <Route path='/' component={Home} exact={true} />
             <Route path='/mypage' component={Mypage} exact={true} />
             <Route path='/email' component={Email} exact={true} />
-            <Route exact path='/' render={() => <Redirect to='/home' />} />          
           </IonRouterOutlet>
         </IonReactRouter>
       </AuthProvider>
