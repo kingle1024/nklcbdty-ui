@@ -4,6 +4,7 @@ import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import Home from './pages/Home';
 import { AuthProvider } from './common/AuthContextType';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -26,20 +27,22 @@ import Mypage from './pages/Mypage';
 import Email from './pages/EmailInquiry';
 
 setupIonicReact();
-
+const queryClient = new QueryClient();
 const App: React.FC = () => {
 
   return (
     <IonApp>
-      <AuthProvider>
-        <IonReactRouter>
-          <IonRouterOutlet>
-            <Route path='/' component={Home} exact={true} />
-            <Route path='/mypage' component={Mypage} exact={true} />
-            <Route path='/email' component={Email} exact={true} />
-          </IonRouterOutlet>
-        </IonReactRouter>
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <IonReactRouter>
+            <IonRouterOutlet>
+              <Route path='/' component={Home} exact={true} />
+              <Route path='/mypage' component={Mypage} exact={true} />
+              <Route path='/email' component={Email} exact={true} />
+            </IonRouterOutlet>
+          </IonReactRouter>
+        </AuthProvider>
+      </QueryClientProvider>
     </IonApp>
   );
 };
