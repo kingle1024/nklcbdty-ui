@@ -87,11 +87,48 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
   };
 
   const filteredProducts = products.filter((item) => {
+    // 1. 고용 형태 필터링
     const matchesEmploymentType = filters.employmentType ? item.empTypeCdNm === filters.employmentType : true;
-    const matchesCareerPeriod = filters.careerPeriod ? item.subJobCdNm === filters.careerPeriod : true;
 
+    // 2. 직군 카테고리 필터링
     const allCategories = Object.values(filters.categories).flat();
     const matchesCategory = allCategories.length ? allCategories.includes(item.subJobCdNm) : true;
+
+    // 3. 경력 필터링
+    const filterMinExp = filters.personalHistory.start; // 슬라이더 시작 연차
+    const filterMaxExp = filters.personalHistory.end;   // 슬라이더 끝 연차
+
+    const jobMinExp = item.personalHistory; // 공고의 최소 경력
+    let jobMaxExp; // 공고의 최대 경력 (계산 로직 변경)
+
+    // 1) item.personalHistoryEnd가 0이고 jobMinExp가 0이 아닐 경우 (예: 2년차 이상, 최대 경력 0)
+    //    -> 최대 경력 제한이 없다고 보고 Infinity로 설정
+    if (item.personalHistoryEnd === 0 && jobMinExp > 0) {
+        jobMaxExp = Infinity;
+    }
+    // 2) item.personalHistoryEnd가 정의되어 있고 null이 아닐 경우 (실제 값이 있는 경우)
+    else if (item.personalHistoryEnd !== undefined && item.personalHistoryEnd !== null) {
+        jobMaxExp = item.personalHistoryEnd;
+    }
+    // 3) 그 외의 경우 (undefined 또는 null)
+    //    -> 최대 경력 제한이 없다고 보고 Infinity로 설정
+    else {
+        jobMaxExp = Infinity;
+    }
+
+    let matchesCareer = false;
+    // 경력 필터링 로직: '경력 무관 포함' 체크박스 반영
+    if (jobMinExp === 0) { // 현재 공고가 '경력 무관'인 경우 (최소 경력이 0)
+      if (filters.includeNoExperience) {
+        matchesCareer = true; // '경력 무관 포함'이 체크되어 있으면 무조건 포함
+      } else {
+        matchesCareer = false; // 체크 해제되어 있으면 포함하지 않음
+      }
+    } else { // 현재 공고가 '경력'이 있는 경우 (jobMinExp > 0)
+      // 공고의 경력 범위 [jobMinExp, jobMaxExp]와
+      // 필터의 경력 범위 [filterMinExp, filterMaxExp]가 겹치는지 확인
+      matchesCareer = (jobMinExp <= filterMaxExp) && (jobMaxExp >= filterMinExp);
+    }
 
     const searchText = searchQuery.toLowerCase();
     const matchesSearch = searchQuery === '' || 
@@ -99,7 +136,7 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
       (item.sysCompanyCdNm && item.sysCompanyCdNm.toLowerCase().includes(searchText)) ||
       item.subJobCdNm.toLowerCase().includes(searchText);
 
-    return matchesEmploymentType && matchesCareerPeriod && matchesCategory && matchesSearch;
+    return matchesEmploymentType && matchesCareer && matchesCategory && matchesSearch;
   });
 
   const handleClick = async (

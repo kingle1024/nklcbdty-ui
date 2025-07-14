@@ -36,6 +36,25 @@
   color: #333333; /* 콘텐츠 텍스트 색상 */
 }
 
+/* 새로 추가되는 input 스타일 */
+/* 경력 입력 필드에 적용할 클래스 */
+.experience-input {
+  width: 50px;
+  text-align: center;
+  vertical-align: middle; /* 텍스트와 체크박스 세로 정렬 맞추기 */
+  background-color: white; /* 배경색을 흰색으로! */
+  color: black;           /* 글자색을 검은색으로! */
+  border: 1px solid #ccc; /* 테두리도 명확하게! */
+  border-radius: 4px;     /* 모서리 둥글게 */
+  padding: 1px 5px;           /* 내부 여백 */
+  /* margin-left와 margin-right는 인라인 스타일로 유지하거나,
+     부모 요소의 flex/grid 속성을 이용해 간격 조절 */
+}
+
+.rc-slider-mark-text {
+  white-space: nowrap; /* <-- 이 속성을 추가! */
+}
+
 input[type="checkbox"] {
   margin-right: 10px; /* 체크박스와 레이블 간격 */
 }
