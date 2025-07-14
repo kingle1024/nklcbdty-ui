@@ -163,7 +163,7 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
                     <p>{item.sysCompanyCdNm} | {item.subJobCdNm}
                     {item.endDate ? ` | ~${item.endDate}` : ''}
                     {item.personalHistory !== undefined && item.personalHistory !== null
-                      ? ` | ${item.personalHistory === 0 ? '무관' : `${item.personalHistory}년 이상`}`
+                      ? ` | ${item.personalHistory === 0 ? '경력 무관' : `${item.personalHistory}년 이상`}`
                       : ''
                     }
                     {item.personalHistoryEnd !== undefined && item.personalHistoryEnd !== null
