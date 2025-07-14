@@ -9,6 +9,8 @@ import { Autoplay, Navigation, Pagination } from 'swiper/modules'; // 필요한 
 import 'swiper/swiper-bundle.css'; // Swiper CSS import
 import './Home.css';
 import CommonHeader from '../common/CommonHeader';
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
 
 // 필터 타입 정의
 export interface Filters {
@@ -17,6 +19,11 @@ export interface Filters {
   categories: {
     [key: string]: string[];
   };
+  personalHistory: {
+    start: number;
+    end: number;
+  };
+  includeNoExperience: boolean;
 }
 
 interface CategoryDtl {
@@ -37,6 +44,8 @@ const Home: React.FC = () => {
     employmentType: '',
     careerPeriod: '',
     categories: {},
+    personalHistory: { start: 0, end: 10 },
+    includeNoExperience: true,
   });
 
   // 카테고리 데이터 로드
@@ -47,16 +56,16 @@ const Home: React.FC = () => {
         setCategoriesData(response.data);
 
         // 필터 초기화
-        const initialFilters = {
-          employmentType: '',
-          careerPeriod: '',
-          categories: response.data.reduce((acc: Record<string, string[]>, category: CategoryMst) => {
-            acc[category.name.toLowerCase()] = []; // 초기 카테고리 배열을 빈 배열로 설정
-            return acc;
-          }, {}),
-        };
+        const initialCategoriesFilter = response.data.reduce((acc: Record<string, string[]>, category: CategoryMst) => {
+          acc[category.name.toLowerCase()] = [];
+          return acc;
+        }, {});
         
-        setFilters(initialFilters);
+        setFilters(prevFilters => ({
+          ...prevFilters,
+          personalHistory: { start: 0, end: 10 }, // 경력 필터도 초기화
+          categories: initialCategoriesFilter,
+        }));
         
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -88,6 +97,64 @@ const Home: React.FC = () => {
       };
     });
   };
+
+  const handleExperienceSliderChange = (range: number | number[]) => {
+    if (Array.isArray(range)) {
+      setFilters(prevFilters => ({
+        ...prevFilters,
+        personalHistory: {
+          start: range[0],
+          end: range[1],
+        },
+      }));
+    }
+  };
+
+  const handleIncludeNoExperienceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { checked } = event.target;
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      includeNoExperience: checked,
+    }));
+  };
+
+  const handleExperienceInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'start' | 'end') => {
+    const value = e.target.value;
+    let numValue = parseInt(value, 10);
+
+    // 입력값이 비어있거나 숫자가 아니면 0으로 처리 (혹은 다른 기본값으로)
+    if (isNaN(numValue) || value === '') {
+      numValue = 0; // 또는 원하는 기본값
+    }
+
+    setFilters(prevFilters => {
+      let newStart = prevFilters.personalHistory.start;
+      let newEnd = prevFilters.personalHistory.end;
+
+      if (field === 'start') {
+        newStart = numValue;
+        // 시작 값이 끝 값보다 커지지 않도록 조정 (선택 사항)
+        if (newStart > newEnd) newEnd = newStart;
+      } else {
+        newEnd = numValue;
+        // 끝 값이 시작 값보다 작아지지 않도록 조정 (선택 사항)
+        if (newEnd < newStart) newStart = newEnd;
+      }
+
+      // 최소/최대 범위도 고려하여 조정 (선택 사항)
+      if (newStart < 0) newStart = 0;
+      if (newEnd > 10) newEnd = 10; // max 값과 일치시켜야 함
+
+      return {
+        ...prevFilters,
+        personalHistory: {
+          start: newStart,
+          end: newEnd,
+        },
+      };
+    });
+  };
+
 
   // Toggle function for category visibility
   const toggleCategories = (title: string) => {
@@ -184,6 +251,58 @@ const Home: React.FC = () => {
                 );
               })}
             </form>
+
+            <div style={{ marginTop: '30px', padding: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                <h2 style={{ margin: 0, marginRight: '10px' }}>경력</h2>
+                
+                <input
+                  type="checkbox"
+                  id="includeNoExperience"
+                  checked={filters.includeNoExperience}
+                  onChange={handleIncludeNoExperienceChange}
+                  style={{ verticalAlign: 'middle' }}
+                />
+                <label htmlFor="includeNoExperience" style={{ marginLeft: '1px', display: 'inline-block', verticalAlign: 'middle' }}>
+                  경력 무관 포함
+                </label>
+              </div>
+
+              <div>
+                <input
+                  type="number"
+                  min={0} // 최소값 설정
+                  max={filters.personalHistory.end}
+                  value={filters.personalHistory.start}
+                  onChange={(e) => handleExperienceInputChange(e, 'start')}
+                  className="experience-input"
+                  style={{ marginRight: '2px' }}
+                />
+                년 ~
+                <input
+                  type="number"
+                  min={filters.personalHistory.start} 
+                  max={10}
+                  value={filters.personalHistory.end}
+                  onChange={(e) => handleExperienceInputChange(e, 'end')}
+                  className="experience-input"
+                  style={{ marginLeft: '2px', marginRight: '5px' }}
+                />
+                년
+
+                <Slider
+                  range
+                  min={0}
+                  max={10}
+                  defaultValue={[filters.personalHistory.start, filters.personalHistory.end]}
+                  value={[filters.personalHistory.start, filters.personalHistory.end]}
+                  onChange={handleExperienceSliderChange}
+                  marks={{ 0: '0년', 3: '3년', 5: '5년', 7: '7년', 10: '10년+' }} // 눈금 표시
+                  step={1} 
+                  style={{ marginTop: '5px' }}
+                />
+              </div>
+            </div>
           </aside>
           <main className="content">
             <ListContainer filters={filters} />
