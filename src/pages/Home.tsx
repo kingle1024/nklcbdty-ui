@@ -121,7 +121,7 @@ const Home: React.FC = () => {
       </Helmet>
       <CommonHeader />
       <IonContent fullscreen>
-      <Swiper
+      {/* <Swiper
           modules={[Navigation, Pagination, Autoplay]} // 모듈 추가
           spaceBetween={30}
           pagination={{
@@ -144,7 +144,7 @@ const Home: React.FC = () => {
             <img src="https://static.toss.im/career-resource/0321__786_160_place.png" alt="Slide 2" />
           </a>
         </SwiperSlide>
-      </Swiper>
+      </Swiper> */}
         <div className="container">
           <aside className="left-aside">
             <h2>직군</h2>

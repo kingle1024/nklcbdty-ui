@@ -16,6 +16,8 @@ interface Job_mst {
   sysCompanyCdNm: string | null;
   jobDetailLink: string;
   endDate: string;
+  personalHistory: number;
+  personalHistoryEnd: number;
 }
 
 interface ListContainerProps {
@@ -160,6 +162,14 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
                     <h3>{item.annoSubject}</h3>
                     <p>{item.sysCompanyCdNm} | {item.subJobCdNm}
                     {item.endDate ? ` | ~${item.endDate}` : ''}
+                    {item.personalHistory !== undefined && item.personalHistory !== null
+                      ? ` | ${item.personalHistory === 0 ? '경력 무관' : `${item.personalHistory}년 이상`}`
+                      : ''
+                    }
+                    {item.personalHistoryEnd !== undefined && item.personalHistoryEnd !== null
+                      ? `${item.personalHistoryEnd === 0 ? '' : ` ${item.personalHistoryEnd}년 이하`}`
+                      : ''
+                    }
                     </p>
                     <a 
                       href={item.jobDetailLink} 
