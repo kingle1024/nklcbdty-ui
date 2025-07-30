@@ -12,7 +12,9 @@ import {
   IonGrid,
   IonRow,
   IonCol,
-  IonInput
+  IonInput,
+  IonRadio,
+  IonRadioGroup
 } from '@ionic/react';
 import { Helmet } from 'react-helmet';
 import './Mypage.css';
@@ -28,6 +30,7 @@ const Mypage: React.FC = () => {
   const [emailAddress, setEmailAddress] = useState<string>('');
   const [selectedCompanys, setSelectedCompanys] = useState<string[]>([]);
   const [selectedJobRoles, setSelectedJobRoles] = useState<string[]>([]);
+  const [selectedCareerYears, setSelectedCareerYears] = useState<number | null>(null);
   const [availableJobRoles, setAvailableJobRoles] = useState<any>([]); // 객체 배열로 변경
   const [isLoading, setIsLoading] = useState(true);
   const { fetchWithToken } = UseTokenRefresh();
@@ -54,6 +57,10 @@ const Mypage: React.FC = () => {
           
           if (Array.isArray(userSettings.selectedJobRoles)) {
             setSelectedJobRoles(userSettings.selectedJobRoles);
+          }
+
+          if (userSettings.careerYear !== undefined && userSettings.careerYear !== null) {
+            setSelectedCareerYears(userSettings.careerYear);
           }
         }
         
@@ -110,7 +117,8 @@ const Mypage: React.FC = () => {
     console.log('구독 설정 및 직무 저장:', {
       email: emailAddress,
       selectedCompanys,
-      selectedJobRoles
+      selectedJobRoles,
+      selectedCareerYears
     });
 
     if (!validateEmail(emailAddress)) {
@@ -125,7 +133,8 @@ const Mypage: React.FC = () => {
         const savePayload = {
           email: emailAddress,
           subscribedServices: selectedCompanys,
-          selectedJobRoles: selectedJobRoles
+          selectedJobRoles: selectedJobRoles,
+          selectedCareerYears: selectedCareerYears
         };
 
         const result = await fetchWithToken(
@@ -203,6 +212,25 @@ const Mypage: React.FC = () => {
                 ></IonInput>
               </IonItem>
             </IonList>
+
+            <h2 style={{ fontSize: '1.5em', margin: '32px 0 16px 0' }}>본인 경력 선택</h2>
+            <IonGrid>
+              <IonRow className="ion-justify-content-start ion-align-items-center"> {/* 버튼들이 보기 좋게 정렬되도록 */}
+                {[0, 1, 2, 3, 4, 5, 6, 7, 8].map(year => (
+                  <IonCol size="auto" key={year} className="ion-no-padding"> {/* 각 버튼이 적절한 공간을 갖도록 */}
+                    <IonButton
+                      expand="block" // 가로로 꽉 채움 (필요시 'full'이나 'block' 사용)
+                      fill={selectedCareerYears === year ? "solid" : "outline"} // 선택된 버튼은 꽉 채우고, 나머지는 테두리만
+                      color={selectedCareerYears === year ? "primary" : "medium"} // 선택된 버튼은 강조색, 나머지는 일반색
+                      onClick={() => setSelectedCareerYears(year)} // 클릭 시 해당 년도로 상태 업데이트
+                      className="career-button" // 추가적인 스타일링을 위한 클래스
+                    >
+                      {year}년
+                    </IonButton>
+                  </IonCol>
+                ))}                
+              </IonRow>
+            </IonGrid>
 
             <h2 style={{ fontSize: '1.5em', margin: '32px 0 16px 0' }}>기업 선택</h2>
             <IonList>

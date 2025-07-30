@@ -16,3 +16,30 @@
   background-color: #007bff; /* 활성화된 메뉴 배경색 */
   color: rgb(0, 0, 0); /* 활성화된 메뉴 텍스트 색상 */
 }
+
+.career-button {
+    /* 버튼 좌우 마진을 주어 서로 너무 붙지 않게 */
+    margin: 5px; /* 모든 방향으로 마진 */
+    min-width: 60px; /* 버튼의 최소 너비 설정 (텍스트 길이에 따라 조절) */
+    /* 필요하다면 폰트 크기나 패딩도 조절 가능 */
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+}
+
+/* IonGrid/IonRow의 기본 패딩이 불편하다면 제거 */
+ion-grid {
+  --ion-grid-padding: 0;
+}
+ion-row {
+  --ion-grid-row-padding: 0;
+}
+ion-col {
+  --ion-grid-column-padding: 0;
+}
+
+/* .ion-no-padding 클래스가 없으면 아래를 사용 */
+.ion-no-padding {
+  padding: 0 !important; /* 중요한 부분! Ionic 기본 패딩 제거 */
+}
