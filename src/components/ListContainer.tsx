@@ -18,6 +18,7 @@ interface Job_mst {
   endDate: string;
   personalHistory: number;
   personalHistoryEnd: number;
+  insertDts: string | Date | null;
 }
 
 interface ListContainerProps {
@@ -159,6 +160,32 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
     }
   };
 
+  function isTodayInsertDts(value?: string | Date | null): boolean {
+    if (!value) return false;
+
+    const toDatePart = (v: string | Date) => {
+      if (v instanceof Date && !isNaN(v.getTime())) {
+        const y = v.getFullYear();
+        const m = String(v.getMonth() + 1).padStart(2, '0');
+        const d = String(v.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+      const s = String(v).replace(/^"+|"+$/g, '').trim(); // 양끝 따옴표 제거
+      return s.split('T')[0]; // '2025-08-07'
+    };
+
+    const datePart = toDatePart(value);
+
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const todayPart = `${y}-${m}-${d}`;
+
+    return datePart === todayPart;
+  }
+
+
   return (
     <div className="container">
       <div className="announcement-section">
@@ -190,13 +217,17 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
                 item.companyCd && item.companyCd.toUpperCase().includes(key.toUpperCase())
               );
               const backgroundColor = companyKey ? companyColors[companyKey] : 'white';
+              const isNew = isTodayInsertDts(item.insertDts); // 추가: 오늘 여부 판단
 
               return (
                 <div className="job-card" key={item.id} style={{ display: 'flex'}}>
                   <div className="left-area" style={{ backgroundColor }}>
                   </div>
                   <div className="right-area">
-                    <h3>{item.annoSubject}</h3>
+                    <h3>
+                      <span className="job-title-text">{item.annoSubject}</span>
+                      {isNew && <span className="badge-new" aria-label="오늘 등록됨">NEW</span>}
+                    </h3>                    
                     <p>{item.sysCompanyCdNm} | {item.subJobCdNm}
                     {item.endDate ? ` | ~${item.endDate}` : ''}
                     {item.personalHistory !== undefined && item.personalHistory !== null

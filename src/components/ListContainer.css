@@ -64,6 +64,7 @@ li {
 .job-card h3 {
   font-size: 18px;
   margin-bottom: 8px;
+  display: block;
 }
 
 .job-card p {
@@ -122,4 +123,19 @@ li {
   font-size: 18px;
   color: #666;
   padding: 20px;
+}
+
+.badge-new {
+  display: inline-block;   /* 인라인 옆에 안정적으로 위치 */
+  margin-left: 5px;
+  margin-top: 6px;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background-color: #ff3b30;
+  border-radius: 10px;
+  line-height: 1;
+  vertical-align: text-top; /* 또는 middle */
+  white-space: nowrap;      /* NEW 단어 자체는 줄바꿈 금지 */
 }
