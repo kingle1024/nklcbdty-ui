@@ -1,0 +1,502 @@
+/* ===== 레이아웃 ===== */
+.admin-content {
+  --background: #f5f6fa;
+}
+
+.admin-wrapper {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 28px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  color: #1a1d29;
+  letter-spacing: -0.02em;
+}
+
+.admin-subtitle {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* ===== 통계 카드 ===== */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.stat-card {
+  background: #ffffff;
+  border: 1px solid #e6e8ee;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+.stat-card--list {
+  display: block;
+}
+
+.stat-card--primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #fff;
+  border-color: transparent;
+}
+
+.stat-card--primary .stat-card__icon {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.stat-card--primary .stat-card__label {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.stat-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #eef0ff;
+  color: #4f46e5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.stat-card__label {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.stat-card__value {
+  font-size: 28px;
+  font-weight: 700;
+  color: inherit;
+  line-height: 1.1;
+}
+
+.stat-card__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.rank-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #eef2ff;
+  color: #4338ca;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.rank-chip--alt {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.rank-chip strong {
+  font-weight: 600;
+}
+
+.rank-chip em {
+  font-style: normal;
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.muted {
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+/* ===== 검색바 ===== */
+.search-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.search-bar__input {
+  flex: 1;
+  min-width: 240px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #e6e8ee;
+  border-radius: 10px;
+  padding: 4px 14px;
+  transition: border-color 0.15s ease;
+}
+
+.search-bar__input:focus-within {
+  border-color: #4f46e5;
+}
+
+.search-bar__input ion-icon {
+  color: #9ca3af;
+  font-size: 18px;
+}
+
+.search-bar__input ion-input {
+  --padding-start: 0;
+  --padding-end: 0;
+  --background: transparent;
+  font-size: 14px;
+}
+
+.search-bar__btn {
+  --background: #4f46e5;
+  --background-hover: #4338ca;
+}
+
+.applied-keyword {
+  margin-bottom: 12px;
+}
+
+/* ===== 테이블 ===== */
+.table-card {
+  background: #ffffff;
+  border: 1px solid #e6e8ee;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-table thead th {
+  background: #f9fafb;
+  color: #374151;
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e6e8ee;
+  white-space: nowrap;
+}
+
+.admin-table tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f3f7;
+  vertical-align: middle;
+  color: #1f2937;
+}
+
+.admin-table tbody tr:hover {
+  background: #fbfbfd;
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table .center {
+  text-align: center;
+}
+
+.mono {
+  font-family: 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
+  font-size: 13px;
+}
+
+.small {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 12px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.tag--company {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.tag--job {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.tag--career {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ===== 페이징 ===== */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-top: 1px solid #e6e8ee;
+  background: #fbfbfd;
+}
+
+.pagination__info {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.pagination__info strong {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.pagination__buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* ===== 로딩/빈 상태 ===== */
+.loading-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px 16px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.empty {
+  padding: 48px 16px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* ===== 모달 ===== */
+ion-modal.show-modal {
+  --width: 90vw;
+  --max-width: 900px;
+  --height: auto;
+  --max-height: 80vh;
+  --border-radius: 16px;
+}
+
+.modal-container {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  max-height: 80vh;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e6e8ee;
+}
+
+.modal-header h2 {
+  margin: 0 0 4px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1d29;
+}
+
+.modal-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.modal-body {
+  padding: 16px 24px 24px;
+  overflow-y: auto;
+}
+
+.item-grid {
+  --ion-grid-padding: 0;
+  font-size: 13px;
+}
+
+.item-grid__head {
+  background: #f9fafb;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #374151;
+  padding: 8px 4px;
+  margin-bottom: 4px;
+}
+
+.item-grid__row {
+  padding: 10px 4px;
+  border-bottom: 1px solid #f1f3f7;
+  align-items: center;
+}
+
+.item-grid__row:last-child {
+  border-bottom: none;
+}
+
+/* ===== 편집 폼 ===== */
+.edit-section {
+  margin-bottom: 24px;
+}
+
+.edit-section:last-child {
+  margin-bottom: 0;
+}
+
+.edit-section__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1d29;
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e6e8ee;
+}
+
+.check-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.check-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e6e8ee;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  color: #1f2937;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  user-select: none;
+}
+
+.check-card:hover {
+  border-color: #c7c9d6;
+  background: #fbfbfd;
+}
+
+.check-card--active {
+  border-color: #4f46e5;
+  background: #eef2ff;
+  color: #3730a3;
+  font-weight: 600;
+}
+
+.check-card ion-checkbox {
+  flex-shrink: 0;
+  --size: 18px;
+}
+
+.career-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.job-category {
+  margin-bottom: 16px;
+}
+
+.job-category:last-child {
+  margin-bottom: 0;
+}
+
+.job-category__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+/* ===== 모달 푸터 ===== */
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  border-top: 1px solid #e6e8ee;
+  background: #fbfbfd;
+}
+
+.modal-footer__hint {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.modal-footer__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+}
