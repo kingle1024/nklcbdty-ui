@@ -25,6 +25,7 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import Mypage from './pages/Mypage';
 import Email from './pages/EmailInquiry';
+import AdminSubscriptions from './pages/AdminSubscriptions';
 
 setupIonicReact();
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App: React.FC = () => {
               <Route path='/' component={Home} exact={true} />
               <Route path='/mypage' component={Mypage} exact={true} />
               <Route path='/email' component={Email} exact={true} />
+              <Route path='/admin/subscriptions' component={AdminSubscriptions} exact={true} />
             </IonRouterOutlet>
           </IonReactRouter>
         </AuthProvider>
