@@ -21,6 +21,8 @@ import {
   refreshOutline,
   saveOutline,
   createOutline,
+  mailOutline,
+  paperPlaneOutline,
 } from 'ionicons/icons';
 import { Helmet } from 'react-helmet';
 import './AdminSubscriptions.css';
@@ -127,6 +129,7 @@ const AdminSubscriptions: React.FC = () => {
   const [editJobs, setEditJobs] = useState<string[]>([]);
   const [editCareer, setEditCareer] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [sendingUserId, setSendingUserId] = useState<string | null>(null);
 
   // 직무 카테고리 (마이페이지와 동일 API)
   const [jobCategories, setJobCategories] = useState<JobCategoryMst[]>([]);
@@ -248,6 +251,24 @@ const AdminSubscriptions: React.FC = () => {
       alert('저장에 실패했습니다.');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const sendMail = async (userId: string, email: string | null) => {
+    const target = email ? `${userId} (${email})` : userId;
+    if (!window.confirm(`${target} 사용자에게 맞춤 채용 공고 메일을 발송하시겠습니까?`)) return;
+    setSendingUserId(userId);
+    try {
+      await axios.post(
+        `${API_URL}/api/admin/subscriptions/${encodeURIComponent(userId)}/send-email`
+      );
+      // 백엔드에서 @Async로 처리되므로 요청만 큐잉되고 즉시 202 응답
+      alert(`메일 발송 요청을 보냈습니다. ${email ? `(${email})` : ''}`);
+    } catch (e) {
+      console.error('메일 발송 요청 실패:', e);
+      alert('메일 발송 요청에 실패했습니다.');
+    } finally {
+      setSendingUserId(null);
     }
   };
 
@@ -404,7 +425,7 @@ const AdminSubscriptions: React.FC = () => {
                         <th>관심 직무</th>
                         <th style={{ width: '70px' }}>경력</th>
                         <th style={{ width: '150px' }}>최근 변경</th>
-                        <th style={{ width: '110px' }}>관리</th>
+                        <th style={{ width: '170px' }}>관리</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -443,10 +464,25 @@ const AdminSubscriptions: React.FC = () => {
                           </td>
                           <td className="mono small">{formatDate(row.latestUpdateDts)}</td>
                           <td>
-                            <IonButton size="small" fill="outline" onClick={() => openDetail(row.userId)}>
-                              <IonIcon slot="start" icon={createOutline} />
-                              편집
-                            </IonButton>
+                            <div className="row-actions">
+                              <IonButton size="small" fill="outline" onClick={() => openDetail(row.userId)}>
+                                <IonIcon slot="icon-only" icon={createOutline} />
+                              </IonButton>
+                              <IonButton
+                                size="small"
+                                fill="outline"
+                                color="success"
+                                disabled={!row.email || sendingUserId === row.userId}
+                                title={row.email ? '맞춤 채용 메일 발송' : '이메일이 없어 발송 불가'}
+                                onClick={() => sendMail(row.userId, row.email)}
+                              >
+                                {sendingUserId === row.userId ? (
+                                  <IonSpinner name="crescent" className="btn-spinner-inline" />
+                                ) : (
+                                  <IonIcon slot="icon-only" icon={mailOutline} />
+                                )}
+                              </IonButton>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -593,6 +629,25 @@ const AdminSubscriptions: React.FC = () => {
                 {hasChanges ? '변경된 내용이 있습니다.' : '변경 사항 없음'}
               </span>
               <div className="modal-footer__actions">
+                <IonButton
+                  fill="outline"
+                  color="success"
+                  disabled={!detail?.email || sendingUserId === selectedUserId}
+                  title={detail?.email ? '맞춤 채용 메일 발송' : '이메일이 없어 발송 불가'}
+                  onClick={() => selectedUserId && sendMail(selectedUserId, detail?.email ?? null)}
+                >
+                  {sendingUserId === selectedUserId ? (
+                    <>
+                      <IonSpinner name="crescent" className="btn-spinner" />
+                      발송중
+                    </>
+                  ) : (
+                    <>
+                      <IonIcon slot="start" icon={paperPlaneOutline} />
+                      메일 발송
+                    </>
+                  )}
+                </IonButton>
                 <IonButton fill="outline" onClick={closeDetail} disabled={isSaving}>
                   취소
                 </IonButton>
