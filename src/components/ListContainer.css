@@ -1,4 +1,16 @@
 /* ListContainer.css */
+
+/* 삭제요청 버튼 영역 */
+.delete-request-area {
+  margin-top: 8px;
+}
+.delete-request-btn {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  font-size: 12px;
+  margin: 0;
+}
+
 .announcement-section {
   /* width: 680px; */ /* 고정 너비 대신 */
   width: 100%; /* 부모 너비를 따르되 */
