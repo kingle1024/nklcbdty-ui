@@ -30,6 +30,9 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
   const [company, setCompany] = useState<string>('NAVER');
   const [cache, setCache] = useState<{ [key: string]: Job_mst[] }>({});
   const [searchQuery, setSearchQuery] = useState<string>('');
+  // 삭제요청(PENDING)된 공고 id 집합 — 버튼 상태 표시용
+  const [requestedDeleteIds, setRequestedDeleteIds] = useState<Set<number>>(new Set());
+  const [requestingDeleteId, setRequestingDeleteId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,6 +61,43 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
     };
     fetchData();
   }, [company]);
+
+  // 삭제요청(PENDING) 상태인 공고 id 목록을 불러와 버튼 상태에 반영
+  useEffect(() => {
+    const fetchPendingDeleteIds = async () => {
+      try {
+        const response = await axios.get<number[]>(`${API_URL}/api/job-delete-requests/pending-ids`);
+        if (Array.isArray(response.data)) {
+          setRequestedDeleteIds(new Set(response.data));
+        }
+      } catch (error) {
+        console.error('삭제요청 목록 조회 실패:', error);
+      }
+    };
+    fetchPendingDeleteIds();
+  }, []);
+
+  const handleDeleteRequest = async (jobId: number | null) => {
+    if (jobId == null) return;
+    if (requestedDeleteIds.has(jobId)) return; // 이미 요청됨
+    const confirmed = window.confirm('이 공고의 삭제를 요청하시겠어요?\n관리자 확인 후 삭제됩니다.');
+    if (!confirmed) return;
+
+    setRequestingDeleteId(jobId);
+    try {
+      await axios.post(`${API_URL}/api/job-delete-requests`, { jobId });
+      setRequestedDeleteIds((prev) => {
+        const next = new Set(prev);
+        next.add(jobId);
+        return next;
+      });
+    } catch (error) {
+      console.error('삭제요청 실패:', error);
+      alert('삭제요청에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+    } finally {
+      setRequestingDeleteId(null);
+    }
+  };
 
   const handleCompanyChange = (selectedCompany: string) => {
     setCompany(selectedCompany);
@@ -239,14 +279,38 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
                       : ''
                     }
                     </p>
-                    <a 
-                      href={item.jobDetailLink} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
+                    <a
+                      href={item.jobDetailLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       onClick={(event) => handleClick(event, item.annoId, item.annoSubject)}
                     >
                       자세히 보기
                     </a>
+                    <div className="delete-request-area">
+                      {item.id != null && requestedDeleteIds.has(item.id) ? (
+                        <IonButton
+                          size="small"
+                          fill="clear"
+                          color="medium"
+                          disabled
+                          className="delete-request-btn"
+                        >
+                          삭제 요청됨
+                        </IonButton>
+                      ) : (
+                        <IonButton
+                          size="small"
+                          fill="outline"
+                          color="danger"
+                          className="delete-request-btn"
+                          disabled={requestingDeleteId === item.id}
+                          onClick={() => handleDeleteRequest(item.id)}
+                        >
+                          {requestingDeleteId === item.id ? '요청 중...' : '삭제 요청'}
+                        </IonButton>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
