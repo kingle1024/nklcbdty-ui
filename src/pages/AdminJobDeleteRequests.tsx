@@ -12,6 +12,7 @@ import {
 import { refreshOutline, trashOutline, closeCircleOutline, checkmarkDoneOutline } from 'ionicons/icons';
 import { Helmet } from 'react-helmet';
 import CommonHeader from '../common/CommonHeader';
+import AdminSidebar from '../common/AdminSidebar';
 import API_URL from '../config';
 
 interface JobDeleteRequest {
@@ -112,7 +113,9 @@ const AdminJobDeleteRequests: React.FC = () => {
       </Helmet>
       <CommonHeader />
       <IonContent>
-        <div style={{ maxWidth: 1000, margin: '0 auto', padding: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+          <AdminSidebar />
+          <div style={{ flex: 1, minWidth: 0, maxWidth: 1000, margin: '0 auto', padding: 16 }}>
           <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <div>
               <h1 style={{ margin: 0, fontSize: 22 }}>공고 삭제요청 관리</h1>
@@ -215,6 +218,7 @@ const AdminJobDeleteRequests: React.FC = () => {
               })}
             </div>
           )}
+          </div>
         </div>
       </IonContent>
     </IonPage>

@@ -27,6 +27,7 @@ import {
 import { Helmet } from 'react-helmet';
 import './AdminSubscriptions.css';
 import CommonHeader from '../common/CommonHeader';
+import AdminSidebar from '../common/AdminSidebar';
 import API_URL from '../config';
 
 // TODO: 관리자 로그인 도입 후 fetchWithToken로 교체하여 Bearer 토큰을 첨부한다.
@@ -318,7 +319,9 @@ const AdminSubscriptions: React.FC = () => {
       </Helmet>
       <CommonHeader />
       <IonContent className="admin-content">
-        <div className="admin-wrapper">
+        <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+        <AdminSidebar />
+        <div className="admin-wrapper" style={{ flex: 1, minWidth: 0 }}>
           <header className="admin-header">
             <div>
               <h1 className="admin-title">구독 관리</h1>
@@ -514,6 +517,7 @@ const AdminSubscriptions: React.FC = () => {
               <div className="empty"><p>구독자 데이터가 없습니다.</p></div>
             )}
           </section>
+        </div>
         </div>
 
         {/* 편집 모달 */}
