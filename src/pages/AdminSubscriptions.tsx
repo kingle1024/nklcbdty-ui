@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import axios from 'axios';
+import { useHistory } from 'react-router-dom';
 import {
   IonPage,
   IonContent,
@@ -28,6 +28,7 @@ import { Helmet } from 'react-helmet';
 import './AdminSubscriptions.css';
 import CommonHeader from '../common/CommonHeader';
 import AdminSidebar from '../common/AdminSidebar';
+import adminApi, { isAdminLoggedIn } from '../common/adminApi';
 import API_URL from '../config';
 
 // TODO: 관리자 로그인 도입 후 fetchWithToken로 교체하여 Bearer 토큰을 첨부한다.
@@ -112,6 +113,7 @@ const topEntries = (counts: Record<string, number> | undefined, limit = 3): Arra
 };
 
 const AdminSubscriptions: React.FC = () => {
+  const history = useHistory();
   const [page, setPage] = useState<PageResponse | null>(null);
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [keyword, setKeyword] = useState('');
@@ -145,7 +147,7 @@ const AdminSubscriptions: React.FC = () => {
       if (appliedKeyword) {
         params.set('keyword', appliedKeyword);
       }
-      const { data } = await axios.get<PageResponse>(
+      const { data } = await adminApi.get<PageResponse>(
         `${API_URL}/api/admin/subscriptions?${params.toString()}`
       );
       setPage(data);
@@ -159,7 +161,7 @@ const AdminSubscriptions: React.FC = () => {
 
   const fetchStats = useCallback(async () => {
     try {
-      const { data } = await axios.get<StatsResponse>(`${API_URL}/api/admin/subscriptions/stats`);
+      const { data } = await adminApi.get<StatsResponse>(`${API_URL}/api/admin/subscriptions/stats`);
       setStats(data);
     } catch (e) {
       console.error('관리자 통계 조회 실패:', e);
@@ -168,12 +170,19 @@ const AdminSubscriptions: React.FC = () => {
 
   const fetchJobCategories = useCallback(async () => {
     try {
-      const { data } = await axios.get<JobCategoryMst[]>(`${API_URL}/api/category/list`);
+      const { data } = await adminApi.get<JobCategoryMst[]>(`${API_URL}/api/category/list`);
       setJobCategories(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error('직무 카테고리 조회 실패:', e);
     }
   }, []);
+
+  // 미로그인 시 관리자 로그인(/admin)으로 이동
+  useEffect(() => {
+    if (!isAdminLoggedIn()) {
+      history.replace('/admin');
+    }
+  }, [history]);
 
   useEffect(() => { fetchList(); }, [fetchList]);
   useEffect(() => { fetchStats(); }, [fetchStats]);
@@ -197,7 +206,7 @@ const AdminSubscriptions: React.FC = () => {
     setIsDetailLoading(true);
     setDetail(null);
     try {
-      const { data } = await axios.get<SubscriptionDetail>(
+      const { data } = await adminApi.get<SubscriptionDetail>(
         `${API_URL}/api/admin/subscriptions/${encodeURIComponent(userId)}`
       );
       setDetail(data);
@@ -238,7 +247,7 @@ const AdminSubscriptions: React.FC = () => {
         selectedJobRoles: editJobs,
         selectedCareerYears: editCareer !== null ? String(editCareer) : null,
       };
-      const { data } = await axios.put<SubscriptionDetail>(
+      const { data } = await adminApi.put<SubscriptionDetail>(
         `${API_URL}/api/admin/subscriptions/${encodeURIComponent(selectedUserId)}`,
         payload
       );
@@ -260,7 +269,7 @@ const AdminSubscriptions: React.FC = () => {
     if (!window.confirm(`${target} 사용자에게 맞춤 채용 공고 메일을 발송하시겠습니까?`)) return;
     setSendingUserId(userId);
     try {
-      await axios.post(
+      await adminApi.post(
         `${API_URL}/api/admin/subscriptions/${encodeURIComponent(userId)}/send-email`
       );
       // 백엔드에서 @Async로 처리되므로 요청만 큐잉되고 즉시 202 응답

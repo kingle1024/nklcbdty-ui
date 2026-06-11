@@ -1,10 +1,12 @@
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { IonIcon } from '@ionic/react';
-import { peopleOutline, trashOutline, homeOutline } from 'ionicons/icons';
+import { gridOutline, peopleOutline, trashOutline, homeOutline, logOutOutline } from 'ionicons/icons';
+import { clearAdminAuth } from './adminApi';
 
 // 관리자 페이지 공통 사이드바. 신규 관리자 메뉴는 여기 MENU 에 추가하면 모든 관리자 페이지에 노출됨.
 const MENU: Array<{ label: string; path: string; icon: string }> = [
+  { label: '관리자 홈', path: '/admin', icon: gridOutline },
   { label: '구독 관리', path: '/admin/subscriptions', icon: peopleOutline },
   { label: '공고 삭제요청', path: '/admin/job-delete-requests', icon: trashOutline },
 ];
@@ -12,6 +14,11 @@ const MENU: Array<{ label: string; path: string; icon: string }> = [
 const AdminSidebar: React.FC = () => {
   const history = useHistory();
   const location = useLocation();
+
+  const handleLogout = () => {
+    clearAdminAuth();
+    history.replace('/admin');
+  };
 
   return (
     <aside
@@ -58,7 +65,7 @@ const AdminSidebar: React.FC = () => {
         })}
       </nav>
 
-      <div style={{ marginTop: 16, borderTop: '1px solid #ececec', paddingTop: 12 }}>
+      <div style={{ marginTop: 16, borderTop: '1px solid #ececec', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 4 }}>
         <button
           type="button"
           onClick={() => history.push('/')}
@@ -79,6 +86,27 @@ const AdminSidebar: React.FC = () => {
         >
           <IonIcon icon={homeOutline} style={{ fontSize: 18 }} />
           서비스 홈으로
+        </button>
+        <button
+          type="button"
+          onClick={handleLogout}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            width: '100%',
+            padding: '10px 12px',
+            border: 'none',
+            borderRadius: 8,
+            cursor: 'pointer',
+            textAlign: 'left',
+            fontSize: 14,
+            color: '#eb445a',
+            background: 'transparent',
+          }}
+        >
+          <IonIcon icon={logOutOutline} style={{ fontSize: 18 }} />
+          로그아웃
         </button>
       </div>
     </aside>
