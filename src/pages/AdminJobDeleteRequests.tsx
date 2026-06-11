@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import axios from 'axios';
+import { useHistory } from 'react-router-dom';
 import {
   IonPage,
   IonContent,
@@ -12,6 +12,8 @@ import {
 import { refreshOutline, trashOutline, closeCircleOutline, checkmarkDoneOutline } from 'ionicons/icons';
 import { Helmet } from 'react-helmet';
 import CommonHeader from '../common/CommonHeader';
+import AdminSidebar from '../common/AdminSidebar';
+import adminApi, { isAdminLoggedIn } from '../common/adminApi';
 import API_URL from '../config';
 
 interface JobDeleteRequest {
@@ -52,16 +54,24 @@ const formatDate = (value: string | null): string => {
 };
 
 const AdminJobDeleteRequests: React.FC = () => {
+  const history = useHistory();
   const [requests, setRequests] = useState<JobDeleteRequest[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('PENDING');
   const [isLoading, setIsLoading] = useState(true);
   const [processingId, setProcessingId] = useState<number | null>(null);
 
+  // 미로그인 시 관리자 로그인(/admin)으로 이동
+  useEffect(() => {
+    if (!isAdminLoggedIn()) {
+      history.replace('/admin');
+    }
+  }, [history]);
+
   const fetchRequests = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = statusFilter ? `?status=${statusFilter}` : '';
-      const { data } = await axios.get<JobDeleteRequest[]>(
+      const { data } = await adminApi.get<JobDeleteRequest[]>(
         `${API_URL}/api/admin/job-delete-requests${params}`
       );
       setRequests(Array.isArray(data) ? data : []);
@@ -78,7 +88,7 @@ const AdminJobDeleteRequests: React.FC = () => {
     if (!window.confirm(`"${req.annoSubject ?? req.jobId}" 공고를 삭제(승인)하시겠습니까?\n승인 시 실제 공고가 삭제됩니다.`)) return;
     setProcessingId(req.id);
     try {
-      await axios.post(`${API_URL}/api/admin/job-delete-requests/${req.id}/approve`);
+      await adminApi.post(`${API_URL}/api/admin/job-delete-requests/${req.id}/approve`);
       await fetchRequests();
     } catch (e) {
       console.error('승인 실패:', e);
@@ -92,7 +102,7 @@ const AdminJobDeleteRequests: React.FC = () => {
     if (!window.confirm(`"${req.annoSubject ?? req.jobId}" 삭제요청을 반려하시겠습니까?\n공고는 유지됩니다.`)) return;
     setProcessingId(req.id);
     try {
-      await axios.post(`${API_URL}/api/admin/job-delete-requests/${req.id}/reject`);
+      await adminApi.post(`${API_URL}/api/admin/job-delete-requests/${req.id}/reject`);
       await fetchRequests();
     } catch (e) {
       console.error('반려 실패:', e);
@@ -112,7 +122,9 @@ const AdminJobDeleteRequests: React.FC = () => {
       </Helmet>
       <CommonHeader />
       <IonContent>
-        <div style={{ maxWidth: 1000, margin: '0 auto', padding: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+          <AdminSidebar />
+          <div style={{ flex: 1, minWidth: 0, maxWidth: 1000, margin: '0 auto', padding: 16 }}>
           <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <div>
               <h1 style={{ margin: 0, fontSize: 22 }}>공고 삭제요청 관리</h1>
@@ -215,6 +227,7 @@ const AdminJobDeleteRequests: React.FC = () => {
               })}
             </div>
           )}
+          </div>
         </div>
       </IonContent>
     </IonPage>
