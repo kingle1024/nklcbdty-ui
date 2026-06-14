@@ -70,6 +70,7 @@ const AdminHome: React.FC = () => {
                   value={username}
                   placeholder="아이디"
                   autocomplete="username"
+                  style={{ '--placeholder-color': '#9aa0a6', '--placeholder-opacity': 1 } as React.CSSProperties}
                   onIonInput={(e) => setUsername(e.detail.value ?? '')}
                 />
               </div>
@@ -79,6 +80,7 @@ const AdminHome: React.FC = () => {
                   value={password}
                   placeholder="비밀번호"
                   autocomplete="current-password"
+                  style={{ '--placeholder-color': '#9aa0a6', '--placeholder-opacity': 1 } as React.CSSProperties}
                   onIonInput={(e) => setPassword(e.detail.value ?? '')}
                 />
               </div>
