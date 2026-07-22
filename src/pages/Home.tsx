@@ -226,7 +226,7 @@ const Home: React.FC = () => {
                   <div key={categoryData.id}>
                     <span
                       onClick={() => toggleCategories(categoryData.name)}
-                      style={{ cursor: 'pointer', color: '#007bff', fontWeight: 'bold' }}
+                      className="category-toggle"
                     >
                       {categoryData.name}
                     </span>

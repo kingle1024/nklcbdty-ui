@@ -2,12 +2,26 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px;
+  padding: 24px 16px;
   height: 100%;
+  background-color: var(--surface-bg);
+  box-sizing: border-box;
 }
+
+.detail-container h1 {
+  font-size: 22px;
+  font-weight: 700;
+}
+
 .detail-content {
   margin: 0 auto;
   width: 43%;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .d-flex {
@@ -24,6 +38,10 @@
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .detail-content {
+    width: 100%;
+  }
 }
 
 .map-container {
@@ -32,6 +50,9 @@
   margin: 20px auto;
   display: flex;
   justify-content: left;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
 }
 
 .comment-section {
@@ -52,8 +73,13 @@
 }
 
 .small-button {
-  font-size: 10px; /* 텍스트 크기 */
-  padding: 4px 8px; /* 버튼 내부 여백 */
-  height: 20px; /* 버튼 높이 */
+  font-size: 11px; /* 텍스트 크기 */
+  height: 24px; /* 버튼 높이 */
   line-height: 1; /* 텍스트 줄 높이 */
+  text-transform: none;
+  font-weight: 600;
+  --border-radius: var(--radius-pill);
+  --box-shadow: none;
+  --padding-start: 10px;
+  --padding-end: 10px;
 }

@@ -1,29 +1,70 @@
 .mypage-container {
   display: flex;
+  gap: 20px;
+  padding: 20px;
+  background-color: var(--surface-bg);
+  min-height: 100%;
+  box-sizing: border-box;
 }
 
 .sidebar {
   width: 200px; /* 사이드바의 너비 */
-  padding: 10px;
+  padding: 12px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  align-self: flex-start;
+}
+
+.sidebar ion-item {
+  --background: transparent;
+  --color: var(--text-secondary);
+  --border-color: transparent;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .content {
   flex: 1; /* 남은 공간을 차지 */
-  padding: 20px;
+  padding: 24px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.content h2 {
+  margin-top: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.content h4 {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-muted);
 }
 
 .active {
-  background-color: #007bff; /* 활성화된 메뉴 배경색 */
-  color: rgb(0, 0, 0); /* 활성화된 메뉴 텍스트 색상 */
+  --background: var(--brand-primary-tint);
+  background-color: var(--brand-primary-tint);
+  --color: var(--brand-primary);
+  color: var(--brand-primary);
+  font-weight: 700;
 }
 
 .career-button {
     /* 버튼 좌우 마진을 주어 서로 너무 붙지 않게 */
-    margin: 5px; /* 모든 방향으로 마진 */
+    margin: 4px;
     min-width: 60px; /* 버튼의 최소 너비 설정 (텍스트 길이에 따라 조절) */
-    /* 필요하다면 폰트 크기나 패딩도 조절 가능 */
-    --padding-start: 12px;
-    --padding-end: 12px;
+    text-transform: none;
+    font-weight: 600;
+    --border-radius: var(--radius-pill);
+    --box-shadow: none;
+    --padding-start: 14px;
+    --padding-end: 14px;
     --padding-top: 8px;
     --padding-bottom: 8px;
 }
