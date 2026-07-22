@@ -2,152 +2,209 @@
 
 /* 삭제요청 버튼 영역 */
 .delete-request-area {
-  margin-top: 8px;
+  margin-top: 10px;
 }
 .delete-request-btn {
-  --padding-start: 8px;
-  --padding-end: 8px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  --border-radius: var(--radius-pill);
+  --border-width: 1px;
   font-size: 12px;
+  font-weight: 600;
   margin: 0;
+  text-transform: none;
 }
 
 .announcement-section {
-  /* width: 680px; */ /* 고정 너비 대신 */
-  width: 100%; /* 부모 너비를 따르되 */
-  max-width: 680px; /* 최대 너비를 680px로 제한 */
-  /* 필요하다면 가운데 정렬 */
+  width: 100%;
+  max-width: 680px;
   margin-left: auto;
   margin-right: auto;
 }
 
 .badge {
   background-color: rgba(255, 255, 255, 0.652);
-  color: black; /* 글자 색상 */
+  color: var(--text-strong);
   padding: 5px 10px;
   border-radius: 5px;
 }
 
 li {
-  margin-bottom: 10px; /* 아래쪽에 10px 간격을 추가 */
+  margin-bottom: 10px;
 }
 
+/* 회사 필터: 알약형 칩 버튼 */
 .button-section {
   display: flex;
-  flex-wrap: wrap; /* 버튼이 화면 크기에 맞춰 줄바꿈 가능 */  
-  margin-bottom: 20px; /* 버튼 아래 여백 */
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
 }
 
-.button-section IonButton {
-  flex: 1 1 45%; /* 버튼을 2개씩 줄 바꿈하고, 최대 너비를 45%로 설정 */
-  min-width: 100px; /* 최소 너비 설정 */
+.button-section ion-button {
+  flex: 0 0 auto;
+  min-width: auto;
+  margin: 0;
+  height: 36px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  --border-radius: var(--radius-pill);
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --box-shadow: none;
+}
+
+/* 비활성(회색) 칩 */
+.button-section ion-button[color="medium"] {
+  --background: var(--surface);
+  --background-hover: var(--surface-field);
+  --background-activated: var(--surface-field);
+  --color: var(--text-secondary);
+  --border-width: 1px;
+  --border-style: solid;
+  --border-color: var(--border);
+}
+
+/* 활성(선택) 칩 */
+.button-section ion-button[color="primary"] {
+  --background: var(--brand-primary);
+  --background-hover: var(--brand-primary-pressed);
+  --background-activated: var(--brand-primary-pressed);
+  --color: #ffffff;
 }
 
 .card-container {
   display: flex;
-  flex-direction: column; /* 세로 방향으로 배치 */
+  flex-direction: column;
+  gap: 12px;
   margin-top: 20px;
 }
 
 .job-card {
-  border: 1px solid #ddd;
-  border-radius: 8px; /* 모서리 둥글게 유지 */
-  padding: 0; /* 패딩 제거하여 꽉 차게 */
-  margin: 8px 0; /* 위아래 여백 추가 */
-  width: 100%; /* 카드의 너비를 100%로 설정 */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  display: flex; /* 카드 내부에서 왼쪽과 오른쪽 정렬 */
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  background-color: var(--surface);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
+.job-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+/* 회사 컬러 스트립 */
 .left-area {
-  background-color: #f0f0f0; /* 배경색 */
-  padding: 10px;
-  width: 10%; /* 왼쪽 영역 너비 */
-  border-top-left-radius: 8px; /* 모서리 둥글게 */
-  border-bottom-left-radius: 8px; /* 모서리 둥글게 */
+  background-color: var(--surface-field);
+  padding: 0;
+  width: 6px;
+  flex-shrink: 0;
+  border-radius: 0;
 }
 
 .right-area {
-  width: 90%; /* 오른쪽 영역 너비 */
-  padding: 16px; /* 오른쪽 영역 패딩 추가 */
-  border-top-right-radius: 8px; /* 모서리 둥글게 */
-  border-bottom-right-radius: 8px; /* 모서리 둥글게 */
+  flex: 1;
+  width: auto;
+  padding: 18px 20px;
+  border-radius: 0;
 }
 
 .job-card h3 {
-  font-size: 18px;
-  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-strong);
+  margin: 0 0 6px;
   display: block;
+  line-height: 1.45;
 }
 
 .job-card p {
-  margin: 4px 0;
+  margin: 4px 0 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
 }
 
 .job-card a {
-  color: #007bff;
+  display: inline-block;
+  color: var(--brand-primary);
+  background-color: var(--brand-primary-tint);
   text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  transition: background-color 0.15s ease;
+}
+
+.job-card a:hover {
+  background-color: #d7e9ff;
 }
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .button-section {
-    flex-direction: row; /* 모바일에서 가로 방향으로 나열 */
-    justify-content: space-between; /* 버튼 사이의 공간을 균등하게 분배 */
-    gap: 1px; /* 버튼 간의 간격 줄이기 */
-    margin-bottom: -20px;
+    gap: 6px;
+    margin-bottom: 4px;
   }
 
-  .left-area {
-    width: 10%; /* 모바일에서 왼쪽 영역 너비 조정 */
-  }
-
-  .right-area {
-    width: 90%; /* 모바일에서 오른쪽 영역 너비 조정 */
-  }
-}
-
-@media (min-width: 769px) {
-  .left-area {
-    width: 10%; /* 데스크탑에서 왼쪽 영역 고정 너비 */
+  .button-section ion-button {
+    height: 32px;
+    font-size: 13px;
+    --padding-start: 12px;
+    --padding-end: 12px;
   }
 
   .right-area {
-    width: 90%; /* 데스크탑에서 오른쪽 영역 고정 너비 */
+    padding: 14px 16px;
   }
 }
 
 .search-section {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   width: 100%;
 }
 
 .custom-searchbar {
-  --background: #ffffff;
-  --border-radius: 8px;
-  --box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  --placeholder-color: #666;
-  --icon-color: #666;
+  --background: var(--surface);
+  --border-radius: var(--radius-md);
+  --box-shadow: none;
+  --placeholder-color: var(--text-muted);
+  --icon-color: var(--text-muted);
+  --color: var(--text-strong);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0;
   max-width: 100%;
 }
 
 .no-data-message {
   text-align: center;
-  font-size: 18px;
-  color: #666;
-  padding: 20px;
+  font-size: 15px;
+  color: var(--text-muted);
+  padding: 48px 20px;
+  background-color: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
 }
 
 .badge-new {
-  display: inline-block;   /* 인라인 옆에 안정적으로 위치 */
-  margin-left: 5px;
-  margin-top: 6px;
-  padding: 2px 6px;
-  font-size: 12px;
+  display: inline-block;
+  margin-left: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
   font-weight: 700;
-  color: #fff;
-  background-color: #ff3b30;
-  border-radius: 10px;
+  color: var(--danger);
+  background-color: var(--danger-tint);
+  border-radius: var(--radius-pill);
   line-height: 1;
-  vertical-align: text-top; /* 또는 middle */
-  white-space: nowrap;      /* NEW 단어 자체는 줄바꿈 금지 */
+  vertical-align: text-top;
+  white-space: nowrap;
 }

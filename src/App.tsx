@@ -23,6 +23,7 @@ import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
 
 /* Theme variables */
+import './theme.css';
 import Mypage from './pages/Mypage';
 import Email from './pages/EmailInquiry';
 import AdminHome from './pages/AdminHome';

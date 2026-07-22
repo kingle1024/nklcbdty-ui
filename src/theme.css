@@ -1,0 +1,101 @@
+/* =========================================
+   전역 디자인 토큰 & Ionic 테마 오버라이드
+   화면별 CSS는 여기 정의된 변수를 사용한다.
+   ========================================= */
+/* Ionic의 .ion-page / ion-content(slot) 경계에서 커스텀 프로퍼티 상속이
+   끊기는 경우가 있어 해당 경계 안쪽에도 토큰을 다시 선언한다. */
+:root,
+.ion-page,
+ion-content > * {
+  /* Brand */
+  --brand-primary: #3182f6;
+  --brand-primary-pressed: #1b64da;
+  --brand-primary-tint: #e8f3ff;
+
+  /* Text */
+  --text-strong: #191f28;
+  --text-body: #333d4b;
+  --text-secondary: #4e5968;
+  --text-muted: #8b95a1;
+  --text-disabled: #b0b8c1;
+
+  /* Surface */
+  --surface: #ffffff;
+  --surface-bg: #f7f8fa;
+  --surface-field: #f2f4f6;
+  --border: #e5e8eb;
+  --divider: #f2f4f6;
+
+  /* Semantic */
+  --danger: #f04452;
+  --danger-tint: #fdecee;
+  --success: #059669;
+  --success-tint: #d1fae5;
+
+  /* Shape & shadow */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 9999px;
+  --shadow-card: 0 2px 12px rgba(25, 31, 40, 0.06);
+  --shadow-card-hover: 0 6px 20px rgba(25, 31, 40, 0.1);
+
+  /* Ionic 테마 매핑 */
+  --ion-color-primary: #3182f6;
+  --ion-color-primary-rgb: 49, 130, 246;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #1b64da;
+  --ion-color-primary-tint: #4690f7;
+
+  --ion-background-color: #f7f8fa;
+  --ion-text-color: #191f28;
+  --ion-border-color: #e5e8eb;
+  --ion-font-family: "Pretendard Variable", Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI",
+    "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+}
+
+body {
+  letter-spacing: -0.01em;
+  color: var(--text-body);
+}
+
+h1, h2, h3, h4 {
+  color: var(--text-strong);
+  letter-spacing: -0.02em;
+}
+
+/* ---------- 공통 헤더 ---------- */
+ion-header ion-toolbar {
+  --background: var(--surface);
+  --border-color: var(--border);
+  --color: var(--text-strong);
+}
+
+ion-header ion-title {
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  color: var(--brand-primary);
+}
+
+ion-header ion-buttons ion-button {
+  --color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* ---------- 푸터 ---------- */
+ion-footer ion-toolbar {
+  --background: var(--surface);
+  --border-color: var(--border);
+}
+
+.footer-text {
+  display: block;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
