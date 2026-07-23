@@ -180,6 +180,13 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
     return matchesEmploymentType && matchesCareer && matchesCategory && matchesSearch;
   });
 
+  // 오늘 등록된 공고(NEW)를 최상위로. Array.prototype.sort는 안정 정렬이므로 나머지 순서는 유지된다.
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    const aIsNew = isTodayInsertDts(a.insertDts) ? 1 : 0;
+    const bIsNew = isTodayInsertDts(b.insertDts) ? 1 : 0;
+    return bIsNew - aIsNew;
+  });
+
   const handleClick = async (
     event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, 
     annoId: number | string,
@@ -251,8 +258,8 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
         </div>
 
         <div className="card-container">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((item: Job_mst) => {
+          {sortedProducts.length > 0 ? (
+            sortedProducts.map((item: Job_mst) => {
               const companyKey = Object.keys(companyColors).find(key => 
                 item.companyCd && item.companyCd.toUpperCase().includes(key.toUpperCase())
               );
