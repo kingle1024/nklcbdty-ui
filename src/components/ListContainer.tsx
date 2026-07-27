@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import API_URL from "../config";
+import { cachedGet } from '../common/kvCache';
 import './ListContainer.css';
 import { IonButton, IonSearchbar } from '@ionic/react';
 import { Filters } from '../pages/Home';
@@ -42,18 +43,16 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
       }
 
       try {
-        const response: AxiosResponse<Job_mst[]> = await axios.get<Job_mst[]>(`${API_URL}/api/list`, {
-          params: { company },
-        });
+        const data = await cachedGet<Job_mst[]>(`nklcb:list:${company}`, `${API_URL}/api/list`, { company });
 
-        if (Array.isArray(response.data)) {
-          setProducts(response.data);
+        if (Array.isArray(data)) {
+          setProducts(data);
           setCache((prevCache) => ({
             ...prevCache,
-            [company]: response.data,
+            [company]: data,
           }));
         } else {
-          console.error('Unexpected response format:', response.data);
+          console.error('Unexpected response format:', data);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
