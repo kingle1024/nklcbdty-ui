@@ -38,7 +38,7 @@ export async function cachedGet<T>(key: string, originUrl: string, params?: Reco
       .put(`${kvUrl}?ttl=${TTL_SECONDS}`, JSON.stringify(response.data), {
         headers: { 'Content-Type': 'application/json' },
       })
-      .catch(() => {});
+      .catch(() => undefined);
   }
 
   return response.data;
