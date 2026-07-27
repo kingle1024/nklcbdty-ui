@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import { cachedGet } from '../common/kvCache';
 import { 
   IonPage, 
   IonContent, 
@@ -64,10 +64,10 @@ const Mypage: React.FC = () => {
           }
         }
         
-        const allJobRolesData = await axios.get(`${API_URL}/api/category/list`);
+        const allJobRolesData = await cachedGet<any>('nklcb:category:list', `${API_URL}/api/category/list`);
 
-        if (allJobRolesData.data) {
-          setAvailableJobRoles(allJobRolesData.data);
+        if (allJobRolesData) {
+          setAvailableJobRoles(allJobRolesData);
         }
         
 

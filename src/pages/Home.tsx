@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import API_URL from "../config";
+import { cachedGet } from '../common/kvCache';
 import { IonButton, IonButtons, IonContent, IonFooter, IonHeader, IonPage, IonText, IonTitle, IonToolbar } from '@ionic/react';
 import ListContainer from '../components/ListContainer';
 import { Helmet } from 'react-helmet';
@@ -52,11 +52,11 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(`${API_URL}/api/category/list`); // API 엔드포인트 수정
-        setCategoriesData(response.data);
+        const data = await cachedGet<CategoryMst[]>('nklcb:category:list', `${API_URL}/api/category/list`);
+        setCategoriesData(data);
 
         // 필터 초기화
-        const initialCategoriesFilter = response.data.reduce((acc: Record<string, string[]>, category: CategoryMst) => {
+        const initialCategoriesFilter = data.reduce((acc: Record<string, string[]>, category: CategoryMst) => {
           acc[category.name.toLowerCase()] = [];
           return acc;
         }, {});
