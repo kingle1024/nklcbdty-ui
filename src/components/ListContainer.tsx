@@ -26,6 +26,13 @@ interface ListContainerProps {
   filters: Filters;
 }
 
+// /api/company/list — 회사 코드별 채용 페이지 주소 ("채용 페이지로 가기" 버튼용)
+interface CompanyInfo {
+  companyCd: string;
+  companyNm: string;
+  careerPageUrl: string;
+}
+
 const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
   const [products, setProducts] = useState<Job_mst[]>([]);
   const [company, setCompany] = useState<string>('NAVER');
@@ -34,6 +41,8 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
   // 삭제요청(PENDING)된 공고 id 집합 — 버튼 상태 표시용
   const [requestedDeleteIds, setRequestedDeleteIds] = useState<Set<number>>(new Set());
   const [requestingDeleteId, setRequestingDeleteId] = useState<number | null>(null);
+  // 회사코드 -> 채용 페이지 주소
+  const [careerPageUrls, setCareerPageUrls] = useState<{ [companyCd: string]: string }>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -74,6 +83,26 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
       }
     };
     fetchPendingDeleteIds();
+  }, []);
+
+  // 회사별 채용 페이지 주소를 받아온다. 실패하면 버튼만 안 보이고 목록은 그대로 동작한다.
+  useEffect(() => {
+    const fetchCareerPages = async () => {
+      try {
+        const response = await axios.get<CompanyInfo[]>(`${API_URL}/api/company/list`);
+        if (Array.isArray(response.data)) {
+          setCareerPageUrls(
+            response.data.reduce((acc: { [companyCd: string]: string }, item) => {
+              acc[item.companyCd] = item.careerPageUrl;
+              return acc;
+            }, {})
+          );
+        }
+      } catch (error) {
+        console.error('회사 채용 페이지 목록 조회 실패:', error);
+      }
+    };
+    fetchCareerPages();
   }, []);
 
   const handleDeleteRequest = async (jobId: number | null) => {
@@ -256,6 +285,22 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
           ))}
         </div>
 
+        {/* 선택한 회사의 채용 페이지로 바로 이동. 크롤링에 안 잡힌 공고는 여기서 확인할 수 있다. */}
+        {careerPageUrls[company] && (
+          <div className="career-page-section">
+            <IonButton
+              size="small"
+              fill="outline"
+              className="career-page-btn"
+              href={careerPageUrls[company]}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {companies[company]} 채용 페이지로 가기
+            </IonButton>
+          </div>
+        )}
+
         <div className="card-container">
           {sortedProducts.length > 0 ? (
             sortedProducts.map((item: Job_mst) => {
@@ -324,6 +369,13 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
           ) : (
             <div className="no-data-message">
               데이터가 없습니다.
+              {careerPageUrls[company] && (
+                <div className="no-data-career-link">
+                  <a href={careerPageUrls[company]} target="_blank" rel="noopener noreferrer">
+                    {companies[company]} 채용 페이지에서 직접 확인하기
+                  </a>
+                </div>
+              )}
             </div>
           )}
         </div>
