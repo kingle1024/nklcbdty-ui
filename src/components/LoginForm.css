@@ -1,0 +1,91 @@
+/* 로그인/회원가입 폼. PC 모달과 모바일 /login 페이지가 공유한다.
+   색/모서리 값은 theme.css 의 토큰을 쓴다. */
+.login-form {
+  width: 100%;
+}
+
+/* ---------- 로그인 / 회원가입 탭 ---------- */
+.login-form__tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--surface-field, #f2f4f6);
+  border-radius: var(--radius-sm, 8px);
+  padding: 4px;
+  margin-bottom: 20px;
+}
+
+.login-form__tab {
+  flex: 1;
+  height: 38px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm, 8px);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-muted, #8b95a1);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.login-form__tab--active {
+  background: var(--surface, #ffffff);
+  color: var(--text-strong, #191f28);
+  box-shadow: var(--shadow-card, 0 2px 12px rgba(25, 31, 40, 0.06));
+}
+
+/* ---------- 입력 ---------- */
+.login-form__field {
+  border: 1px solid var(--border, #e5e8eb);
+  border-radius: var(--radius-sm, 8px);
+  padding: 2px 12px;
+  margin-bottom: 10px;
+  background: var(--surface, #ffffff);
+}
+
+.login-form__field ion-input {
+  --padding-start: 0;
+  --padding-end: 0;
+  --placeholder-color: var(--text-disabled, #b0b8c1);
+  --placeholder-opacity: 1;
+  font-size: 15px;
+}
+
+.login-form__error {
+  margin: 4px 0 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--danger, #f04452);
+}
+
+.login-form__submit {
+  margin: 6px 0 0;
+  --border-radius: var(--radius-sm, 8px);
+  height: 48px;
+  font-weight: 700;
+}
+
+/* ---------- 구분선 ---------- */
+.login-form__divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 16px;
+  color: var(--text-muted, #8b95a1);
+  font-size: 12px;
+}
+
+.login-form__divider::before,
+.login-form__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--divider, #f2f4f6);
+}
+
+.login-form__hint {
+  margin: 16px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted, #8b95a1);
+}

@@ -1,0 +1,41 @@
+/* PC 로그인 모달. 폼 높이에 맞춰 가운데 카드처럼 띄운다. */
+.login-modal {
+  --width: 400px;
+  --max-width: 92vw;
+  --height: auto;
+  --border-radius: var(--radius-lg, 16px);
+  --box-shadow: 0 12px 40px rgba(25, 31, 40, 0.18);
+  --background: var(--surface, #ffffff);
+}
+
+.login-modal__body {
+  padding: 20px 24px 28px;
+}
+
+.login-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.login-modal__header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--brand-primary, #3182f6);
+}
+
+.login-modal__header ion-button {
+  --color: var(--text-muted, #8b95a1);
+  margin: 0;
+}
+
+.login-modal__lead {
+  margin: 0 0 20px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary, #4e5968);
+}
