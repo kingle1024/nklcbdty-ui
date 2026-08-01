@@ -72,16 +72,15 @@ const shiftMonth = ({ year, month }: TargetMonth, delta: number): TargetMonth =>
 
 /**
  * 처음 열었을 때 펼쳐 둘 날짜.
- * 아직 지원할 수 있는 가장 가까운 마감일을 고르고, 그런 날이 없으면(지난 달 조회) 그 달 첫 마감일.
- * ISO 문자열(yyyy-MM-dd)은 사전순 비교가 날짜순 비교와 같다.
+ * 아직 지원할 수 있는 공고가 남은 가장 이른 날을 고른다. 오늘이라도 그날 마감이 이미
+ * 다 지났으면 건너뛴다. 그런 날이 없으면(지난 달 조회) 그 달 첫 마감일.
  */
 const pickDefaultDate = (month: CalendarMonth): string | null => {
   if (month.days.length === 0) {
     return null;
   }
-  const today = todayKey();
-  const upcoming = month.days.find((day) => day.date >= today);
-  return (upcoming ?? month.days[0]).date;
+  const open = month.days.find((day) => day.jobs.some((job) => !job.closed));
+  return (open ?? month.days[0]).date;
 };
 
 /** 공고 클릭 로그. 목록 화면과 같은 API 를 쓴다. 실패해도 이동은 막지 않는다. */
@@ -171,7 +170,10 @@ const Calendar: React.FC = () => {
         >
           <span className="calendar-cell__day">{dayNumber}</span>
           {day && (isMobile ? (
-            <span className="calendar-cell__count">{day.count}</span>
+            // 그날 공고가 전부 마감이면 배지도 흐리게 — 지난 달을 봐도 진행 중처럼 보이지 않게
+            <span className={`calendar-cell__count${day.jobs.every((job) => job.closed) ? ' calendar-cell__count--closed' : ''}`}>
+              {day.count}
+            </span>
           ) : (
             <span className="calendar-cell__chips">
               {day.jobs.slice(0, MAX_CHIPS_PER_CELL).map((job) => (
@@ -269,7 +271,10 @@ const Calendar: React.FC = () => {
                     {selectedDay.date.replace(/^\d{4}-0?(\d+)-0?(\d+)$/, '$1월 $2일')} ({WEEKDAYS[selectedDay.dayOfWeek - 1]}) 마감 {selectedDay.count}건
                   </h2>
                   {selectedDay.jobs.map((job) => (
-                    <div className="calendar-job" key={job.id ?? `${job.companyCd}-${job.annoId}`}>
+                    <div
+                      className={`calendar-job${job.closed ? ' calendar-job--closed' : ''}`}
+                      key={job.id ?? `${job.companyCd}-${job.annoId}`}
+                    >
                       <span
                         className="calendar-job__bar"
                         style={{ backgroundColor: COMPANY_COLORS[job.companyCd] || 'var(--border)' }}
