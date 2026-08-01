@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import API_URL from "../config";
 import { cachedGet } from '../common/kvCache';
+import { COMPANY_COLORS, COMPANY_NAMES } from '../common/companies';
 import './ListContainer.css';
 import { IonButton, IonSearchbar } from '@ionic/react';
 import { Filters } from '../pages/Home';
@@ -131,29 +132,9 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
     setCompany(selectedCompany);
   };
 
-  const companies: { [key: string]: string } = {
-    ALL: '전체',
-    NAVER: '네이버',
-    KAKAO: '카카오',
-    LINE: '라인',
-    COUPANG: '쿠팡',
-    BAEMIN: '배달의민족',
-    DAANGN: '당근마켓',
-    TOSS: '토스',
-    YANOLJA: '야놀자',
-  };
-
-  const companyColors: { [key: string]: string } = {
-    NAVER: '#1EC800',
-    KAKAO: '#FFEB00',
-    LINE: '#00B700',
-    COUPANG: '',
-    BAEMIN: '#48D1CC',
-    DAANGN: '#EB8717',
-    TOSS: '#3182F7',
-    YANOLJA: '#F5A3B8',
-    ALL: 'transparent',
-  };
+  // 회사 이름·색은 캘린더 화면과 공유한다 (common/companies.ts)
+  const companies = COMPANY_NAMES;
+  const companyColors = COMPANY_COLORS;
 
   const filteredProducts = products.filter((item) => {
     // 1. 고용 형태 필터링
