@@ -1,18 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { IonHeader, IonToolbar, IonTitle, IonButtons, IonButton } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { useAuth } from '../common/AuthContextType';
-import KakaoLoginButton from '../components/KakoLoginButton';
+import useIsMobile from '../common/useIsMobile';
+import LoginModal from '../components/LoginModal';
 
 const CommonHeader: React.FC = () => {
   const history = useHistory();
   const { logout, isLoggedIn } = useAuth();
+  const isMobile = useIsMobile();
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const handleTitleClick = () => {
     history.push('/');
   };
 
+  // PC 는 모달로 띄우고, 모바일은 화면이 좁아 별도 로그인 페이지로 이동한다.
+  const handleLoginClick = () => {
+    if (isMobile) {
+      history.push('/login');
+    } else {
+      setShowLoginModal(true);
+    }
+  };
+
   return (
+    <>
     <IonHeader>
       <IonToolbar>
         <IonTitle onClick={handleTitleClick} style={{ cursor: 'pointer' }}>네카라쿠배당토야</IonTitle>
@@ -24,11 +37,17 @@ const CommonHeader: React.FC = () => {
               <IonButton onClick={logout}>로그아웃</IonButton>
             </>
           ) : (
-            <KakaoLoginButton /> // 로그인하지 않은 경우 카카오 로그인 버튼 표시
+            // 이메일 로그인/회원가입과 카카오 로그인을 한 화면에서 고르게 한다
+            <IonButton onClick={handleLoginClick}>로그인</IonButton>
           )}
         </IonButtons>
       </IonToolbar>
     </IonHeader>
+    {/* 오버레이는 ion-header 안에 두면 Ionic 이 template 에 가둬 열리지 않는다. 헤더 밖에 둔다. */}
+    {!isMobile && (
+      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+    )}
+    </>
   );
 };
 

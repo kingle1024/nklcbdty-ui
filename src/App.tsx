@@ -27,6 +27,7 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme.css';
 import Mypage from './pages/Mypage';
+import Login from './pages/Login';
 import Email from './pages/EmailInquiry';
 import AdminHome from './pages/AdminHome';
 import AdminSubscriptions from './pages/AdminSubscriptions';
@@ -51,6 +52,7 @@ const App: React.FC = () => {
             <IonRouterOutlet>
               <Route path='/' component={Home} exact={true} />
               <Route path='/mypage' component={Mypage} exact={true} />
+              <Route path='/login' component={Login} exact={true} />
               <Route path='/email' component={Email} exact={true} />
               <Route path='/admin' component={AdminHome} exact={true} />
               <Route path='/admin/subscriptions' component={AdminSubscriptions} exact={true} />

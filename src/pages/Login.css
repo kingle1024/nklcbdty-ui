@@ -1,0 +1,21 @@
+/* 모바일 로그인 페이지. 폼 자체 스타일은 LoginForm.css 에 있다. */
+.login-page {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 28px 20px 40px;
+}
+
+.login-page__title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-strong, #191f28);
+}
+
+.login-page__lead {
+  margin: 8px 0 24px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary, #4e5968);
+}

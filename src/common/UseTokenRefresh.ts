@@ -17,10 +17,17 @@ const UseTokenRefresh = () => {
       return;
     }
 
+    if (!user?.userId) {
+      console.log('userId is null');
+      logout();
+      return;
+    }
+
     try {
+      // 백엔드 RefreshRequest 는 { refreshToken, userVo: { userId } } 형태를 받는다.
       const tokenResponse = await axios.post(`${API_URL}/api/auth/refresh`, {
         refreshToken,
-        user
+        userVo: { userId: user.userId }
       }, {
         headers: {
           'Authorization': `Bearer ${refreshToken}`
