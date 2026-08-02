@@ -4,7 +4,7 @@ import API_URL from "../config";
 import { cachedGet } from '../common/kvCache';
 import { COMPANY_COLORS, COMPANY_NAMES } from '../common/companies';
 import './ListContainer.css';
-import { IonButton, IonSearchbar } from '@ionic/react';
+import { IonButton, IonSearchbar, IonSpinner } from '@ionic/react';
 import { Filters } from '../pages/Home';
 
 interface Job_mst {
@@ -44,14 +44,19 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
   const [requestingDeleteId, setRequestingDeleteId] = useState<number | null>(null);
   // 회사코드 -> 채용 페이지 주소
   const [careerPageUrls, setCareerPageUrls] = useState<{ [companyCd: string]: string }>({});
+  // 응답 전에는 "데이터가 없습니다"·채용 페이지 안내 대신 로딩을 보여준다.
+  // 잠든 서버가 깨어나는 몇 초 동안 공고가 없는 것처럼 보이던 문제.
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
       if (cache[company]) {
         setProducts(cache[company]);
+        setIsLoading(false);
         return;
       }
 
+      setIsLoading(true);
       try {
         const data = await cachedGet<Job_mst[]>(`nklcb:list:${company}`, `${API_URL}/api/list`, { company });
 
@@ -66,6 +71,8 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
         }
       } catch (error) {
         console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -266,8 +273,9 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
           ))}
         </div>
 
-        {/* 선택한 회사의 채용 페이지로 바로 이동. 크롤링에 안 잡힌 공고는 여기서 확인할 수 있다. */}
-        {careerPageUrls[company] && (
+        {/* 선택한 회사의 채용 페이지로 바로 이동. 크롤링에 안 잡힌 공고는 여기서 확인할 수 있다.
+            응답 전에는 감춘다 — 공고가 없어서 안내하는 것처럼 보이기 때문. */}
+        {!isLoading && careerPageUrls[company] && (
           <div className="career-page-section">
             <IonButton
               size="small"
@@ -283,7 +291,12 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
         )}
 
         <div className="card-container">
-          {sortedProducts.length > 0 ? (
+          {isLoading ? (
+            <div className="list-loading">
+              <IonSpinner name="crescent" />
+              <p>공고를 불러오는 중입니다…</p>
+            </div>
+          ) : sortedProducts.length > 0 ? (
             sortedProducts.map((item: Job_mst) => {
               const companyKey = Object.keys(companyColors).find(key => 
                 item.companyCd && item.companyCd.toUpperCase().includes(key.toUpperCase())

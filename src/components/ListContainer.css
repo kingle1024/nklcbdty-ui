@@ -185,6 +185,22 @@ li {
   max-width: 100%;
 }
 
+/* 응답 오기 전. "데이터가 없습니다" 를 먼저 보여주면 공고가 없는 줄 안다. */
+.list-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px 20px;
+  color: var(--text-muted);
+}
+
+.list-loading p {
+  margin: 0;
+  font-size: 14px;
+}
+
 .no-data-message {
   text-align: center;
   font-size: 15px;

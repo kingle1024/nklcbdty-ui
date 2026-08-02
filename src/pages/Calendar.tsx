@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { IonButton, IonContent, IonFooter, IonPage, IonSpinner, IonText, IonToolbar } from '@ionic/react';
+import { IonButton, IonContent, IonFooter, IonIcon, IonModal, IonPage, IonSpinner, IonText, IonToolbar } from '@ionic/react';
+import { closeOutline } from 'ionicons/icons';
 import { Helmet } from 'react-helmet';
 import API_URL from '../config';
+import { cachedGet } from '../common/kvCache';
 import CommonHeader from '../common/CommonHeader';
 import useIsMobile from '../common/useIsMobile';
 import { COMPANY_COLORS, COMPANY_NAMES } from '../common/companies';
@@ -20,7 +22,6 @@ interface CalendarJob {
   jobDetailLink: string;
   endDate: string;
   endTime: string | null;
-  closed: boolean;
 }
 
 interface CalendarDay {
@@ -71,15 +72,30 @@ const shiftMonth = ({ year, month }: TargetMonth, delta: number): TargetMonth =>
 };
 
 /**
+ * "yyyy-MM-dd HH:mm:ss" 를 Date 로. 사파리는 공백으로 구분된 형식을 못 읽어 T 로 바꿔 준다.
+ * 마감 여부를 서버가 아니라 여기서 판정하는 이유: 서버 응답에 "지금" 기준 값이 들어가면
+ * 응답을 캐싱할 수 없다.
+ */
+const parseEndDate = (endDate: string): Date | null => {
+  const parsed = new Date(endDate.replace(' ', 'T'));
+  return isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const isClosed = (job: CalendarJob, nowMs: number): boolean => {
+  const end = parseEndDate(job.endDate);
+  return end !== null && end.getTime() < nowMs;
+};
+
+/**
  * 처음 열었을 때 펼쳐 둘 날짜.
  * 아직 지원할 수 있는 공고가 남은 가장 이른 날을 고른다. 오늘이라도 그날 마감이 이미
  * 다 지났으면 건너뛴다. 그런 날이 없으면(지난 달 조회) 그 달 첫 마감일.
  */
-const pickDefaultDate = (month: CalendarMonth): string | null => {
+const pickDefaultDate = (month: CalendarMonth, nowMs: number): string | null => {
   if (month.days.length === 0) {
     return null;
   }
-  const open = month.days.find((day) => day.jobs.some((job) => !job.closed));
+  const open = month.days.find((day) => day.jobs.some((job) => !isClosed(job, nowMs)));
   return (open ?? month.days[0]).date;
 };
 
@@ -97,6 +113,8 @@ const Calendar: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  // 모바일은 2단 배치가 안 들어가 팝업으로 띄운다. PC 는 오른쪽 패널에 항상 붙어 있다.
+  const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
 
   useEffect(() => {
     // 달/회사를 빠르게 바꾸면 먼저 보낸 요청이 늦게 도착해 화면을 덮을 수 있어 취소 플래그를 둔다.
@@ -106,13 +124,15 @@ const Calendar: React.FC = () => {
       setLoading(true);
       setHasError(false);
       try {
-        // 마감 여부(closed)는 시시각각 바뀌므로 KV 캐시를 타지 않고 원본 API 에서 받는다.
-        const response = await axios.get<CalendarMonth>(`${API_URL}/api/calendar/deadlines`, {
-          params: { year: target.year, month: target.month, company },
-        });
+        // 목록과 같은 KV 캐시를 탄다. 응답에 "지금" 기준 값이 없어 캐싱해도 안전하다.
+        const month = await cachedGet<CalendarMonth>(
+          `nklcb:calendar:${company}:${target.year}-${pad(target.month)}`,
+          `${API_URL}/api/calendar/deadlines`,
+          { year: String(target.year), month: String(target.month), company },
+        );
         if (cancelled) return;
-        setData(response.data);
-        setSelectedDate(pickDefaultDate(response.data));
+        setData(month);
+        setSelectedDate(pickDefaultDate(month, Date.now()));
       } catch (error) {
         if (cancelled) return;
         console.error('캘린더 조회 실패:', error);
@@ -137,6 +157,19 @@ const Calendar: React.FC = () => {
 
   const selectedDay = selectedDate ? daysByDate.get(selectedDate) : undefined;
   const today = todayKey();
+  const nowMs = Date.now();
+
+  const handleDayClick = (dateKey: string) => {
+    setSelectedDate(dateKey);
+    if (isMobile) {
+      setIsDetailOpen(true);
+    }
+  };
+
+  const goToMonth = (delta: number) => {
+    // 연속으로 빠르게 눌러도 한 달만 움직이지 않도록 이전 상태에서 계산한다.
+    setTarget((prev) => shiftMonth(prev, delta));
+  };
 
   const renderCells = (month: CalendarMonth) => {
     // 1일이 월요일이 아니면 그만큼 앞을 비운다.
@@ -165,20 +198,20 @@ const Calendar: React.FC = () => {
           className={classNames}
           key={dateKey}
           disabled={!day}
-          onClick={() => setSelectedDate(dateKey)}
+          onClick={() => handleDayClick(dateKey)}
           aria-label={day ? `${month.month}월 ${dayNumber}일 마감 ${day.count}건` : `${month.month}월 ${dayNumber}일`}
         >
           <span className="calendar-cell__day">{dayNumber}</span>
           {day && (isMobile ? (
             // 그날 공고가 전부 마감이면 배지도 흐리게 — 지난 달을 봐도 진행 중처럼 보이지 않게
-            <span className={`calendar-cell__count${day.jobs.every((job) => job.closed) ? ' calendar-cell__count--closed' : ''}`}>
+            <span className={`calendar-cell__count${day.jobs.every((job) => isClosed(job, nowMs)) ? ' calendar-cell__count--closed' : ''}`}>
               {day.count}
             </span>
           ) : (
             <span className="calendar-cell__chips">
               {day.jobs.slice(0, MAX_CHIPS_PER_CELL).map((job) => (
                 <span
-                  className={`calendar-chip${job.closed ? ' calendar-chip--closed' : ''}`}
+                  className={`calendar-chip${isClosed(job, nowMs) ? ' calendar-chip--closed' : ''}`}
                   key={job.id ?? `${job.companyCd}-${job.annoId}`}
                 >
                   <i className="calendar-chip__dot" style={{ backgroundColor: COMPANY_COLORS[job.companyCd] || 'var(--text-muted)' }} />
@@ -197,6 +230,48 @@ const Calendar: React.FC = () => {
     return [...blanks, ...cells];
   };
 
+  const dayTitle = (day: CalendarDay) =>
+    `${day.date.replace(/^\d{4}-0?(\d+)-0?(\d+)$/, '$1월 $2일')} (${WEEKDAYS[day.dayOfWeek - 1]}) 마감 ${day.count}건`;
+
+  const renderJobs = (day: CalendarDay) => (
+    <>
+      {day.jobs.map((job) => {
+        const closed = isClosed(job, nowMs);
+        return (
+          <div
+            className={`calendar-job${closed ? ' calendar-job--closed' : ''}`}
+            key={job.id ?? `${job.companyCd}-${job.annoId}`}
+          >
+            <span
+              className="calendar-job__bar"
+              style={{ backgroundColor: COMPANY_COLORS[job.companyCd] || 'var(--border)' }}
+            />
+            <div className="calendar-job__body">
+              <h3 className="calendar-job__title">
+                {job.annoSubject}
+                {closed && <span className="calendar-badge-closed">마감</span>}
+              </h3>
+              <p className="calendar-job__meta">
+                {job.companyNm}
+                {job.subJobCdNm ? ` | ${job.subJobCdNm}` : ''}
+                {job.endTime ? ` | ${job.endTime} 마감` : ''}
+                {job.workplace ? ` | ${job.workplace}` : ''}
+              </p>
+              <a
+                href={job.jobDetailLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => logJobClick(job)}
+              >
+                자세히 보기
+              </a>
+            </div>
+          </div>
+        );
+      })}
+    </>
+  );
+
   return (
     <IonPage>
       <Helmet>
@@ -209,12 +284,11 @@ const Calendar: React.FC = () => {
       <IonContent fullscreen>
         <div className="calendar-page">
           <div className="calendar-toolbar">
-            {/* 연속으로 빠르게 눌러도 한 달만 움직이지 않도록 이전 상태에서 계산한다 */}
-            <IonButton fill="clear" className="calendar-nav-btn" onClick={() => setTarget((prev) => shiftMonth(prev, -1))} aria-label="이전 달">
+            <IonButton fill="clear" className="calendar-nav-btn" onClick={() => goToMonth(-1)} aria-label="이전 달">
               &lsaquo;
             </IonButton>
             <h1 className="calendar-title">{target.year}년 {target.month}월</h1>
-            <IonButton fill="clear" className="calendar-nav-btn" onClick={() => setTarget((prev) => shiftMonth(prev, 1))} aria-label="다음 달">
+            <IonButton fill="clear" className="calendar-nav-btn" onClick={() => goToMonth(1)} aria-label="다음 달">
               &rsaquo;
             </IonButton>
             <IonButton size="small" fill="outline" className="calendar-today-btn" onClick={() => setTarget(thisMonth())}>
@@ -253,66 +327,67 @@ const Calendar: React.FC = () => {
                 <span className="calendar-summary__note">상시채용(영입종료시) 공고는 마감일이 없어 캘린더에 표시되지 않습니다.</span>
               </p>
 
-              <div className="calendar-grid">
-                {WEEKDAYS.map((label, index) => (
-                  <div
-                    className={`calendar-weekday${index === 5 ? ' calendar-weekday--saturday' : ''}${index === 6 ? ' calendar-weekday--sunday' : ''}`}
-                    key={label}
-                  >
-                    {label}
-                  </div>
-                ))}
-                {renderCells(data)}
-              </div>
-
-              {selectedDay ? (
-                <section className="calendar-detail">
-                  <h2 className="calendar-detail__title">
-                    {selectedDay.date.replace(/^\d{4}-0?(\d+)-0?(\d+)$/, '$1월 $2일')} ({WEEKDAYS[selectedDay.dayOfWeek - 1]}) 마감 {selectedDay.count}건
-                  </h2>
-                  {selectedDay.jobs.map((job) => (
+              {/* PC: 왼쪽 달력 · 오른쪽 공고. 모바일: 달력만 두고 날짜를 누르면 팝업. */}
+              <div className="calendar-layout">
+                <div className="calendar-grid">
+                  {WEEKDAYS.map((label, index) => (
                     <div
-                      className={`calendar-job${job.closed ? ' calendar-job--closed' : ''}`}
-                      key={job.id ?? `${job.companyCd}-${job.annoId}`}
+                      className={`calendar-weekday${index === 5 ? ' calendar-weekday--saturday' : ''}${index === 6 ? ' calendar-weekday--sunday' : ''}`}
+                      key={label}
                     >
-                      <span
-                        className="calendar-job__bar"
-                        style={{ backgroundColor: COMPANY_COLORS[job.companyCd] || 'var(--border)' }}
-                      />
-                      <div className="calendar-job__body">
-                        <h3 className="calendar-job__title">
-                          {job.annoSubject}
-                          {job.closed && <span className="calendar-badge-closed">마감</span>}
-                        </h3>
-                        <p className="calendar-job__meta">
-                          {job.companyNm}
-                          {job.subJobCdNm ? ` | ${job.subJobCdNm}` : ''}
-                          {job.endTime ? ` | ${job.endTime} 마감` : ''}
-                          {job.workplace ? ` | ${job.workplace}` : ''}
-                        </p>
-                        <a
-                          href={job.jobDetailLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={() => logJobClick(job)}
-                        >
-                          자세히 보기
-                        </a>
-                      </div>
+                      {label}
                     </div>
                   ))}
-                </section>
-              ) : (
-                <div className="calendar-status">
-                  {data.totalCount === 0
-                    ? '이 달에 마감되는 공고가 없습니다.'
-                    : '날짜를 선택하면 그날 마감되는 공고를 볼 수 있습니다.'}
+                  {renderCells(data)}
                 </div>
+
+                {!isMobile && (
+                  <aside className="calendar-detail">
+                    {selectedDay ? (
+                      <>
+                        <h2 className="calendar-detail__title">{dayTitle(selectedDay)}</h2>
+                        {renderJobs(selectedDay)}
+                      </>
+                    ) : (
+                      <p className="calendar-detail__placeholder">
+                        {data.totalCount === 0
+                          ? '이 달에 마감되는 공고가 없습니다.'
+                          : '날짜를 선택하면 그날 마감되는 공고가 여기에 표시됩니다.'}
+                      </p>
+                    )}
+                  </aside>
+                )}
+              </div>
+
+              {isMobile && data.totalCount === 0 && (
+                <div className="calendar-status">이 달에 마감되는 공고가 없습니다.</div>
               )}
             </>
           )}
         </div>
       </IonContent>
+
+      {/* 모바일 전용 팝업. 날짜를 누르면 그날 공고가 시트로 올라온다. */}
+      <IonModal
+        isOpen={isMobile && isDetailOpen && !!selectedDay}
+        onDidDismiss={() => setIsDetailOpen(false)}
+        className="calendar-modal"
+        initialBreakpoint={0.75}
+        breakpoints={[0, 0.75, 1]}
+      >
+        {selectedDay && (
+          <div className="calendar-modal__body">
+            <header className="calendar-modal__header">
+              <h2>{dayTitle(selectedDay)}</h2>
+              <IonButton fill="clear" size="small" aria-label="닫기" onClick={() => setIsDetailOpen(false)}>
+                <IonIcon slot="icon-only" icon={closeOutline} />
+              </IonButton>
+            </header>
+            {renderJobs(selectedDay)}
+          </div>
+        )}
+      </IonModal>
+
       <IonFooter>
         <IonToolbar>
           <IonText className="footer-text">
