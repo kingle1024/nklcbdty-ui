@@ -33,6 +33,9 @@ import Email from './pages/EmailInquiry';
 import AdminHome from './pages/AdminHome';
 import AdminSubscriptions from './pages/AdminSubscriptions';
 import AdminJobDeleteRequests from './pages/AdminJobDeleteRequests';
+import Board from './pages/Board';
+import BoardDetail from './pages/BoardDetail';
+import BoardWrite from './pages/BoardWrite';
 
 setupIonicReact();
 const queryClient = new QueryClient();
@@ -56,6 +59,11 @@ const App: React.FC = () => {
               <Route path='/mypage' component={Mypage} exact={true} />
               <Route path='/login' component={Login} exact={true} />
               <Route path='/email' component={Email} exact={true} />
+              {/* 자유게시판. /board/write 가 /board/:id 보다 먼저 와야 'write' 가 글 id 로 잡히지 않는다 */}
+              <Route path='/board' component={Board} exact={true} />
+              <Route path='/board/write' component={BoardWrite} exact={true} />
+              <Route path='/board/:id/edit' component={BoardWrite} exact={true} />
+              <Route path='/board/:id' component={BoardDetail} exact={true} />
               <Route path='/admin' component={AdminHome} exact={true} />
               <Route path='/admin/subscriptions' component={AdminSubscriptions} exact={true} />
               <Route path='/admin/job-delete-requests' component={AdminJobDeleteRequests} exact={true} />
