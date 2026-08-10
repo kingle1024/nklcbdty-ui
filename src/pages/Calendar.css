@@ -62,12 +62,88 @@
   --border-width: 1px;
 }
 
+/* ---------- 상단 필터 ---------- */
+.calendar-filters {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.calendar-filters__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 검색창은 남는 폭을 다 먹되, 드롭다운이 밀려나지 않게 최소폭을 준다. */
+.calendar-filters ion-searchbar.calendar-filters__search {
+  flex: 1 1 220px;
+  min-width: 180px;
+  padding: 0;
+  --background: var(--surface-field);
+  --box-shadow: none;
+  --border-radius: var(--radius-sm);
+  --placeholder-color: var(--text-muted);
+  --color: var(--text-body);
+  height: 38px;
+  font-size: 14px;
+}
+
+.calendar-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-field);
+}
+
+.calendar-select__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.calendar-select select {
+  max-width: 160px;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-body);
+  cursor: pointer;
+  outline: none;
+}
+
+.calendar-select select:disabled {
+  color: var(--text-disabled);
+  cursor: default;
+}
+
+.calendar-filters ion-button.calendar-filters__reset {
+  margin: 0 0 0 auto;
+  height: 38px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
+  --color: var(--text-secondary);
+}
+
 /* ---------- 회사 필터 (목록 화면과 같은 알약형 칩) ---------- */
 .calendar-company-filter {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .calendar-company-filter ion-button {
@@ -93,6 +169,12 @@
 
 .calendar-summary strong {
   color: var(--brand-primary);
+}
+
+.calendar-summary__total {
+  margin-left: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
 }
 
 .calendar-summary__note {
@@ -414,5 +496,46 @@
   .calendar-title {
     font-size: 18px;
     min-width: 110px;
+  }
+
+  /* 한 줄에 다 못 들어가니 검색은 한 줄 전체, 드롭다운은 2개씩 나눠 놓는다.
+     필터가 첫 화면을 다 먹으면 달력이 안 보이므로 줄 수를 최대한 줄인다. */
+  .calendar-filters {
+    padding: 10px;
+  }
+
+  /* 회사 칩은 두 줄로 접히는 대신 옆으로 넘긴다 (한 줄 = 약 44px 절약). */
+  .calendar-company-filter {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .calendar-company-filter::-webkit-scrollbar {
+    display: none;
+  }
+
+  .calendar-filters ion-searchbar.calendar-filters__search {
+    flex: 1 1 100%;
+  }
+
+  .calendar-select {
+    flex: 1 1 calc(50% - 4px);
+    justify-content: space-between;
+    padding: 0 8px;
+  }
+
+  .calendar-select select {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+    text-align: right;
+  }
+
+  /* 진행여부와 한 줄에 나란히 — 초기화 버튼 혼자 한 줄을 쓰지 않게. */
+  .calendar-filters ion-button.calendar-filters__reset {
+    flex: 1 1 calc(50% - 4px);
+    margin: 0;
   }
 }
