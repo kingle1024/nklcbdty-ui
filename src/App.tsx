@@ -32,6 +32,9 @@ import Email from './pages/EmailInquiry';
 import AdminHome from './pages/AdminHome';
 import AdminSubscriptions from './pages/AdminSubscriptions';
 import AdminJobDeleteRequests from './pages/AdminJobDeleteRequests';
+import Board from './pages/Board';
+import BoardDetail from './pages/BoardDetail';
+import BoardWrite from './pages/BoardWrite';
 
 setupIonicReact();
 const queryClient = new QueryClient();
@@ -57,6 +60,21 @@ const App: React.FC = () => {
               <Route path='/admin' component={AdminHome} exact={true} />
               <Route path='/admin/subscriptions' component={AdminSubscriptions} exact={true} />
               <Route path='/admin/job-delete-requests' component={AdminJobDeleteRequests} exact={true} />
+
+              {/* 자유게시판. :id 를 숫자로 못박아 /board/write 가 글 id 로 잡히지 않게 한다
+                  (IonRouterOutlet 은 Switch 처럼 첫 매치만 쓰지 않아서 순서만으로는 부족하다) */}
+              <Route path='/board' component={Board} exact={true} />
+              <Route path='/board/write' component={BoardWrite} exact={true} />
+              <Route path='/board/:id(\d+)/edit' component={BoardWrite} exact={true} />
+              <Route path='/board/:id(\d+)' component={BoardDetail} exact={true} />
+
+              {/* 공지사항. 작성은 관리자 API 로만 하므로 읽기 경로만 둔다 */}
+              <Route path='/notice' exact={true} render={() => <Board boardType='notice' />} />
+              <Route
+                path='/notice/:id(\d+)'
+                exact={true}
+                render={() => <BoardDetail boardType='notice' />}
+              />
             </IonRouterOutlet>
           </IonReactRouter>
         </AuthProvider>
