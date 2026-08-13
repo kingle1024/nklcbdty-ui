@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import API_URL from "../config";
 import { cachedGet } from '../common/kvCache';
+import { COMPANY_COLORS, COMPANY_NAMES } from '../common/companies';
 import './ListContainer.css';
-import { IonButton, IonSearchbar } from '@ionic/react';
+import { IonButton, IonSearchbar, IonSpinner } from '@ionic/react';
 import { Filters } from '../pages/Home';
 
 interface Job_mst {
@@ -26,6 +27,13 @@ interface ListContainerProps {
   filters: Filters;
 }
 
+// /api/company/list — 회사 코드별 채용 페이지 주소 ("채용 페이지로 가기" 버튼용)
+interface CompanyInfo {
+  companyCd: string;
+  companyNm: string;
+  careerPageUrl: string;
+}
+
 const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
   const [products, setProducts] = useState<Job_mst[]>([]);
   const [company, setCompany] = useState<string>('NAVER');
@@ -34,14 +42,21 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
   // 삭제요청(PENDING)된 공고 id 집합 — 버튼 상태 표시용
   const [requestedDeleteIds, setRequestedDeleteIds] = useState<Set<number>>(new Set());
   const [requestingDeleteId, setRequestingDeleteId] = useState<number | null>(null);
+  // 회사코드 -> 채용 페이지 주소
+  const [careerPageUrls, setCareerPageUrls] = useState<{ [companyCd: string]: string }>({});
+  // 응답 전에는 "데이터가 없습니다"·채용 페이지 안내 대신 로딩을 보여준다.
+  // 잠든 서버가 깨어나는 몇 초 동안 공고가 없는 것처럼 보이던 문제.
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
       if (cache[company]) {
         setProducts(cache[company]);
+        setIsLoading(false);
         return;
       }
 
+      setIsLoading(true);
       try {
         const data = await cachedGet<Job_mst[]>(`nklcb:list:${company}`, `${API_URL}/api/list`, { company });
 
@@ -56,6 +71,8 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
         }
       } catch (error) {
         console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -74,6 +91,26 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
       }
     };
     fetchPendingDeleteIds();
+  }, []);
+
+  // 회사별 채용 페이지 주소를 받아온다. 실패하면 버튼만 안 보이고 목록은 그대로 동작한다.
+  useEffect(() => {
+    const fetchCareerPages = async () => {
+      try {
+        const response = await axios.get<CompanyInfo[]>(`${API_URL}/api/company/list`);
+        if (Array.isArray(response.data)) {
+          setCareerPageUrls(
+            response.data.reduce((acc: { [companyCd: string]: string }, item) => {
+              acc[item.companyCd] = item.careerPageUrl;
+              return acc;
+            }, {})
+          );
+        }
+      } catch (error) {
+        console.error('회사 채용 페이지 목록 조회 실패:', error);
+      }
+    };
+    fetchCareerPages();
   }, []);
 
   const handleDeleteRequest = async (jobId: number | null) => {
@@ -102,29 +139,9 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
     setCompany(selectedCompany);
   };
 
-  const companies: { [key: string]: string } = {
-    ALL: '전체',
-    NAVER: '네이버',
-    KAKAO: '카카오',
-    LINE: '라인',
-    COUPANG: '쿠팡',
-    BAEMIN: '배달의민족',
-    DAANGN: '당근마켓',
-    TOSS: '토스',
-    YANOLJA: '야놀자',
-  };
-
-  const companyColors: { [key: string]: string } = {
-    NAVER: '#1EC800',
-    KAKAO: '#FFEB00',
-    LINE: '#00B700',
-    COUPANG: '',
-    BAEMIN: '#48D1CC',
-    DAANGN: '#EB8717',
-    TOSS: '#3182F7',
-    YANOLJA: '#F5A3B8',
-    ALL: 'transparent',
-  };
+  // 회사 이름·색은 캘린더 화면과 공유한다 (common/companies.ts)
+  const companies = COMPANY_NAMES;
+  const companyColors = COMPANY_COLORS;
 
   const filteredProducts = products.filter((item) => {
     // 1. 고용 형태 필터링
@@ -256,8 +273,30 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
           ))}
         </div>
 
+        {/* 선택한 회사의 채용 페이지로 바로 이동. 크롤링에 안 잡힌 공고는 여기서 확인할 수 있다.
+            응답 전에는 감춘다 — 공고가 없어서 안내하는 것처럼 보이기 때문. */}
+        {!isLoading && careerPageUrls[company] && (
+          <div className="career-page-section">
+            <IonButton
+              size="small"
+              fill="outline"
+              className="career-page-btn"
+              href={careerPageUrls[company]}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {companies[company]} 채용 페이지로 가기
+            </IonButton>
+          </div>
+        )}
+
         <div className="card-container">
-          {sortedProducts.length > 0 ? (
+          {isLoading ? (
+            <div className="list-loading">
+              <IonSpinner name="crescent" />
+              <p>공고를 불러오는 중입니다…</p>
+            </div>
+          ) : sortedProducts.length > 0 ? (
             sortedProducts.map((item: Job_mst) => {
               const companyKey = Object.keys(companyColors).find(key => 
                 item.companyCd && item.companyCd.toUpperCase().includes(key.toUpperCase())
@@ -324,6 +363,13 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
           ) : (
             <div className="no-data-message">
               데이터가 없습니다.
+              {careerPageUrls[company] && (
+                <div className="no-data-career-link">
+                  <a href={careerPageUrls[company]} target="_blank" rel="noopener noreferrer">
+                    {companies[company]} 채용 페이지에서 직접 확인하기
+                  </a>
+                </div>
+              )}
             </div>
           )}
         </div>

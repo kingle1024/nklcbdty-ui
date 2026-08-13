@@ -27,6 +27,7 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme.css';
 import Mypage from './pages/Mypage';
+import Calendar from './pages/Calendar';
 import Login from './pages/Login';
 import Email from './pages/EmailInquiry';
 import AdminHome from './pages/AdminHome';
@@ -54,6 +55,7 @@ const App: React.FC = () => {
           <IonReactRouter>
             <IonRouterOutlet>
               <Route path='/' component={Home} exact={true} />
+              <Route path='/calendar' component={Calendar} exact={true} />
               <Route path='/mypage' component={Mypage} exact={true} />
               <Route path='/login' component={Login} exact={true} />
               <Route path='/email' component={Email} exact={true} />

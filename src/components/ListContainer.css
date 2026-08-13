@@ -185,6 +185,22 @@ li {
   max-width: 100%;
 }
 
+/* 응답 오기 전. "데이터가 없습니다" 를 먼저 보여주면 공고가 없는 줄 안다. */
+.list-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px 20px;
+  color: var(--text-muted);
+}
+
+.list-loading p {
+  margin: 0;
+  font-size: 14px;
+}
+
 .no-data-message {
   text-align: center;
   font-size: 15px;
@@ -193,6 +209,31 @@ li {
   background-color: var(--surface);
   border: 1px dashed var(--border);
   border-radius: var(--radius-lg);
+}
+
+.no-data-career-link {
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+/* 선택한 회사의 채용 페이지 바로가기 */
+.career-page-section {
+  display: flex;
+  margin-top: -8px;
+  margin-bottom: 16px;
+}
+
+.career-page-btn {
+  margin: 0;
+  height: 32px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  --border-radius: var(--radius-pill);
+  --border-width: 1px;
+  --padding-start: 14px;
+  --padding-end: 14px;
 }
 
 .badge-new {
