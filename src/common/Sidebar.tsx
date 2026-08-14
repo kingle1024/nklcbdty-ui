@@ -1,32 +1,33 @@
 import React from 'react';
 import { IonList, IonItem } from '@ionic/react';
+import { useHistory } from 'react-router-dom';
+
+/** 마이페이지 안의 메뉴. activeTab 은 각 페이지가 자기 값을 넘긴다. */
+const TABS = [
+  { key: 'profile', label: '내 정보', path: '/mypage' },
+  { key: 'calendar', label: '나의 채용 캘린더', path: '/mypage/calendar' },
+];
 
 interface SidebarProps {
   activeTab: string;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab }) => {
-  const handleTabClick = (tab: string) => {
-    if (tab === 'profile') {
-      window.location.href = '/mypage'; // 프로필 탭 클릭 시
-    } else if (tab === 'likes') {
-      window.location.href = '/mypage/likes'; // 좋아요 목록 탭 클릭 시
-    } else if (tab === 'addCourse') {
-      window.location.href = '/mypage/course/add'; // 데이트 코스 등록 클릭 시
-    }
-  };
-
+  const history = useHistory();
 
   return (
     <div className="sidebar">
       <IonList>
-        <IonItem
-          button
-          onClick={() => handleTabClick('profile')}
-          className={activeTab === 'profile' ? 'active' : ''}
-        >
-          내 정보
-        </IonItem>
+        {TABS.map((tab) => (
+          <IonItem
+            key={tab.key}
+            button
+            onClick={() => history.push(tab.path)}
+            className={activeTab === tab.key ? 'active' : ''}
+          >
+            {tab.label}
+          </IonItem>
+        ))}
       </IonList>
     </div>
   );

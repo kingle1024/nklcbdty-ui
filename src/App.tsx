@@ -27,6 +27,7 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme.css';
 import Mypage from './pages/Mypage';
+import MyCalendar from './pages/MyCalendar';
 import Calendar from './pages/Calendar';
 import Login from './pages/Login';
 import Email from './pages/EmailInquiry';
@@ -57,6 +58,8 @@ const App: React.FC = () => {
               <Route path='/' component={Home} exact={true} />
               <Route path='/calendar' component={Calendar} exact={true} />
               <Route path='/mypage' component={Mypage} exact={true} />
+              {/* 마이페이지 안의 나의 채용 캘린더. 로그인해야 쓸 수 있다. */}
+              <Route path='/mypage/calendar' component={MyCalendar} exact={true} />
               <Route path='/login' component={Login} exact={true} />
               <Route path='/email' component={Email} exact={true} />
               {/* 자유게시판. /board/write 가 /board/:id 보다 먼저 와야 'write' 가 글 id 로 잡히지 않는다 */}
