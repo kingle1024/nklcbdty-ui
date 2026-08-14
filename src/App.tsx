@@ -58,7 +58,7 @@ const App: React.FC = () => {
               <Route path='/' component={Home} exact={true} />
               <Route path='/calendar' component={Calendar} exact={true} />
               <Route path='/mypage' component={Mypage} exact={true} />
-              {/* 마이페이지 안의 나의 채용 캘린더. 로그인해야 쓸 수 있다. */}
+              {/* 마이페이지 안의 나의 캘린더. 로그인해야 쓸 수 있다. */}
               <Route path='/mypage/calendar' component={MyCalendar} exact={true} />
               <Route path='/login' component={Login} exact={true} />
               <Route path='/email' component={Email} exact={true} />

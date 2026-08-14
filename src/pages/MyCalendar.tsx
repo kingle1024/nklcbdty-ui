@@ -366,17 +366,17 @@ const MyCalendar: React.FC = () => {
   return (
     <IonPage>
       <Helmet>
-        <title>나의 채용 캘린더 | 네카라쿠배당토야</title>
+        <title>나의 캘린더 | 네카라쿠배당토야</title>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="내가 지원할 회사를 달력에 저장해 두는 나만의 채용 캘린더" />
+        <meta name="description" content="내가 지원할 회사를 달력에 저장해 두는 나의 캘린더" />
       </Helmet>
       <CommonHeader />
       <IonContent>
         <div className="mypage-container">
           <Sidebar activeTab="calendar" />
           <div className="content">
-            <h2>나의 채용 캘린더</h2>
+            <h2>나의 캘린더</h2>
 
             {!isLoggedIn ? (
               // 개인 일정이라 로그인해야 볼 수 있다. 서버도 토큰 없이는 401 을 낸다.
