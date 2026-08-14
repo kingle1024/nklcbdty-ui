@@ -1,4 +1,4 @@
-// 나의 채용 캘린더 API. 백엔드 MyCalendarController(/api/my-calendar/**) 와 짝을 이룬다.
+// 나의 캘린더 API. 백엔드 MyCalendarController(/api/my-calendar/**) 와 짝을 이룬다.
 // 전부 로그인이 필요하다 — 서버에서 AuthFilter 가 토큰을 요구하고, 토큰이 없으면 401 이 온다.
 import axios from 'axios';
 import API_URL from '../config';
