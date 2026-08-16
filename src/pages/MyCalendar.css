@@ -337,9 +337,13 @@ ion-button.mycal-add-btn {
   --background: var(--surface, #ffffff);
 }
 
-.mycal-modal__body {
-  padding: 16px 16px 28px;
-  overflow-y: auto;
+.mycal-modal ion-content.mycal-modal__content {
+  --background: var(--surface, #ffffff);
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 4px;
+  /* 아이폰 홈 인디케이터에 "일정 추가" 버튼이 가리지 않게 여백을 둔다. */
+  --padding-bottom: calc(20px + env(safe-area-inset-bottom));
 }
 
 .mycal-modal__header {
@@ -348,6 +352,14 @@ ion-button.mycal-add-btn {
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 12px;
+}
+
+.mycal-modal .mycal-modal__header {
+  flex: 0 0 auto;
+  margin-bottom: 0;
+  /* 위쪽은 시트를 끌어내리는 손잡이 자리라 비워 둔다. */
+  padding: 20px 10px 10px 16px;
+  border-bottom: 1px solid var(--border, #e5e8eb);
 }
 
 .mycal-modal__header h2 {
@@ -373,6 +385,9 @@ ion-button.mycal-add-btn {
 
 .mycal-form {
   padding: 16px 16px 20px;
+  /* 키보드가 올라와 모달이 눌려도 안쪽이 잘리지 않고 굴러가게 한다. */
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -442,19 +457,105 @@ ion-button.mycal-add-btn {
 
 /* ---------- 모바일 ---------- */
 @media (max-width: 768px) {
-  .mycal-grid {
-    gap: 4px;
-    padding: 8px;
-    border-radius: var(--radius-md);
-  }
-
-  .mycal-cell {
-    min-height: 52px;
-    padding: 4px;
+  /* 월 이동은 한 손으로 누른다. 좌우 화살표를 손가락 크기(44px)로 키운다. */
+  .mycal-toolbar {
+    gap: 0;
+    margin: 12px 0 10px;
   }
 
   .mycal-title {
-    font-size: 17px;
-    min-width: 105px;
+    flex: 1;
+    min-width: 0;
+    font-size: 16px;
+  }
+
+  .mycal-toolbar ion-button.mycal-nav-btn {
+    width: 44px;
+    height: 44px;
+    --padding-start: 0;
+    --padding-end: 0;
+  }
+
+  .mycal-toolbar ion-button.mycal-today-btn {
+    height: 34px;
+    font-size: 12px;
+  }
+
+  .mycal-summary {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  .mycal-grid {
+    gap: 3px;
+    padding: 6px;
+    border-radius: var(--radius-md);
+  }
+
+  .mycal-weekday {
+    font-size: 11px;
+  }
+
+  /*
+   * 좁은 폭에 7칸이 들어가야 해 셀 하나가 45px 남짓이다.
+   * 날짜를 가운데 두고 건수를 그 아래 붙여, 겹치지 않으면서 눌리는 높이를 확보한다.
+   */
+  .mycal-cell {
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 48px;
+    padding: 5px 2px;
+  }
+
+  .mycal-cell__day {
+    align-self: center;
+    font-size: 13px;
+  }
+
+  .mycal-cell__count {
+    margin: 0;
+    min-width: 18px;
+    padding: 0 5px;
+    font-size: 11px;
+    line-height: 16px;
+  }
+
+  /* 팝업 안에서 수정·삭제를 누르는 손가락이 미끄러지지 않게 키운다. */
+  .mycal-entry {
+    padding: 12px;
+  }
+
+  .mycal-entry__actions ion-button {
+    height: 36px;
+    font-size: 13px;
+    --padding-start: 10px;
+    --padding-end: 10px;
+  }
+
+  ion-button.mycal-add-btn {
+    height: 44px;
+    font-size: 14px;
+  }
+
+  .mycal-form-modal {
+    --width: calc(100% - 24px);
+    --max-height: 88vh;
+  }
+
+  .mycal-form {
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+
+  /* 16px 아래로 내려가면 iOS 사파리가 입력할 때 화면을 확대해 버린다. */
+  .mycal-field input,
+  .mycal-field textarea {
+    font-size: 16px;
+    padding: 12px;
+  }
+
+  .mycal-form__actions ion-button {
+    flex: 1;
+    height: 44px;
   }
 }

@@ -1,0 +1,45 @@
+/* 공통 헤더 — 모바일에선 메뉴가 잘려 나가 햄버거 팝오버로 접는다. */
+
+.common-header__title {
+  cursor: pointer;
+}
+
+/* 제목이 길어 메뉴 버튼을 밀어내지 않도록 모바일에선 폭을 줄이고 왼쪽에 붙인다. */
+@media (max-width: 768px) {
+  .common-header__title {
+    padding-inline-start: 12px;
+    padding-inline-end: 4px;
+    font-size: 16px;
+    text-align: left;
+  }
+}
+
+ion-button.common-header__menu-btn {
+  --padding-start: 10px;
+  --padding-end: 10px;
+  /* 손가락으로 누르는 버튼이라 44px 아래로 내려가지 않게 둔다. */
+  height: 44px;
+  width: 44px;
+  font-size: 22px;
+}
+
+.common-header__menu {
+  --width: 210px;
+  --max-height: 80vh;
+  --border-radius: var(--radius-md, 12px);
+  --background: var(--surface, #ffffff);
+}
+
+.common-header__menu ion-list {
+  padding: 4px 0;
+  background: transparent;
+}
+
+.common-header__menu ion-item {
+  --background: transparent;
+  --color: var(--text-strong, #191f28);
+  --min-height: 46px;
+  --padding-start: 16px;
+  font-size: 15px;
+  font-weight: 600;
+}
