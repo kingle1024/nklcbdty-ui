@@ -414,15 +414,20 @@ const MyCalendar: React.FC = () => {
         initialBreakpoint={0.75}
         breakpoints={[0, 0.75, 1]}
       >
-        <div className="mycal-modal__body">
-          <header className="mycal-modal__header">
-            <h2>{dayPanelTitle}</h2>
-            <IonButton fill="clear" size="small" aria-label="닫기" onClick={() => setIsDayOpen(false)}>
-              <IonIcon slot="icon-only" icon={closeOutline} />
-            </IonButton>
-          </header>
+        {/* 제목은 고정해 두고 목록만 굴린다. */}
+        <header className="mycal-modal__header">
+          <h2>{dayPanelTitle}</h2>
+          <IonButton fill="clear" size="small" aria-label="닫기" onClick={() => setIsDayOpen(false)}>
+            <IonIcon slot="icon-only" icon={closeOutline} />
+          </IonButton>
+        </header>
+        {/*
+          시트 안의 스크롤은 ion-content 여야 한다. 그냥 div 로 두면 손가락을 올렸을 때
+          목록이 굴러가는 대신 시트 자체가 끌려 내려가 일정이 많은 날을 볼 수 없다.
+        */}
+        <IonContent className="mycal-modal__content">
           {renderDayEntries(selectedDay)}
-        </div>
+        </IonContent>
       </IonModal>
 
       {/* 등록·수정 폼. 필수값은 회사명뿐이다. */}

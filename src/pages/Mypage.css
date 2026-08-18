@@ -47,6 +47,49 @@
   color: var(--text-muted);
 }
 
+/* ---------- 모바일 ---------- */
+/*
+ * 200px 사이드바를 옆에 붙여 두면 375px 화면에서 본문에 130px 남짓밖에 안 남는다.
+ * 달력처럼 가로를 쓰는 화면이 뭉개지므로 위아래로 쌓고, 메뉴는 탭처럼 눕힌다.
+ */
+@media (max-width: 768px) {
+  .mypage-container {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .sidebar {
+    width: 100%;
+    padding: 6px;
+    box-sizing: border-box;
+  }
+
+  .sidebar ion-list {
+    display: flex;
+    gap: 6px;
+    padding: 0;
+    background: transparent;
+  }
+
+  .sidebar ion-item {
+    flex: 1;
+    --min-height: 42px;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    --inner-border-width: 0;
+    text-align: center;
+  }
+
+  .content {
+    padding: 16px 12px;
+  }
+
+  .content h2 {
+    font-size: 18px;
+  }
+}
+
 .active {
   --background: var(--brand-primary-tint);
   background-color: var(--brand-primary-tint);
