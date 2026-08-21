@@ -24,6 +24,7 @@ import {
   deleteMyCalendarEntry,
   fetchMyCalendarMonth,
   guessCompanyName,
+  setMyCalendarEntryCompleted,
   updateMyCalendarEntry,
 } from '../common/myCalendarApi';
 import './MyCalendar.css';
@@ -42,7 +43,10 @@ interface TargetMonth {
 /** 작성 중인 일정. id 가 없으면 새 일정이다. */
 interface EntryForm {
   id: number | null;
+  /** ongoing 이 참이면 저장할 때 버려진다. 체크를 풀었을 때 되살리려고 그대로 들고 있는다. */
   applyDate: string;
+  /** 마감일 없는 상시채용으로 저장할지 */
+  ongoing: boolean;
   companyName: string;
   url: string;
   memo: string;
@@ -74,9 +78,10 @@ const formatDateLabel = (dateKey: string) => {
   return `${month}월 ${day}일 (${WEEKDAYS[(dayOfWeek + 6) % 7]})`;
 };
 
-const emptyForm = (applyDate: string): EntryForm => ({
+const emptyForm = (applyDate: string, ongoing = false): EntryForm => ({
   id: null,
   applyDate,
+  ongoing,
   companyName: '',
   url: '',
   memo: '',
@@ -84,7 +89,9 @@ const emptyForm = (applyDate: string): EntryForm => ({
 
 const toForm = (entry: MyCalendarEntry): EntryForm => ({
   id: entry.id,
-  applyDate: entry.applyDate,
+  // 상시채용은 날짜가 없다. 체크를 풀면 고를 날짜가 있어야 하니 오늘로 채워 둔다.
+  applyDate: entry.applyDate ?? todayKey(),
+  ongoing: entry.ongoing,
   companyName: entry.companyName,
   url: entry.url ?? '',
   memo: entry.memo ?? '',
@@ -107,6 +114,8 @@ const MyCalendar: React.FC = () => {
   const [saving, setSaving] = useState<boolean>(false);
   const [guessing, setGuessing] = useState<boolean>(false);
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+  // 완료를 누른 일정. 응답을 기다리는 동안 그 버튼만 잠근다.
+  const [togglingId, setTogglingId] = useState<number | null>(null);
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
 
   const load = useCallback(async () => {
@@ -190,6 +199,7 @@ const MyCalendar: React.FC = () => {
     try {
       const input = {
         applyDate: form.applyDate,
+        ongoing: form.ongoing,
         companyName: form.companyName.trim(),
         url: form.url.trim(),
         memo: form.memo.trim(),
@@ -200,13 +210,32 @@ const MyCalendar: React.FC = () => {
         await updateMyCalendarEntry(form.id, input);
       }
       // 날짜를 옮겼을 수 있으니 저장한 날로 선택을 맞춘 뒤 다시 읽는다.
-      setSelectedDate(form.applyDate);
+      // 상시채용은 어느 날짜에도 안 붙으므로 보고 있던 날을 그대로 둔다.
+      if (!form.ongoing) {
+        setSelectedDate(form.applyDate);
+      }
       setForm(null);
       await load();
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : '일정을 저장하지 못했습니다.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  /**
+   * 완료 표시를 켜고 끈다. 다시 읽는 동안 버튼이 두 번 눌리면 요청이 두 번 가지만,
+   * 서버가 켤지 끌지를 그대로 받으므로 결과는 같다.
+   */
+  const handleToggleCompleted = async (entry: MyCalendarEntry) => {
+    setTogglingId(entry.id);
+    try {
+      await setMyCalendarEntryCompleted(entry.id, !entry.completed);
+      await load();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : '완료 표시를 바꾸지 못했습니다.');
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -257,8 +286,13 @@ const MyCalendar: React.FC = () => {
           ) : (
             <span className="mycal-cell__chips">
               {day.entries.slice(0, MAX_CHIPS_PER_CELL).map((entry) => (
-                <span className="mycal-chip" key={entry.id}>
-                  <span className="mycal-chip__text">{entry.companyName}</span>
+                <span
+                  className={`mycal-chip${entry.completed ? ' mycal-chip--done' : ''}`}
+                  key={entry.id}
+                >
+                  <span className="mycal-chip__text">
+                    {entry.completed ? '✓ ' : ''}{entry.companyName}
+                  </span>
                 </span>
               ))}
               {day.count > MAX_CHIPS_PER_CELL && (
@@ -273,34 +307,49 @@ const MyCalendar: React.FC = () => {
     return [...blanks, ...cells];
   };
 
+  /** 일정 한 건. 날짜 있는 일정과 상시채용이 같은 모양이라 한 곳에서 그린다. */
+  const renderEntry = (entry: MyCalendarEntry) => (
+    <div className={`mycal-entry${entry.completed ? ' mycal-entry--done' : ''}`} key={entry.id}>
+      <div className="mycal-entry__body">
+        <h3 className="mycal-entry__company">
+          {entry.companyName}
+          {entry.completed && <span className="mycal-entry__badge">완료</span>}
+        </h3>
+        {entry.url && (
+          <a
+            className="mycal-entry__link"
+            href={entry.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            공고 열기
+          </a>
+        )}
+        {entry.memo && <p className="mycal-entry__memo">{entry.memo}</p>}
+      </div>
+      <div className="mycal-entry__actions">
+        <IonButton
+          size="small"
+          fill="clear"
+          color={entry.completed ? 'medium' : 'success'}
+          disabled={togglingId === entry.id}
+          onClick={() => handleToggleCompleted(entry)}
+        >
+          {entry.completed ? '되돌리기' : '완료'}
+        </IonButton>
+        <IonButton size="small" fill="clear" onClick={() => setForm(toForm(entry))}>
+          수정
+        </IonButton>
+        <IonButton size="small" fill="clear" color="danger" onClick={() => setDeleteTargetId(entry.id)}>
+          삭제
+        </IonButton>
+      </div>
+    </div>
+  );
+
   const renderDayEntries = (day: MyCalendarDay | undefined) => (
     <>
-      {(day?.entries ?? []).map((entry) => (
-        <div className="mycal-entry" key={entry.id}>
-          <div className="mycal-entry__body">
-            <h3 className="mycal-entry__company">{entry.companyName}</h3>
-            {entry.url && (
-              <a
-                className="mycal-entry__link"
-                href={entry.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                공고 열기
-              </a>
-            )}
-            {entry.memo && <p className="mycal-entry__memo">{entry.memo}</p>}
-          </div>
-          <div className="mycal-entry__actions">
-            <IonButton size="small" fill="clear" onClick={() => setForm(toForm(entry))}>
-              수정
-            </IonButton>
-            <IonButton size="small" fill="clear" color="danger" onClick={() => setDeleteTargetId(entry.id)}>
-              삭제
-            </IonButton>
-          </div>
-        </div>
-      ))}
+      {(day?.entries ?? []).map(renderEntry)}
       {(day?.entries.length ?? 0) === 0 && (
         <p className="mycal-detail__placeholder">
           이 날에 적어 둔 일정이 없습니다.<br />
@@ -319,6 +368,35 @@ const MyCalendar: React.FC = () => {
   );
 
   const dayPanelTitle = `${formatDateLabel(selectedDate)} 일정 ${selectedDay?.count ?? 0}건`;
+
+  /**
+   * 마감일 없는 상시채용. 달력 칸에 찍을 날짜가 없어 달력 아래에 따로 모아 둔다.
+   * 어느 달을 보고 있어도 같은 목록이므로 달을 넘겨도 그대로 남는다.
+   */
+  const renderOngoingSection = (month: MyCalendarMonth) => (
+    <section className="mycal-ongoing">
+      <h2 className="mycal-ongoing__title">
+        상시채용 <strong>{month.ongoingCount}건</strong>
+        <span className="mycal-ongoing__note">마감일이 없어 달력에 찍지 않습니다. 지원했으면 완료를 눌러 주세요.</span>
+      </h2>
+      {month.ongoingEntries.length === 0 ? (
+        <p className="mycal-detail__placeholder">
+          적어 둔 상시채용이 없습니다.<br />
+          마감일 없는 공고를 여기에 모아 두세요.
+        </p>
+      ) : (
+        month.ongoingEntries.map(renderEntry)
+      )}
+      <IonButton
+        expand="block"
+        size="small"
+        className="mycal-add-btn"
+        onClick={() => setForm(emptyForm(selectedDate, true))}
+      >
+        + 상시채용 추가
+      </IonButton>
+    </section>
+  );
 
   const renderCalendar = () => {
     if (loading) {
@@ -359,6 +437,8 @@ const MyCalendar: React.FC = () => {
             </aside>
           )}
         </div>
+
+        {renderOngoingSection(data)}
       </>
     );
   };
@@ -441,13 +521,29 @@ const MyCalendar: React.FC = () => {
               </IonButton>
             </header>
 
+            {/* 상시채용은 마감일이 없다. 체크하면 날짜 입력을 잠그고 상시채용 목록으로 보낸다. */}
+            <label className="mycal-field mycal-field--check">
+              <input
+                type="checkbox"
+                checked={form.ongoing}
+                onChange={(e) => setForm({ ...form, ongoing: e.target.checked })}
+              />
+              <span className="mycal-field__label">상시채용 (마감일 없음)</span>
+            </label>
+
             <label className="mycal-field">
               <span className="mycal-field__label">날짜</span>
               <input
                 type="date"
                 value={form.applyDate}
+                disabled={form.ongoing}
                 onChange={(e) => setForm({ ...form, applyDate: e.target.value })}
               />
+              {form.ongoing && (
+                <span className="mycal-field__hint">
+                  상시채용은 날짜 없이 저장되어 달력 아래 목록에 모입니다.
+                </span>
+              )}
             </label>
 
             <label className="mycal-field">
