@@ -37,6 +37,7 @@ import AdminJobDeleteRequests from './pages/AdminJobDeleteRequests';
 import Board from './pages/Board';
 import BoardDetail from './pages/BoardDetail';
 import BoardWrite from './pages/BoardWrite';
+import InstallPrompt from './components/InstallPrompt';
 
 setupIonicReact();
 const queryClient = new QueryClient();
@@ -82,6 +83,9 @@ const App: React.FC = () => {
               />
             </IonRouterOutlet>
           </IonReactRouter>
+
+          {/* 모바일 웹에서만 뜨는 "홈 화면에 앱 추가" 안내. 화면 전환과 무관하게 하단에 고정된다. */}
+          <InstallPrompt />
         </AuthProvider>
       </QueryClientProvider>
     </IonApp>
