@@ -530,7 +530,11 @@ const AdminSubscriptions: React.FC = () => {
         </div>
 
         {/* 편집 모달 */}
-        <IonModal isOpen={selectedUserId !== null} onDidDismiss={closeDetail}>
+        <IonModal
+          isOpen={selectedUserId !== null}
+          onDidDismiss={closeDetail}
+          className="admin-detail-modal"
+        >
           <div className="modal-container">
             <header className="modal-header">
               <div>
