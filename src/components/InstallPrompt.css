@@ -1,0 +1,102 @@
+/*
+ * 홈 화면 추가 안내 배너 — 모바일 화면 아래에 떠 있는다.
+ * 표시 여부는 useInstallPrompt 가 정하고, 여기서는 모양만 잡는다.
+ */
+.install-prompt {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  /* 아이폰 홈 인디케이터에 가리지 않게 여백을 둔다. */
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  padding: 12px;
+  border: 1px solid var(--border, #e5e8eb);
+  border-radius: var(--radius-lg, 16px);
+  background: var(--surface, #fff);
+  box-shadow: var(--shadow-card-hover, 0 6px 20px rgba(25, 31, 40, 0.1));
+  /* Ionic 모달(20000)보다는 아래, 본문보다는 위. */
+  z-index: 1000;
+  animation: install-prompt-in 240ms ease-out;
+}
+
+@keyframes install-prompt-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.install-prompt__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.install-prompt__icon {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm, 8px);
+  background: var(--surface-field, #f2f4f6);
+  object-fit: contain;
+}
+
+.install-prompt__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.install-prompt__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-strong, #191f28);
+}
+
+.install-prompt__desc {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-secondary, #4e5968);
+  margin-top: 2px;
+}
+
+ion-button.install-prompt__cta {
+  flex: 0 0 auto;
+  margin: 0;
+  height: 34px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: none;
+  --border-radius: var(--radius-pill, 9999px);
+  --padding-start: 14px;
+  --padding-end: 14px;
+}
+
+ion-button.install-prompt__close {
+  flex: 0 0 auto;
+  margin: 0;
+  height: 34px;
+  --color: var(--text-muted, #8b95a1);
+  --padding-start: 4px;
+  --padding-end: 4px;
+}
+
+.install-prompt__steps {
+  margin: 10px 0 0;
+  padding: 10px 0 0 20px;
+  border-top: 1px solid var(--divider, #f2f4f6);
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-secondary, #4e5968);
+}
+
+/* PC 폭에서는 애초에 렌더링하지 않지만, 창을 넓혀 둔 경우까지 막는다. */
+@media (min-width: 769px) {
+  .install-prompt {
+    display: none;
+  }
+}
