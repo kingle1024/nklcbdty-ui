@@ -335,6 +335,13 @@ ion-button.mycal-add-btn {
 .mycal-modal {
   --border-radius: var(--radius-lg, 16px) var(--radius-lg, 16px) 0 0;
   --background: var(--surface, #ffffff);
+  /*
+   * 시트 높이를 Ionic 기본값(:host(.modal-sheet)) 과 같은 값으로 다시 적어 둔다.
+   * CRA 는 모든 CSS 를 한 덩어리로 묶으므로 다른 화면의 ion-modal 규칙이 --height 를
+   * auto 로 덮어쓸 수 있고, 그러면 시트가 제목 줄만 남기고 접혀 일정·추가 버튼이 화면 밖으로 나간다.
+   */
+  --height: calc(100% - (var(--ion-safe-area-top, 0px) + 10px));
+  --max-height: none;
 }
 
 .mycal-modal ion-content.mycal-modal__content {

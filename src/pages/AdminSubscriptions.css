@@ -331,8 +331,10 @@
   font-size: 14px;
 }
 
-/* ===== 모달 ===== */
-ion-modal.show-modal {
+/* ===== 모달 =====
+   ion-modal.show-modal 로 두면 CRA 가 CSS 를 한 덩어리로 묶어 앱 안의 모든 모달
+   (나의 캘린더 날짜 팝업 등)까지 --height: auto 로 덮어썼다. 이 화면 모달에만 걸리도록 클래스를 붙인다. */
+ion-modal.admin-detail-modal {
   --width: 90vw;
   --max-width: 900px;
   --height: auto;
