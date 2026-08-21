@@ -45,6 +45,26 @@ const isMobile = () =>
   /Android|iPhone|iPad|iPod|Mobile/i.test(window.navigator.userAgent) ||
   (window.navigator.maxTouchPoints > 0 && window.innerWidth <= MOBILE_MAX_WIDTH);
 
+/**
+ * 삼성 인터넷인가. **여기서는 설치를 권하지 않는다.**
+ *
+ * 삼성 인터넷은 PWA 를 설치할 때 WebAPK 를 기기 안에서 직접 만들어 서명한다
+ * (크롬은 구글 서버가 만들어 서명한 것을 받아 온다). 그렇게 만든 APK 의
+ * targetSdkVersion 이 낮아서, 안드로이드 14 이상은 설치를 막고 겁주는 창을 띄운다 —
+ * "안전하지 않은 앱 차단됨 / 이 앱은 Android 이전 버전에 맞게 개발되었으며 최신
+ * 개인 정보 보호 기능을 포함하지 않습니다" (2026-08-21 갤럭시에서 확인).
+ *
+ * 우리가 고칠 수 있는 값이 아니다 — targetSdkVersion 은 브라우저가 만드는 APK 안에
+ * 있고 매니페스트에는 없다. 안내 문구를 어떻게 고쳐도 그 창은 그대로 뜬다. 그래서
+ * 이 브라우저에서는 배너를 아예 띄우지 않는다. 겁주는 창으로 끝나는 길을 권하는
+ * 것보다 없는 편이 낫다.
+ *
+ * 브라우저가 스스로 띄우는 설치 안내는 index.html 의 beforeinstallprompt 처리에서
+ * 이미 preventDefault() 로 막혀 있어 여기서 더 할 일이 없다. 그래도 홈 화면에 두고
+ * 싶은 사람은 브라우저 메뉴로 직접 추가할 수 있다 — 그 길까지 막을 수는 없다.
+ */
+const isSamsungInternet = () => /SamsungBrowser/.test(window.navigator.userAgent);
+
 const isRecentlyDismissed = () => {
   try {
     const dismissedAt = Number(window.localStorage.getItem(DISMISSED_KEY));
@@ -60,13 +80,14 @@ const isRecentlyDismissed = () => {
  *
  * - 안드로이드 크롬: beforeinstallprompt 가 오면 설치 프롬프트를 직접 띄운다.
  * - iOS 사파리·프롬프트가 오지 않는 브라우저: 손으로 추가하는 방법을 알려 준다.
+ * - 삼성 인터넷: 아무것도 띄우지 않는다. 이유는 isSamsungInternet() 에 적어 두었다.
  */
 const useInstallPrompt = () => {
   const [mode, setMode] = useState<InstallMode | null>(null);
   const [dismissed, setDismissed] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!isMobile() || isStandalone() || isRecentlyDismissed()) {
+    if (!isMobile() || isStandalone() || isRecentlyDismissed() || isSamsungInternet()) {
       return;
     }
 

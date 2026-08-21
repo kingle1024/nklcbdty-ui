@@ -20,7 +20,11 @@
 
     <!-- add to homescreen for ios -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="Ionic App" />
+    <!-- 홈 화면 아이콘 아래에 적히는 이름. 손대지 않으면 "Ionic App" 이 그대로 박힌다. -->
+    <meta name="apple-mobile-web-app-title" content="네카라쿠배당토야" />
+    <!-- iOS 는 매니페스트가 아니라 이 링크로 홈 화면 아이콘을 고른다.
+         없으면 아이콘 자리에 화면을 찍은 그림이 들어간다. -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/images/og.png" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <!--
       크롬은 페이지가 뜨자마자 beforeinstallprompt 를 던지는데, 그때 React 는 아직 마운트되지 않았다.
