@@ -69,13 +69,39 @@ const messageOf = (error: unknown, fallback: string): string => {
   return fallback;
 };
 
+/*
+ * 상시채용·완료를 모르는 옛 서버는 ongoingEntries / ongoing / completed 를 안 보낸다.
+ * 그대로 쓰면 화면이 undefined.length 로 죽고, 체크박스가 controlled ↔ uncontrolled 를
+ * 넘나든다. 프론트는 Netlify 로 즉시 뜨는데 백엔드는 콘솔에서 손으로 재배포해야 해서
+ * 둘의 시차는 늘 생긴다 — 빠진 값은 이 한 곳에서 채우고 화면은 몰라도 되게 한다.
+ *
+ * 서버가 새 필드를 보내기 시작하면 이 함수는 아무것도 바꾸지 않는 통과 지점이 된다.
+ */
+const entryWithDefaults = (entry: MyCalendarEntry): MyCalendarEntry => ({
+  ...entry,
+  applyDate: entry.applyDate ?? null,
+  ongoing: entry.ongoing ?? entry.applyDate == null,
+  completed: entry.completed ?? false,
+  completedAt: entry.completedAt ?? null,
+});
+
+const withDefaults = (month: MyCalendarMonth): MyCalendarMonth => ({
+  ...month,
+  days: (month.days ?? []).map((day) => ({
+    ...day,
+    entries: (day.entries ?? []).map(entryWithDefaults),
+  })),
+  ongoingEntries: (month.ongoingEntries ?? []).map(entryWithDefaults),
+  ongoingCount: month.ongoingCount ?? 0,
+});
+
 export const fetchMyCalendarMonth = async (year: number, month: number): Promise<MyCalendarMonth> => {
   try {
     const res = await axios.get<MyCalendarMonth>(`${API_URL}/api/my-calendar/entries`, {
       params: { year, month },
       headers: authHeaders(),
     });
-    return res.data;
+    return withDefaults(res.data);
   } catch (error) {
     throw new Error(messageOf(error, '캘린더를 불러오지 못했습니다.'));
   }
