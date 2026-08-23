@@ -1,16 +1,18 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { IonPage, IonContent, IonButton, IonSpinner, IonIcon } from '@ionic/react';
-import { arrowBackOutline } from 'ionicons/icons';
+import { arrowBackOutline, copyOutline, checkmarkOutline } from 'ionicons/icons';
 import { Helmet } from 'react-helmet';
 import CommonHeader from '../common/CommonHeader';
 import AdminSidebar from '../common/AdminSidebar';
 import { isAdminLoggedIn } from '../common/adminApi';
 import {
   TroubleshootingDetail,
+  copyToClipboard,
   fetchNote,
   formatOccurredOn,
   formatStamp,
+  noteToText,
   severityMeta,
 } from '../common/troubleshootingApi';
 import './AdminTroubleshooting.css';
@@ -44,6 +46,8 @@ const AdminTroubleshootingDetail: React.FC = () => {
   const [note, setNote] = useState<TroubleshootingDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  // '복사됨' / '복사 실패' 중 어느 쪽인지. 잠깐 보여주고 되돌린다.
+  const [copyState, setCopyState] = useState<'idle' | 'done' | 'failed'>('idle');
 
   useEffect(() => {
     if (!isAdminLoggedIn()) {
@@ -67,6 +71,21 @@ const AdminTroubleshootingDetail: React.FC = () => {
     load();
   }, [load]);
 
+  // 다른 기록으로 넘어가면 이전 화면의 '복사됨' 표시가 남지 않게 되돌린다
+  useEffect(() => {
+    setCopyState('idle');
+  }, [slug]);
+
+  const handleCopyAll = async () => {
+    if (!note) {
+      return;
+    }
+    const ok = await copyToClipboard(noteToText(note));
+    setCopyState(ok ? 'done' : 'failed');
+    // 실패는 조금 더 오래 남겨 둔다 — 놓치면 빈 클립보드를 붙여 넣게 된다
+    window.setTimeout(() => setCopyState('idle'), ok ? 1800 : 4000);
+  };
+
   const sev = severityMeta(note?.severity ?? null);
 
   return (
@@ -81,14 +100,29 @@ const AdminTroubleshootingDetail: React.FC = () => {
         <div className="ts-layout">
           <AdminSidebar />
           <div className="ts-main">
-            <IonButton
-              fill="clear"
-              size="small"
-              onClick={() => history.push('/admin/troubleshooting')}
-            >
-              <IonIcon slot="start" icon={arrowBackOutline} />
-              목록으로
-            </IonButton>
+            <div className="ts-detail-toolbar">
+              <IonButton
+                fill="clear"
+                size="small"
+                onClick={() => history.push('/admin/troubleshooting')}
+              >
+                <IonIcon slot="start" icon={arrowBackOutline} />
+                목록으로
+              </IonButton>
+
+              {/* 기록 전체를 마크다운 텍스트로 클립보드에 넣는다. Claude 에게 붙여 넣어
+                  참고시키는 용도라, 화면에 보이는 순서 그대로 절 제목을 붙여 뽑는다. */}
+              <IonButton
+                fill="outline"
+                size="small"
+                disabled={!note}
+                onClick={handleCopyAll}
+                color={copyState === 'failed' ? 'danger' : copyState === 'done' ? 'success' : undefined}
+              >
+                <IonIcon slot="start" icon={copyState === 'done' ? checkmarkOutline : copyOutline} />
+                {copyState === 'done' ? '복사됨' : copyState === 'failed' ? '복사 실패' : '전체 복사'}
+              </IonButton>
+            </div>
 
             {isLoading ? (
               <div className="ts-loading">
