@@ -1,0 +1,474 @@
+/* 트러블슈팅 기록 열람(목록/상세) 스타일. 색·모양은 theme.css 토큰을 그대로 쓴다. */
+
+.ts-layout {
+  display: flex;
+  align-items: flex-start;
+}
+
+.ts-main {
+  flex: 1;
+  min-width: 0;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* 머리말 */
+.ts-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.ts-head h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.ts-head p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* 심각도 요약 — 전체 기준 집계라 필터를 걸어도 숫자가 바뀌지 않는다 */
+.ts-stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.ts-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.ts-stat.selected {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary-tint);
+  color: var(--brand-primary);
+  font-weight: 700;
+}
+
+.ts-stat-num {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.ts-stat.selected .ts-stat-num {
+  color: var(--brand-primary);
+}
+
+/* 검색 + 프로젝트 선택 */
+.ts-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.ts-filters input,
+.ts-filters select {
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-body);
+  background-color: var(--surface-field);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.ts-filters input {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.ts-filters select {
+  flex: 0 1 240px;
+  max-width: 100%;
+}
+
+.ts-filters input:focus,
+.ts-filters select:focus {
+  border-color: var(--brand-primary);
+}
+
+/* 태그 필터 */
+.ts-tagbar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.ts-tag {
+  padding: 4px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  background: var(--surface-field);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.ts-tag:hover {
+  border-color: var(--border);
+}
+
+.ts-tag.selected {
+  color: #ffffff;
+  background: var(--brand-primary);
+  font-weight: 700;
+}
+
+/* 태그가 많아 접어 둘 때 쓰는 '더 보기' */
+.ts-tag.more {
+  background: transparent;
+  color: var(--brand-primary);
+  font-weight: 600;
+}
+
+/* 적용된 조건 안내 */
+.ts-applied {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.ts-applied button {
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  background: var(--surface-field);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+/* 목록 */
+.ts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ts-card {
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+}
+
+.ts-card:hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
+.ts-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.ts-card-date {
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.ts-card-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--text-strong);
+  word-break: break-word;
+}
+
+.ts-card-lesson {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  word-break: break-word;
+}
+
+.ts-card-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.ts-card-tags span {
+  padding: 2px 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--surface-field);
+  border-radius: var(--radius-pill);
+}
+
+/* 심각도 뱃지 */
+.ts-sev {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.ts-sev.critical {
+  color: #ffffff;
+  background: var(--danger);
+}
+
+.ts-sev.high {
+  color: var(--danger);
+  background: var(--danger-tint);
+}
+
+.ts-sev.medium {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.ts-sev.low {
+  color: var(--success);
+  background: var(--success-tint);
+}
+
+.ts-sev.unknown {
+  color: var(--text-muted);
+  background: var(--surface-field);
+}
+
+/* 코드처럼 보여주는 식별자(에러 코드, slug) */
+.ts-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  background: var(--surface-field);
+  word-break: break-all;
+}
+
+.ts-empty {
+  padding: 48px 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.ts-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 24px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* 페이징 — 게시판과 같은 모양 */
+.ts-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.ts-page-btn {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.ts-page-btn:disabled {
+  color: var(--text-disabled);
+  cursor: default;
+}
+
+.ts-page-btn.current {
+  color: #ffffff;
+  background-color: var(--brand-primary);
+  border-color: var(--brand-primary);
+  font-weight: 700;
+}
+
+/* ── 상세 ── */
+.ts-detail {
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.ts-detail-title {
+  margin: 8px 0 10px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--text-strong);
+  word-break: break-word;
+}
+
+.ts-detail-meta {
+  display: flex;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.ts-detail-meta b {
+  margin-right: 4px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* 본문 절 */
+.ts-section {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.ts-section:last-of-type {
+  border-bottom: none;
+}
+
+.ts-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.ts-section h2 .ts-section-hint {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* 저장된 원문을 손대지 않고 보여준다 — 줄바꿈과 로그 들여쓰기가 내용의 일부다 */
+.ts-body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--text-body);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* 에러 메시지 원문이 섞인 증상은 등폭으로 — 로그의 정렬이 살아 있어야 읽힌다 */
+.ts-body.log {
+  padding: 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  background: var(--surface-field);
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+}
+
+/* 한 줄 교훈은 눈에 띄게 */
+.ts-lesson {
+  margin: 0;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-strong);
+  background: var(--brand-primary-tint);
+  border-left: 3px solid var(--brand-primary);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  word-break: break-word;
+}
+
+.ts-links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ts-links li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  word-break: break-all;
+}
+
+.ts-links a {
+  color: var(--brand-primary);
+  text-decoration: none;
+}
+
+.ts-links a:hover {
+  text-decoration: underline;
+}
+
+.ts-detail-foot {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  /* 좁은 화면에서는 관리자 사이드바를 접고 본문만 남긴다 */
+  .ts-layout > aside {
+    display: none;
+  }
+
+  .ts-main {
+    padding: 12px;
+  }
+
+  .ts-detail {
+    padding: 16px;
+  }
+
+  .ts-head {
+    flex-direction: column;
+  }
+}

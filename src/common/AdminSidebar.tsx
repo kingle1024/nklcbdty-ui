@@ -1,7 +1,7 @@
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { IonIcon } from '@ionic/react';
-import { gridOutline, peopleOutline, trashOutline, homeOutline, logOutOutline } from 'ionicons/icons';
+import { gridOutline, peopleOutline, trashOutline, homeOutline, logOutOutline, bugOutline } from 'ionicons/icons';
 import { clearAdminAuth } from './adminApi';
 
 // 관리자 페이지 공통 사이드바. 신규 관리자 메뉴는 여기 MENU 에 추가하면 모든 관리자 페이지에 노출됨.
@@ -9,6 +9,7 @@ const MENU: Array<{ label: string; path: string; icon: string }> = [
   { label: '관리자 홈', path: '/admin', icon: gridOutline },
   { label: '구독 관리', path: '/admin/subscriptions', icon: peopleOutline },
   { label: '공고 삭제요청', path: '/admin/job-delete-requests', icon: trashOutline },
+  { label: '트러블슈팅 기록', path: '/admin/troubleshooting', icon: bugOutline },
 ];
 
 const AdminSidebar: React.FC = () => {
@@ -36,7 +37,11 @@ const AdminSidebar: React.FC = () => {
       </div>
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {MENU.map((m) => {
-          const active = location.pathname === m.path;
+          // 하위 화면(예: /admin/troubleshooting/<slug>)에서도 그 메뉴가 켜져 있어야 한다.
+          // '/admin' 은 모든 관리자 경로의 앞부분이라 정확히 일치할 때만 켠다.
+          const active =
+            location.pathname === m.path ||
+            (m.path !== '/admin' && location.pathname.startsWith(`${m.path}/`));
           return (
             <button
               key={m.path}
