@@ -252,3 +252,57 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
     return false;
   }
 };
+
+/**
+ * 조건에 맞는 기록을 본문까지 전부 받아온다. 목록의 '전체 복사' 가 쓴다.
+ *
+ * 목록 응답에는 본문이 없어서 건마다 상세를 부르면 N+1 이 된다. 서버가 한 번에 준다.
+ */
+export const fetchNotesForExport = async (
+  query: Omit<TroubleshootingQuery, 'page' | 'size'>
+): Promise<TroubleshootingDetail[]> => {
+  const params: Record<string, string> = {};
+  if (query.keyword) params.keyword = query.keyword;
+  if (query.project) params.project = query.project;
+  if (query.severity) params.severity = query.severity;
+  if (query.tag) params.tag = query.tag;
+
+  try {
+    const { data } = await adminApi.get<{ notes: TroubleshootingDetail[]; count: number }>(
+      `${BASE}/export`,
+      { params }
+    );
+    return data.notes ?? [];
+  } catch (error) {
+    throw new Error(messageOf(error, '기록을 가져오지 못했습니다.'));
+  }
+};
+
+/**
+ * 여러 건을 하나의 문서로 잇는다.
+ *
+ * 맨 위에 몇 건인지와 어떤 조건으로 뽑은 것인지를 적는다 — 붙여 넣은 쪽이 "이게 전부인가,
+ * 걸러진 것인가" 를 알아야 하기 때문이다. 기록 사이는 `---` 로 끊어 경계를 분명히 한다.
+ */
+export const notesToText = (
+  notes: TroubleshootingDetail[],
+  filter: Omit<TroubleshootingQuery, 'page' | 'size'> = {}
+): string => {
+  const conditions: string[] = [];
+  if (filter.keyword) conditions.push(`검색 '${filter.keyword}'`);
+  if (filter.project) conditions.push(`프로젝트 ${filter.project}`);
+  if (filter.severity) conditions.push(`심각도 ${filter.severity}`);
+  if (filter.tag) conditions.push(`태그 #${filter.tag}`);
+
+  const head = [
+    `# 트러블슈팅 기록 ${notes.length}건`,
+    '',
+    conditions.length ? `조건: ${conditions.join(' · ')}` : '조건: 전체',
+    '',
+  ].join('\n');
+
+  // noteToText 가 기록마다 '# 제목' 으로 시작하므로, 문서 제목과 섞이지 않게 한 단계 내린다
+  const body = notes.map((n) => noteToText(n).replace(/^#/gm, '##').trim()).join('\n\n---\n\n');
+
+  return `${head}\n${body}\n`;
+};
