@@ -481,3 +481,19 @@
   gap: 8px;
   flex-wrap: wrap;
 }
+
+/* 목록 머리말 오른쪽 버튼 묶음 — 전체 복사 + 새로고침 */
+.ts-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  /* 좁은 화면에서는 머리말이 위아래로 쌓이므로 버튼을 왼쪽에 붙인다 */
+  .ts-head-actions {
+    width: 100%;
+  }
+}

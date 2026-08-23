@@ -1,15 +1,18 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { IonPage, IonContent, IonButton, IonSpinner, IonIcon, IonAlert } from '@ionic/react';
-import { refreshOutline, linkOutline } from 'ionicons/icons';
+import { refreshOutline, linkOutline, copyOutline, checkmarkOutline } from 'ionicons/icons';
 import { Helmet } from 'react-helmet';
 import CommonHeader from '../common/CommonHeader';
 import AdminSidebar from '../common/AdminSidebar';
 import { isAdminLoggedIn } from '../common/adminApi';
 import {
   TroubleshootingPage,
+  copyToClipboard,
   fetchNotes,
+  fetchNotesForExport,
   formatOccurredOn,
+  notesToText,
   severityMeta,
 } from '../common/troubleshootingApi';
 import './AdminTroubleshooting.css';
@@ -52,6 +55,9 @@ const AdminTroubleshooting: React.FC = () => {
   const [showAllTags, setShowAllTags] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  // 전체 복사: 서버에서 본문까지 받아오는 동안 기다려야 하므로 진행 상태를 따로 둔다
+  const [copyState, setCopyState] = useState<'idle' | 'working' | 'done' | 'failed'>('idle');
+  const [copiedCount, setCopiedCount] = useState(0);
 
   // 미로그인 시 관리자 로그인(/admin)으로 보낸다
   useEffect(() => {
@@ -91,6 +97,35 @@ const AdminTroubleshooting: React.FC = () => {
   const handleSearch = () => {
     setPage(0);
     setKeyword(keywordInput.trim());
+  };
+
+  /**
+   * 지금 걸린 조건에 맞는 기록 전체를 본문까지 텍스트로 복사한다.
+   * 보고 있는 페이지가 아니라 **조건에 맞는 전부**다 — 페이지를 넘겨가며 복사하게 만들지 않는다.
+   */
+  const handleCopyAll = async () => {
+    setCopyState('working');
+    try {
+      const notes = await fetchNotesForExport({ keyword, project, severity, tag });
+      if (notes.length === 0) {
+        setCopyState('failed');
+        setErrorMessage('복사할 기록이 없습니다.');
+        window.setTimeout(() => setCopyState('idle'), 2500);
+        return;
+      }
+      const ok = await copyToClipboard(notesToText(notes, { keyword, project, severity, tag }));
+      setCopiedCount(notes.length);
+      setCopyState(ok ? 'done' : 'failed');
+      if (!ok) {
+        setErrorMessage('클립보드에 넣지 못했습니다. 브라우저 권한을 확인해 주세요.');
+      }
+      // 실패는 조금 더 오래 남긴다 — 놓치면 빈 클립보드를 붙여 넣게 된다
+      window.setTimeout(() => setCopyState('idle'), ok ? 2200 : 4000);
+    } catch (error) {
+      setCopyState('failed');
+      setErrorMessage(error instanceof Error ? error.message : '기록을 가져오지 못했습니다.');
+      window.setTimeout(() => setCopyState('idle'), 4000);
+    }
   };
 
   /** 같은 값을 다시 누르면 해제된다 — 조건을 지우려고 드롭다운을 찾지 않게 */
@@ -156,10 +191,34 @@ const AdminTroubleshooting: React.FC = () => {
                   {result ? ` 전체 ${result.totalNotes}건.` : ''}
                 </p>
               </div>
-              <IonButton fill="outline" size="default" onClick={load} disabled={isLoading}>
-                <IonIcon slot="start" icon={refreshOutline} />
-                새로고침
-              </IonButton>
+              <div className="ts-head-actions">
+                {/* 조건에 맞는 기록 전체를 본문까지 한 번에 복사한다. 상세를 열지 않고
+                    Claude 에게 붙여 넣으려는 용도라 목록 화면에 둔다. */}
+                <IonButton
+                  fill="outline"
+                  size="default"
+                  onClick={handleCopyAll}
+                  disabled={isLoading || copyState === 'working' || rows.length === 0}
+                  color={copyState === 'failed' ? 'danger' : copyState === 'done' ? 'success' : undefined}
+                >
+                  {copyState === 'working' ? (
+                    <IonSpinner name="crescent" style={{ width: 16, height: 16 }} />
+                  ) : (
+                    <IonIcon slot="start" icon={copyState === 'done' ? checkmarkOutline : copyOutline} />
+                  )}
+                  {copyState === 'working'
+                    ? ' 모으는 중'
+                    : copyState === 'done'
+                      ? `${copiedCount}건 복사됨`
+                      : copyState === 'failed'
+                        ? '복사 실패'
+                        : '전체 복사'}
+                </IonButton>
+                <IonButton fill="outline" size="default" onClick={load} disabled={isLoading}>
+                  <IonIcon slot="start" icon={refreshOutline} />
+                  새로고침
+                </IonButton>
+              </div>
             </header>
 
             {/* 심각도 요약 겸 필터. 숫자는 전체 기준이라 필터를 걸어도 변하지 않는다 */}
