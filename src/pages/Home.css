@@ -138,6 +138,14 @@ label {
   border-radius: var(--radius-lg);
 }
 
+/* 모바일 전용 요소 — 데스크탑에서는 숨긴다 */
+.mobile-filter-toggle,
+.filter-backdrop,
+.filter-panel-header,
+.filter-apply {
+  display: none;
+}
+
 /* 반응형 디자인 */
 @media (min-width: 768px) {
   .mySwiper {
@@ -162,6 +170,113 @@ label {
     padding: 12px;
   }
   .left-aside {
-    display: none; /* 모바일에서는 기본적으로 숨김 */
+    display: none; /* 모바일에서는 기본적으로 숨김, 필터 버튼으로 연다 */
+  }
+
+  /* 목록 위에 뜨는 필터 버튼 */
+  .mobile-filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background-color: var(--surface);
+    color: var(--text-strong);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: var(--shadow-card);
+  }
+
+  .mobile-filter-toggle:active {
+    background-color: var(--surface-field);
+  }
+
+  .mobile-filter-badge {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: var(--radius-pill);
+    background-color: var(--brand-primary);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+  }
+
+  /* 시트 뒤 배경 */
+  .filter-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(25, 31, 40, 0.45);
+    z-index: 1000;
+  }
+
+  /* 열린 필터 시트 */
+  .left-aside.is-open {
+    display: block;
+    position: fixed;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-height: 82vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    border: none;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: 0 -4px 20px rgba(25, 31, 40, 0.18);
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    z-index: 1001;
+  }
+
+  .left-aside.is-open .filter-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .left-aside.is-open .filter-panel-header h2 {
+    margin: 0;
+    font-size: 18px;
+  }
+
+  .filter-close {
+    border: none;
+    background: none;
+    padding: 4px 8px;
+    font-size: 16px;
+    line-height: 1;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+
+  /* 시트 하단에 고정되는 적용 버튼 */
+  .left-aside.is-open .filter-apply {
+    display: block;
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+    border: none;
+    border-radius: var(--radius-md);
+    background-color: var(--brand-primary);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .left-aside.is-open .filter-apply:active {
+    background-color: var(--brand-primary-pressed);
   }
 }
