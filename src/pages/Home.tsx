@@ -78,6 +78,15 @@ const Home: React.FC = () => {
   // State to manage the visibility of categories
   const [visibleCategories, setVisibleCategories] = useState<Record<string, boolean>>({});
 
+  // 모바일 필터 시트 열림 여부 (PC 는 사이드바가 항상 보이므로 쓰이지 않는다)
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
+
+  // 필터 버튼 배지 숫자 — 기본값에서 벗어난 필터 개수
+  const activeFilterCount =
+    Object.values(filters.categories).reduce((sum, list) => sum + list.length, 0) +
+    (filters.personalHistory.start !== 0 || filters.personalHistory.end !== 10 ? 1 : 0) +
+    (filters.includeNoExperience ? 0 : 1);
+
   // Function to handle filter change
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked, name } = event.target;
@@ -213,7 +222,34 @@ const Home: React.FC = () => {
         </SwiperSlide>
       </Swiper> */}
         <div className="container">
-          <aside className="left-aside">
+          <button
+            type="button"
+            className="mobile-filter-toggle"
+            onClick={() => setIsFilterOpen(true)}
+            aria-expanded={isFilterOpen}
+            aria-controls="job-filter-panel"
+          >
+            <span aria-hidden="true">&#9776;</span>
+            필터
+            {activeFilterCount > 0 && <span className="mobile-filter-badge">{activeFilterCount}</span>}
+          </button>
+
+          {isFilterOpen && (
+            <div className="filter-backdrop" onClick={() => setIsFilterOpen(false)} />
+          )}
+
+          <aside id="job-filter-panel" className={`left-aside${isFilterOpen ? ' is-open' : ''}`}>
+            <div className="filter-panel-header">
+              <h2>필터</h2>
+              <button
+                type="button"
+                className="filter-close"
+                onClick={() => setIsFilterOpen(false)}
+                aria-label="필터 닫기"
+              >
+                &#10005;
+              </button>
+            </div>
             <h2>직군</h2>
             <form>
               {categoriesData.map((categoryData) => {
@@ -303,6 +339,10 @@ const Home: React.FC = () => {
                 />
               </div>
             </div>
+
+            <button type="button" className="filter-apply" onClick={() => setIsFilterOpen(false)}>
+              결과 보기
+            </button>
           </aside>
           <main className="content">
             <ListContainer filters={filters} />
