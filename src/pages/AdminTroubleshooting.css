@@ -472,3 +472,12 @@
     flex-direction: column;
   }
 }
+
+/* 상세 상단 도구줄 — '목록으로' 와 '전체 복사' */
+.ts-detail-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}

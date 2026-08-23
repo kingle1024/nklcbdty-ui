@@ -162,3 +162,93 @@ export const formatStamp = (value: string | null): string => {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 };
+
+/**
+ * 기록 한 건을 텍스트로 만든다. Claude 에게 붙여 넣어 참고시키려는 용도라,
+ * 화면 모양이 아니라 **읽는 쪽이 구조를 알아볼 수 있는 형태**(마크다운)로 뽑는다.
+ *
+ * 비어 있는 절은 빈 제목만 남기지 않고 뺀다. 본문은 저장된 원문을 그대로 둔다 —
+ * 증상에 든 에러 메시지를 다듬으면 붙여 넣는 의미가 없어진다.
+ */
+export const noteToText = (note: TroubleshootingDetail): string => {
+  const lines: string[] = [`# ${note.title}`, ''];
+
+  const meta: Array<[string, string | null]> = [
+    ['발생일', formatOccurredOn(note.occurredOn)],
+    ['프로젝트', note.project],
+    ['구성요소', note.component],
+    ['심각도', note.severity],
+    ['에러 코드', note.errorCode],
+    ['기술', note.techStack.length ? note.techStack.join(', ') : null],
+    ['태그', note.tags.length ? note.tags.map((t) => `#${t}`).join(' ') : null],
+    ['slug', note.slug],
+  ];
+  for (const [label, value] of meta) {
+    if (value) {
+      lines.push(`- ${label}: ${value}`);
+    }
+  }
+
+  const sections: Array<[string, string | null]> = [
+    ['교훈', note.lesson],
+    ['증상', note.symptom],
+    ['원인', note.rootCause],
+    ['해결', note.resolution],
+    ['검증', note.verification],
+    ['재발 방지', note.prevention],
+  ];
+  for (const [title, body] of sections) {
+    if (body && body.trim()) {
+      lines.push('', `## ${title}`, '', body.trim());
+    }
+  }
+
+  if (note.referenceLinks.length) {
+    lines.push('', '## 참고', '');
+    for (const link of note.referenceLinks) {
+      if (!link.url) {
+        // 주소가 없는 줄(커밋 해시 등)은 그대로
+        lines.push(`- ${link.label}`);
+      } else if (link.label === link.url) {
+        // 라벨 없이 주소만 적힌 줄. 서버가 label 을 url 로 채워 주므로 그대로 쓰면 주소가 두 번 나온다
+        lines.push(`- ${link.url}`);
+      } else {
+        lines.push(`- ${link.label}: ${link.url}`);
+      }
+    }
+  }
+
+  return `${lines.join('\n')}\n`;
+};
+
+/**
+ * 클립보드에 넣는다. navigator.clipboard 는 보안 컨텍스트(https/localhost)에서만 있으므로,
+ * 없거나 거부되면 textarea + execCommand 로 떨어진다. 성공 여부를 boolean 으로 준다 —
+ * 실패했는데 "복사됨" 이 뜨면 사용자가 빈 클립보드를 붙여 넣게 된다.
+ */
+export const copyToClipboard = async (text: string): Promise<boolean> => {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    /* 아래 예비 경로로 간다 */
+  }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    // 화면 밖에 두되 focus 가 가능해야 한다. display:none 이면 선택이 안 된다.
+    ta.style.position = 'fixed';
+    ta.style.top = '-1000px';
+    ta.setAttribute('readonly', 'true');
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
+};
