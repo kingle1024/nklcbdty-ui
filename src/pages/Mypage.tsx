@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useHistory } from 'react-router-dom';
 import { cachedGet } from '../common/kvCache';
 import { 
   IonPage, 
@@ -24,8 +25,9 @@ import Sidebar from '../common/Sidebar';
 import API_URL from "../config";
 import UseTokenRefresh from '../common/UseTokenRefresh';
 
-const Mypage: React.FC = () => {  
-  const { user } = useAuth();
+const Mypage: React.FC = () => {
+  const history = useHistory();
+  const { user, isLoggedIn } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
   const [emailAddress, setEmailAddress] = useState<string>('');
   const [selectedCompanys, setSelectedCompanys] = useState<string[]>([]);
@@ -41,7 +43,18 @@ const Mypage: React.FC = () => {
   };
   const emailInputRef = useRef<HTMLIonInputElement | null>(null);
 
+  // 마이페이지 전체가 로그인 전용이다. 비로그인 진입은 여기서 걸러 메인으로 보낸다 —
+  // 하위 메뉴(나의 캘린더 등)로 넘어가서 로그인 안내가 뜨는 일이 없게 한다.
   useEffect(() => {
+    if (!isLoggedIn) {
+      history.replace('/');
+    }
+  }, [isLoggedIn, history]);
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      return;
+    }
     const fetchData = async () => {
       setIsLoading(true); // 로딩 시작
 

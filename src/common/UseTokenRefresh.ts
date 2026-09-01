@@ -55,7 +55,8 @@ const requestTokenRefresh = async (): Promise<RefreshResult> => {
   }
 };
 
-const refreshOnce = (): Promise<RefreshResult> => {
+// 훅을 못 쓰는 API 모듈(myCalendarApi 등)도 같은 갱신 경로를 타도록 내보낸다.
+export const refreshOnce = (): Promise<RefreshResult> => {
   if (!refreshPromise) {
     refreshPromise = requestTokenRefresh().finally(() => {
       refreshPromise = null;

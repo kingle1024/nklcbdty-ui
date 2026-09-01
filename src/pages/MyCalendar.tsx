@@ -13,7 +13,6 @@ import { closeOutline } from 'ionicons/icons';
 import { Helmet } from 'react-helmet';
 import CommonHeader from '../common/CommonHeader';
 import Sidebar from '../common/Sidebar';
-import LoginModal from '../components/LoginModal';
 import { useAuth } from '../common/AuthContextType';
 import useIsMobile from '../common/useIsMobile';
 import {
@@ -117,7 +116,13 @@ const MyCalendar: React.FC = () => {
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
   // 완료를 누른 일정. 응답을 기다리는 동안 그 버튼만 잠근다.
   const [togglingId, setTogglingId] = useState<number | null>(null);
-  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+
+  // 개인 일정이라 로그인 없이는 볼 게 없다. 로그인 안내를 띄우는 대신 메인으로 보낸다.
+  useEffect(() => {
+    if (!isLoggedIn) {
+      history.replace('/');
+    }
+  }, [isLoggedIn, history]);
 
   const load = useCallback(async () => {
     if (!isLoggedIn) {
@@ -158,14 +163,6 @@ const MyCalendar: React.FC = () => {
   const goToMonth = (delta: number) => {
     // 연속으로 빠르게 눌러도 한 달만 움직이지 않도록 이전 상태에서 계산한다.
     setTarget((prev) => shiftMonth(prev, delta));
-  };
-
-  const handleLoginClick = () => {
-    if (isMobile) {
-      history.push('/login');
-    } else {
-      setShowLoginModal(true);
-    }
   };
 
   /**
@@ -489,13 +486,8 @@ const MyCalendar: React.FC = () => {
           <div className="content">
             <h2>나의 캘린더</h2>
 
-            {!isLoggedIn ? (
-              // 개인 일정이라 로그인해야 볼 수 있다. 서버도 토큰 없이는 401 을 낸다.
-              <div className="mycal-login-gate">
-                <p>로그인하면 지원할 회사를 달력에 저장할 수 있습니다.</p>
-                <IonButton size="small" onClick={handleLoginClick}>로그인</IonButton>
-              </div>
-            ) : (
+            {/* 비로그인은 위 useEffect 가 메인으로 보낸다. 옮겨가는 동안 빈 화면만 둔다. */}
+            {isLoggedIn && (
               <>
                 <div className="mycal-toolbar">
                   <IonButton fill="clear" className="mycal-nav-btn" onClick={() => goToMonth(-1)} aria-label="이전 달">
@@ -663,8 +655,6 @@ const MyCalendar: React.FC = () => {
         buttons={['확인']}
       />
 
-      {/* 오버레이는 ion-header 안에 두면 Ionic 이 template 에 가둬 열리지 않는다. 헤더 밖에 둔다. */}
-      {!isMobile && <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />}
     </IonPage>
   );
 };
