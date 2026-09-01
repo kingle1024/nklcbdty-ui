@@ -1,8 +1,16 @@
 /* ListContainer.css */
 
+/* 자세히 보기 + 삭제요청 버튼 한 줄 배치 */
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
 /* 삭제요청 버튼 영역 */
 .delete-request-area {
-  margin-top: 10px;
+  margin-left: auto;
 }
 .delete-request-btn {
   --padding-start: 10px;

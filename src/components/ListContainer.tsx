@@ -324,6 +324,7 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
                       : ''
                     }
                     </p>
+                    <div className="card-actions">
                     <a
                       href={item.jobDetailLink}
                       target="_blank"
@@ -355,6 +356,7 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
                           {requestingDeleteId === item.id ? '요청 중...' : '삭제 요청'}
                         </IonButton>
                       )}
+                    </div>
                     </div>
                   </div>
                 </div>
