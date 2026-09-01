@@ -27,6 +27,7 @@ import {
   setMyCalendarEntryCompleted,
   updateMyCalendarEntry,
 } from '../common/myCalendarApi';
+import { parsePastedJobText } from '../common/pastedJobText';
 import './MyCalendar.css';
 
 /** 달력은 월요일 시작. 서버의 dayOfWeek(1=월 ~ 7=일)와 인덱스를 맞춘다. */
@@ -164,6 +165,36 @@ const MyCalendar: React.FC = () => {
       history.push('/login');
     } else {
       setShowLoginModal(true);
+    }
+  };
+
+  /**
+   * 공고를 "공유" 해서 복사한 글을 붙여넣으면 회사명·공고명·주소를 나눠 담는다.
+   * 예를 들어 잡코리아 모바일은 제목+회사명 한 줄과 주소 한 줄을 함께 준다.
+   *
+   * 이미 적어 둔 값은 덮지 않는다 — 붙여넣기가 사용자가 쓴 값을 지우면 안 된다.
+   * 공고명은 따로 담을 칸이 없어 메모로 간다.
+   *
+   * @return 나눠 담았으면 true. 주소가 없는 글이면 false 를 주고 평소대로 붙여넣게 둔다.
+   */
+  const applyPastedJobText = (raw: string): boolean => {
+    const parsed = parsePastedJobText(raw);
+    if (!parsed) {
+      return false;
+    }
+    setForm((prev) => prev && ({
+      ...prev,
+      url: parsed.url,
+      companyName: prev.companyName.trim() || parsed.companyName,
+      memo: prev.memo.trim() || parsed.title,
+    }));
+    return true;
+  };
+
+  const handleJobTextPaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
+    if (applyPastedJobText(event.clipboardData.getData('text'))) {
+      // 나눠 담았으니 원래 붙여넣기는 막는다. 안 그러면 칸에 글 전체가 그대로 또 들어간다.
+      event.preventDefault();
     }
   };
 
@@ -553,11 +584,21 @@ const MyCalendar: React.FC = () => {
                 inputMode="url"
                 value={form.url}
                 placeholder="https://careers.example.com/jobs/123"
-                onChange={(e) => setForm({ ...form, url: e.target.value })}
+                onPaste={handleJobTextPaste}
+                onChange={(e) => {
+                  // 붙여넣기 이벤트가 오지 않는 브라우저도 있다(모바일 자동완성 등).
+                  // 주소 한 줄이면 공백이 없으므로, 공백이 섞였을 때만 나눠 담아 본다.
+                  if (/\s/.test(e.target.value) && applyPastedJobText(e.target.value)) {
+                    return;
+                  }
+                  setForm({ ...form, url: e.target.value });
+                }}
                 onBlur={handleUrlBlur}
               />
               <span className="mycal-field__hint">
-                {guessing ? '회사명을 찾는 중…' : '주소를 넣으면 회사명을 자동으로 채워 드립니다.'}
+                {guessing
+                  ? '회사명을 찾는 중…'
+                  : '공고를 공유해서 복사한 글을 그대로 붙여넣으면 회사명·공고명까지 나눠 담습니다.'}
               </span>
             </label>
 
