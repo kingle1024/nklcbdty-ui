@@ -2,6 +2,7 @@
 // 전부 로그인이 필요하다 — 서버에서 AuthFilter 가 토큰을 요구하고, 토큰이 없으면 401 이 온다.
 import axios from 'axios';
 import API_URL from '../config';
+import { refreshOnce } from './UseTokenRefresh';
 
 export interface MyCalendarEntry {
   id: number;
@@ -52,6 +53,38 @@ const authHeaders = (): Record<string, string> => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+/** 리프레시 토큰까지 무효일 때만 부른다. 저장된 세션을 지우고 메인으로 보낸다. */
+const clearAuthAndGoHome = () => {
+  localStorage.removeItem('jwtToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('authUser');
+  window.location.href = '/';
+};
+
+/*
+ * 액세스 토큰은 1시간이면 만료돼 401 이 온다. 로그인이 풀린 게 아니라 토큰이 낡은 것뿐인데,
+ * 그대로 두면 로그인해 둔 사용자에게 "로그인이 필요합니다" 알림이 계속 뜬다.
+ * 401 이면 리프레시 토큰으로 한 번 갱신해 재시도하고, 리프레시 토큰까지 무효일 때만
+ * 세션을 지우고 메인으로 보낸다. run 은 부를 때마다 authHeaders() 를 다시 읽어야
+ * 갱신된 토큰이 실린다.
+ */
+const withAuthRetry = async <T>(run: () => Promise<T>): Promise<T> => {
+  try {
+    return await run();
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      const result = await refreshOnce();
+      if (result === 'ok') {
+        return run();
+      }
+      if (result === 'invalid') {
+        clearAuthAndGoHome();
+      }
+    }
+    throw error;
+  }
+};
+
 /** 서버가 돌려준 사용자용 메세지를 꺼낸다. 없으면 기본 문구. */
 const messageOf = (error: unknown, fallback: string): string => {
   if (axios.isAxiosError(error)) {
@@ -97,10 +130,12 @@ const withDefaults = (month: MyCalendarMonth): MyCalendarMonth => ({
 
 export const fetchMyCalendarMonth = async (year: number, month: number): Promise<MyCalendarMonth> => {
   try {
-    const res = await axios.get<MyCalendarMonth>(`${API_URL}/api/my-calendar/entries`, {
-      params: { year, month },
-      headers: authHeaders(),
-    });
+    const res = await withAuthRetry(() =>
+      axios.get<MyCalendarMonth>(`${API_URL}/api/my-calendar/entries`, {
+        params: { year, month },
+        headers: authHeaders(),
+      }),
+    );
     return withDefaults(res.data);
   } catch (error) {
     throw new Error(messageOf(error, '캘린더를 불러오지 못했습니다.'));
@@ -109,9 +144,11 @@ export const fetchMyCalendarMonth = async (year: number, month: number): Promise
 
 export const createMyCalendarEntry = async (input: MyCalendarEntryInput): Promise<MyCalendarEntry> => {
   try {
-    const res = await axios.post<MyCalendarEntry>(`${API_URL}/api/my-calendar/entries`, input, {
-      headers: authHeaders(),
-    });
+    const res = await withAuthRetry(() =>
+      axios.post<MyCalendarEntry>(`${API_URL}/api/my-calendar/entries`, input, {
+        headers: authHeaders(),
+      }),
+    );
     return res.data;
   } catch (error) {
     throw new Error(messageOf(error, '일정을 저장하지 못했습니다.'));
@@ -123,9 +160,11 @@ export const updateMyCalendarEntry = async (
   input: MyCalendarEntryInput,
 ): Promise<MyCalendarEntry> => {
   try {
-    const res = await axios.put<MyCalendarEntry>(`${API_URL}/api/my-calendar/entries/${id}`, input, {
-      headers: authHeaders(),
-    });
+    const res = await withAuthRetry(() =>
+      axios.put<MyCalendarEntry>(`${API_URL}/api/my-calendar/entries/${id}`, input, {
+        headers: authHeaders(),
+      }),
+    );
     return res.data;
   } catch (error) {
     throw new Error(messageOf(error, '일정을 수정하지 못했습니다.'));
@@ -143,10 +182,12 @@ export const setMyCalendarEntryCompleted = async (
   completed: boolean,
 ): Promise<MyCalendarEntry> => {
   try {
-    const res = await axios.put<MyCalendarEntry>(
-      `${API_URL}/api/my-calendar/entries/${id}/complete`,
-      { completed },
-      { headers: authHeaders() },
+    const res = await withAuthRetry(() =>
+      axios.put<MyCalendarEntry>(
+        `${API_URL}/api/my-calendar/entries/${id}/complete`,
+        { completed },
+        { headers: authHeaders() },
+      ),
     );
     return res.data;
   } catch (error) {
@@ -158,7 +199,9 @@ export const setMyCalendarEntryCompleted = async (
 
 export const deleteMyCalendarEntry = async (id: number): Promise<void> => {
   try {
-    await axios.delete(`${API_URL}/api/my-calendar/entries/${id}`, { headers: authHeaders() });
+    await withAuthRetry(() =>
+      axios.delete(`${API_URL}/api/my-calendar/entries/${id}`, { headers: authHeaders() }),
+    );
   } catch (error) {
     throw new Error(messageOf(error, '일정을 삭제하지 못했습니다.'));
   }
@@ -170,9 +213,11 @@ export const deleteMyCalendarEntry = async (id: number): Promise<void> => {
  */
 export const guessCompanyName = async (url: string): Promise<string> => {
   try {
-    const res = await axios.get<{ companyName: string | null }>(
-      `${API_URL}/api/my-calendar/company-name`,
-      { params: { url }, headers: authHeaders() },
+    const res = await withAuthRetry(() =>
+      axios.get<{ companyName: string | null }>(
+        `${API_URL}/api/my-calendar/company-name`,
+        { params: { url }, headers: authHeaders() },
+      ),
     );
     return res.data.companyName ?? '';
   } catch {
