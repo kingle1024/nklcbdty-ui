@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import API_URL from "../config";
 import { cachedGet } from '../common/kvCache';
-import { IonButton, IonButtons, IonContent, IonFooter, IonHeader, IonPage, IonText, IonTitle, IonToolbar } from '@ionic/react';
+import { IonButton, IonContent, IonFooter, IonIcon, IonModal, IonPage, IonText, IonToolbar } from '@ionic/react';
+import { closeOutline } from 'ionicons/icons';
 import ListContainer from '../components/ListContainer';
+import JobFilterPanel, { CategoryMst } from '../components/JobFilterPanel';
+import useIsMobile from '../common/useIsMobile';
 import { Helmet } from 'react-helmet';
 import { Swiper, SwiperSlide } from 'swiper/react'; // Swiper와 SwiperSlide만 가져오기
 import { Autoplay, Navigation, Pagination } from 'swiper/modules'; // 필요한 모듈 import
 import 'swiper/swiper-bundle.css'; // Swiper CSS import
 import './Home.css';
 import CommonHeader from '../common/CommonHeader';
-import Slider from 'rc-slider';
-import 'rc-slider/assets/index.css';
 
 // 필터 타입 정의
 export interface Filters {
@@ -26,20 +27,22 @@ export interface Filters {
   includeNoExperience: boolean;
 }
 
-interface CategoryDtl {
-  id: number;
-  name: string;
-}
+const DEFAULT_EXPERIENCE = { start: 0, end: 10 };
 
-interface CategoryMst {
-  id: number;
-  name: string;
-  categoryDtls: CategoryDtl[];
-  visible: boolean;
-}
+/** 기본값과 다른 필터 항목 수. 모바일 필터 버튼의 배지에 쓴다. */
+export const countActiveFilters = (filters: Filters): number => {
+  const selectedCategories = Object.values(filters.categories).flat().length;
+  const experienceChanged =
+    filters.personalHistory.start !== DEFAULT_EXPERIENCE.start ||
+    filters.personalHistory.end !== DEFAULT_EXPERIENCE.end;
+  return selectedCategories + (experienceChanged ? 1 : 0) + (filters.includeNoExperience ? 0 : 1);
+};
 
 const Home: React.FC = () => {
   const [categoriesData, setCategoriesData] = useState<CategoryMst[]>([]);
+  const isMobile = useIsMobile();
+  // 모바일 필터 바텀 시트 열림 여부
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const [filters, setFilters] = useState<Filters>({
     employmentType: '',
     careerPeriod: '',
@@ -156,6 +159,21 @@ const Home: React.FC = () => {
   };
 
 
+  // 모든 필터를 기본값으로 되돌린다 (직군 선택 해제, 경력 0~10년, 경력 무관 포함)
+  const resetFilters = () => {
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      categories: Object.keys(prevFilters.categories).reduce((acc: Record<string, string[]>, key) => {
+        acc[key] = [];
+        return acc;
+      }, {}),
+      personalHistory: { ...DEFAULT_EXPERIENCE },
+      includeNoExperience: true,
+    }));
+  };
+
+  const activeFilterCount = countActiveFilters(filters);
+
   // Toggle function for category visibility
   const toggleCategories = (title: string) => {
     setVisibleCategories((prev) => ({
@@ -214,98 +232,23 @@ const Home: React.FC = () => {
       </Swiper> */}
         <div className="container">
           <aside className="left-aside">
-            <h2>직군</h2>
-            <form>
-              {categoriesData.map((categoryData) => {
-                // visible 상태 초기화
-                const isVisible = visibleCategories[categoryData.name] !== undefined
-                  ? visibleCategories[categoryData.name]
-                  : categoryData.visible; // 기본값을 categoryData.visible로 설정
-
-                return (
-                  <div key={categoryData.id}>
-                    <span
-                      onClick={() => toggleCategories(categoryData.name)}
-                      className="category-toggle"
-                    >
-                      {categoryData.name}
-                    </span>
-                    {isVisible && ( // visible이 true일 때만 하위 카테고리 표시
-                      <div className="category-list">
-                        {categoryData.categoryDtls.map((categoryDtl) => (
-                          <div key={categoryDtl.id}>
-                            <input
-                              type="checkbox"
-                              id={categoryDtl.name}
-                              value={categoryDtl.name}
-                              name={categoryData.name.toLowerCase()} // 필터 이름으로 title 소문자 사용
-                              checked={filters.categories[categoryData.name.toLowerCase() as keyof Filters['categories']]?.includes(categoryDtl.name) || false}
-                              onChange={handleFilterChange}
-                            />
-                            <label htmlFor={categoryDtl.name}>{categoryDtl.name}</label>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </form>
-
-            <div style={{ marginTop: '30px', padding: '10px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                <h2 style={{ margin: 0, marginRight: '10px' }}>경력</h2>
-                
-                <input
-                  type="checkbox"
-                  id="includeNoExperience"
-                  checked={filters.includeNoExperience}
-                  onChange={handleIncludeNoExperienceChange}
-                  style={{ verticalAlign: 'middle' }}
-                />
-                <label htmlFor="includeNoExperience" style={{ marginLeft: '1px', display: 'inline-block', verticalAlign: 'middle' }}>
-                  경력 무관 포함
-                </label>
-              </div>
-
-              <div>
-                <input
-                  type="number"
-                  min={0} // 최소값 설정
-                  max={filters.personalHistory.end}
-                  value={filters.personalHistory.start}
-                  onChange={(e) => handleExperienceInputChange(e, 'start')}
-                  className="experience-input"
-                  style={{ marginRight: '2px' }}
-                />
-                년 ~
-                <input
-                  type="number"
-                  min={filters.personalHistory.start} 
-                  max={10}
-                  value={filters.personalHistory.end}
-                  onChange={(e) => handleExperienceInputChange(e, 'end')}
-                  className="experience-input"
-                  style={{ marginLeft: '2px', marginRight: '5px' }}
-                />
-                년
-
-                <Slider
-                  range
-                  min={0}
-                  max={10}
-                  defaultValue={[filters.personalHistory.start, filters.personalHistory.end]}
-                  value={[filters.personalHistory.start, filters.personalHistory.end]}
-                  onChange={handleExperienceSliderChange}
-                  marks={{ 0: '0년', 3: '3년', 5: '5년', 7: '7년', 10: '10년+' }} // 눈금 표시
-                  step={1} 
-                  style={{ marginTop: '5px' }}
-                />
-              </div>
-            </div>
+            <JobFilterPanel
+              categoriesData={categoriesData}
+              filters={filters}
+              visibleCategories={visibleCategories}
+              onToggleCategory={toggleCategories}
+              onCategoryChange={handleFilterChange}
+              onIncludeNoExperienceChange={handleIncludeNoExperienceChange}
+              onExperienceInputChange={handleExperienceInputChange}
+              onExperienceSliderChange={handleExperienceSliderChange}
+            />
           </aside>
           <main className="content">
-            <ListContainer filters={filters} />
+            <ListContainer
+              filters={filters}
+              onOpenFilter={isMobile ? () => setIsFilterOpen(true) : undefined}
+              activeFilterCount={activeFilterCount}
+            />
           </main>
           {/* <aside className="right-aside">
             <h2>광고</h2>
@@ -313,6 +256,52 @@ const Home: React.FC = () => {
           </aside> */}
         </div>
       </IonContent>
+
+      {/* 모바일 전용 필터 바텀 시트. PC 사이드바와 같은 패널을 그린다. 체크하면 목록에 바로 반영된다. */}
+      <IonModal
+        isOpen={isMobile && isFilterOpen}
+        onDidDismiss={() => setIsFilterOpen(false)}
+        className="job-filter-modal"
+        initialBreakpoint={1}
+        breakpoints={[0, 1]}
+      >
+        <div className="job-filter-modal__body">
+          <header className="job-filter-modal__header">
+            <h2>필터</h2>
+            <IonButton fill="clear" size="small" aria-label="닫기" onClick={() => setIsFilterOpen(false)}>
+              <IonIcon slot="icon-only" icon={closeOutline} />
+            </IonButton>
+          </header>
+          <div className="job-filter-modal__content">
+            <JobFilterPanel
+              categoriesData={categoriesData}
+              filters={filters}
+              visibleCategories={visibleCategories}
+              onToggleCategory={toggleCategories}
+              onCategoryChange={handleFilterChange}
+              onIncludeNoExperienceChange={handleIncludeNoExperienceChange}
+              onExperienceInputChange={handleExperienceInputChange}
+              onExperienceSliderChange={handleExperienceSliderChange}
+              idPrefix="m-"
+            />
+          </div>
+          <footer className="job-filter-modal__footer">
+            <IonButton
+              fill="outline"
+              color="medium"
+              className="job-filter-modal__reset"
+              disabled={activeFilterCount === 0}
+              onClick={resetFilters}
+            >
+              초기화
+            </IonButton>
+            <IonButton expand="block" className="job-filter-modal__apply" onClick={() => setIsFilterOpen(false)}>
+              적용하기
+            </IonButton>
+          </footer>
+        </div>
+      </IonModal>
+
       <IonFooter>
         <IonToolbar>
           <IonText className="footer-text">

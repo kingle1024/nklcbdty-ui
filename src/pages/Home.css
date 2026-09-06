@@ -165,3 +165,132 @@ label {
     display: none; /* 모바일에서는 기본적으로 숨김 */
   }
 }
+
+/* 경력 섹션 (사이드바·모바일 시트 공용) */
+.experience-section {
+  margin-top: 30px;
+  padding: 10px;
+}
+
+.experience-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.experience-header h2 {
+  margin: 0 10px 0 0;
+}
+
+.experience-header label {
+  margin-left: 1px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* ---------- 모바일 필터 바텀 시트 ----------
+   브레이크포인트 0.85 로 내리면 시트가 아래로 밀리기만 해서 하단 버튼이 화면 밖으로 나간다.
+   높이를 85% 로 고정하고 브레이크포인트는 [0, 1] 만 둔다(아래로 끌면 닫힘). */
+.job-filter-modal {
+  --height: 85%;
+  --border-radius: var(--radius-lg, 16px) var(--radius-lg, 16px) 0 0;
+  --background: var(--surface, #ffffff);
+}
+
+.job-filter-modal__body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.job-filter-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 16px 16px 8px;
+  flex-shrink: 0;
+}
+
+.job-filter-modal__header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-strong, #191f28);
+}
+
+.job-filter-modal__header ion-button {
+  --color: var(--text-muted, #8b95a1);
+  margin: 0;
+}
+
+/* 패널만 스크롤되고 헤더·버튼은 고정 */
+.job-filter-modal__content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 16px 16px;
+}
+
+.job-filter-modal__content .job-filter-panel h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-strong, #191f28);
+}
+
+.job-filter-modal__content .category-toggle {
+  padding: 10px 10px;
+  font-size: 15px;
+}
+
+.job-filter-modal__content .category-list {
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.job-filter-modal__content .category-list label {
+  font-size: 14px;
+}
+
+.job-filter-modal__content .experience-section {
+  margin-top: 20px;
+  padding: 10px 10px 30px;
+}
+
+.job-filter-modal__footer {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--border, #e5e8eb);
+  background-color: var(--surface, #ffffff);
+  flex-shrink: 0;
+}
+
+.job-filter-modal__footer ion-button {
+  margin: 0;
+  height: 48px;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  --border-radius: var(--radius-md, 12px);
+  --box-shadow: none;
+}
+
+.job-filter-modal__reset {
+  flex: 0 0 auto;
+  --padding-start: 18px;
+  --padding-end: 18px;
+  --border-width: 1px;
+  --border-color: var(--border, #e5e8eb);
+  --color: var(--text-secondary, #4e5968);
+}
+
+.job-filter-modal__apply {
+  flex: 1;
+  --background: var(--brand-primary, #3182f6);
+  --background-activated: var(--brand-primary-pressed, #1b64da);
+  --background-hover: var(--brand-primary-pressed, #1b64da);
+}

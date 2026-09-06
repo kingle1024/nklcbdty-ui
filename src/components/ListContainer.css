@@ -175,11 +175,6 @@ li {
   }
 }
 
-.search-section {
-  margin-bottom: 12px;
-  width: 100%;
-}
-
 .custom-searchbar {
   --background: var(--surface);
   --border-radius: var(--radius-md);
@@ -256,4 +251,65 @@ li {
   line-height: 1;
   vertical-align: text-top;
   white-space: nowrap;
+}
+
+/* 검색창 + (모바일) 필터 버튼 한 줄 */
+.search-section {
+  width: 100%;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-section .custom-searchbar {
+  flex: 1;
+  min-width: 0;
+}
+
+.filter-open-btn {
+  flex: 0 0 auto;
+  margin: 0;
+  height: 40px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  --border-radius: var(--radius-md);
+  --border-width: 1px;
+  --border-color: var(--border);
+  --background: var(--surface);
+  --background-hover: var(--surface-field);
+  --background-activated: var(--surface-field);
+  --color: var(--text-secondary);
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --box-shadow: none;
+}
+
+.filter-open-btn ion-icon {
+  font-size: 18px;
+  margin-right: 4px;
+}
+
+/* 하나라도 적용 중이면 브랜드 컬러로 강조 */
+.filter-open-btn--active {
+  --border-color: var(--brand-primary);
+  --background: var(--brand-primary-tint);
+  --background-hover: var(--brand-primary-tint);
+  --background-activated: var(--brand-primary-tint);
+  --color: var(--brand-primary);
+}
+
+.filter-open-btn__badge {
+  margin-left: 6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  border-radius: var(--radius-pill);
+  --background: var(--brand-primary);
+  --color: #ffffff;
 }
