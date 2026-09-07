@@ -4,7 +4,8 @@ import API_URL from "../config";
 import { cachedGet } from '../common/kvCache';
 import { COMPANY_COLORS, COMPANY_NAMES } from '../common/companies';
 import './ListContainer.css';
-import { IonButton, IonSearchbar, IonSpinner } from '@ionic/react';
+import { IonBadge, IonButton, IonIcon, IonSearchbar, IonSpinner } from '@ionic/react';
+import { optionsOutline } from 'ionicons/icons';
 import { Filters } from '../pages/Home';
 
 interface Job_mst {
@@ -25,6 +26,10 @@ interface Job_mst {
 
 interface ListContainerProps {
   filters: Filters;
+  /** 주어지면 검색창 옆에 필터 버튼을 그린다. Home 이 모바일일 때만 넘긴다(PC 는 사이드바). */
+  onOpenFilter?: () => void;
+  /** 기본값과 다른 필터 항목 수. 0 이면 배지를 숨긴다. */
+  activeFilterCount?: number;
 }
 
 // /api/company/list — 회사 코드별 채용 페이지 주소 ("채용 페이지로 가기" 버튼용)
@@ -34,7 +39,7 @@ interface CompanyInfo {
   careerPageUrl: string;
 }
 
-const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
+const ListContainer: React.FC<ListContainerProps> = ({ filters, onOpenFilter, activeFilterCount = 0 }) => {
   const [products, setProducts] = useState<Job_mst[]>([]);
   const [company, setCompany] = useState<string>('NAVER');
   const [cache, setCache] = useState<{ [key: string]: Job_mst[] }>({});
@@ -259,6 +264,20 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters }) => {
             placeholder="채용공고 검색"
             className="custom-searchbar"
           />
+          {onOpenFilter && (
+            <IonButton
+              fill="outline"
+              className={`filter-open-btn${activeFilterCount > 0 ? ' filter-open-btn--active' : ''}`}
+              aria-label={activeFilterCount > 0 ? `직군·경력 필터 열기, ${activeFilterCount}개 적용 중` : '직군·경력 필터 열기'}
+              onClick={onOpenFilter}
+            >
+              <IonIcon slot="start" icon={optionsOutline} />
+              필터
+              {activeFilterCount > 0 && (
+                <IonBadge className="filter-open-btn__badge">{activeFilterCount}</IonBadge>
+              )}
+            </IonButton>
+          )}
         </div>
         <div className="button-section">         
           {Object.keys(companies).map((comp) => (
