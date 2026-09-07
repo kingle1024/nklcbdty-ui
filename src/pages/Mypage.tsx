@@ -252,14 +252,14 @@ const Mypage: React.FC = () => {
                   {chunkedSubscriptionOptions.map((row:any, rowIndex:any) => (
                     <IonRow key={rowIndex}>
                       {row.map((option:any, colIndex:any) => (
-                        <IonCol size="4" key={option.value}>
-                           <div style={{ display: 'flex', alignItems: 'center', padding: '4px' }}>
+                        // 모바일(375px)에서 3열이면 칸이 100px 남짓이라 라벨이 옆 칸 체크박스 위로 넘친다
+                        <IonCol size="6" sizeMd="4" key={option.value}>
+                           <div className="subscribe-option">
                               <IonCheckbox
                                 checked={selectedCompanys.includes(option.value)}
                                 onIonChange={e => handleCompanySubscribeChange(option.value, e.detail.checked)}
-                                style={{ marginRight: '8px' }}
                               />
-                              <IonLabel className="ion-text-wrap" style={{ flex: '1' }}>{option.label}</IonLabel>
+                              <IonLabel className="ion-text-wrap">{option.label}</IonLabel>
                            </div>
                         </IonCol>
                       ))}
@@ -288,14 +288,15 @@ const Mypage: React.FC = () => {
                           {chunkArray(categoryMst.categoryDtls, 4).map((dtlRow:any, rowIndex:any) => (
                             <IonRow key={rowIndex}>
                               {dtlRow.map((dtl: any) => (
-                                <IonCol size="3" key={dtl.name}>
-                                   <div style={{ display: 'flex', alignItems: 'center', padding: '4px' }}>
+                                // 직무명은 "SecurityEngineering" 처럼 띄어쓰기 없는 영단어라 줄바꿈이 안 된다.
+                                // 모바일 4열(81px)에서는 옆 칸까지 넘쳐 체크박스와 겹치므로 2열로 둔다
+                                <IonCol size="6" sizeMd="3" key={dtl.name}>
+                                   <div className="subscribe-option">
                                       <IonCheckbox
                                         checked={selectedJobRoles.includes(dtl.name)}
                                         onIonChange={e => handleJobRoleChange(dtl.name, e.detail.checked)}
-                                        style={{ marginRight: '8px' }}
                                       />
-                                      <IonLabel className="ion-text-wrap" style={{ flex: '1' }}>{dtl.name}</IonLabel>
+                                      <IonLabel className="ion-text-wrap">{dtl.name}</IonLabel>
                                    </div>
                                 </IonCol>
                               ))}

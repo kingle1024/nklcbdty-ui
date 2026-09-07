@@ -224,11 +224,20 @@ li {
   font-size: 14px;
 }
 
-/* 선택한 회사의 채용 페이지 바로가기 */
+/* 선택한 회사의 채용 페이지 바로가기 (PC: 칩 margin-bottom 20px 에서 8px 을 되감아 12px 간격) */
 .career-page-section {
   display: flex;
   margin-top: -8px;
   margin-bottom: 16px;
+}
+
+/* 모바일은 칩 아래 여백이 4px 로 줄어드는데 -8px 을 그대로 두면 칩 마지막 줄과 겹친다.
+   위쪽 미디어 블록에 넣으면 이 기본 규칙이 뒤에 와서 덮어쓰므로 여기에 둔다. */
+@media (max-width: 768px) {
+  .career-page-section {
+    margin-top: 8px;
+    margin-bottom: 12px;
+  }
 }
 
 .career-page-btn {
