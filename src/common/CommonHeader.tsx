@@ -27,7 +27,9 @@ const NAV_LINKS = [
 
 const CommonHeader: React.FC = () => {
   const history = useHistory();
-  const { logout, isLoggedIn } = useAuth();
+  const { logout, isLoggedIn, user } = useAuth();
+  // 관리자 이메일(백엔드 AdminEmailPolicy)로 로그인한 사람에게만 관리자 메뉴를 보여준다.
+  const isAdmin = isLoggedIn && user?.isAdmin === true;
   const isMobile = useIsMobile();
   const [showLoginModal, setShowLoginModal] = useState(false);
   // 팝오버는 누른 버튼에 붙여야 해서 클릭 이벤트를 그대로 들고 있는다.
@@ -74,6 +76,7 @@ const CommonHeader: React.FC = () => {
               ))}
               {isLoggedIn ? (
                 <>
+                  {isAdmin && <IonButton routerLink="/admin">관리자</IonButton>}
                   <IonButton routerLink="/mypage">마이페이지</IonButton>
                   <IonButton onClick={logout}>로그아웃</IonButton>
                 </>
@@ -104,6 +107,9 @@ const CommonHeader: React.FC = () => {
           ))}
           {isLoggedIn ? (
             <>
+              {isAdmin && (
+                <IonItem button detail={false} onClick={() => goFromMenu('/admin')}>관리자</IonItem>
+              )}
               <IonItem button detail={false} onClick={() => goFromMenu('/mypage')}>마이페이지</IonItem>
               <IonItem
                 button

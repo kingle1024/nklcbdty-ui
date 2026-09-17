@@ -1,9 +1,12 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { AuthResponse } from './authApi';
+import { setAdminAuth, clearAdminAuth } from './adminToken';
 
 interface User {
   name: string; // 예시로 사용자 이름을 포함
   userId?: string; // "kakao@{id}" 또는 "local@{id}". 토큰 재발급에 필요하다.
+  /** 관리자 이메일로 로그인했는지. 헤더의 관리자 메뉴 노출 여부를 이 값으로 정한다. */
+  isAdmin?: boolean;
 }
 
 interface AuthContextType {
@@ -38,10 +41,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // 로그인 시 JWT 토큰과 사용자 정보를 로컬 스토리지에 저장하고 로그인 상태 업데이트
   const login = (auth: AuthResponse) => {
-    const userInfo: User = { name: auth.nickname, userId: auth.userId };
+    const userInfo: User = { name: auth.nickname, userId: auth.userId, isAdmin: auth.isAdmin === true };
     localStorage.setItem('jwtToken', auth.token);
     localStorage.setItem('refreshToken', auth.refreshToken);
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userInfo));
+    // 관리자 이메일이면 이 토큰에 role=ADMIN 이 실려 있다. 관리자 API 전용 저장소에도 넣어
+    // 관리자 아이디/비밀번호로 한 번 더 로그인하지 않아도 관리자 화면이 그대로 열리게 한다.
+    // (관리자 계정으로 따로 로그인해 둔 세션까지 건드리지 않도록, 관리자가 아닐 땐 그냥 둔다)
+    if (userInfo.isAdmin) {
+      setAdminAuth(auth.token, auth.nickname);
+    }
     setIsLoggedIn(true);
     setUser(userInfo);
   }
@@ -51,6 +60,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem('jwtToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem(USER_STORAGE_KEY);
+    // 관리자 이메일로 로그인했다면 같은 토큰이 관리자 저장소에도 들어 있다. 같이 지운다.
+    clearAdminAuth();
     setIsLoggedIn(false);
     setUser(null);
     window.location.href = '/'; // 메인 페이지로 이동

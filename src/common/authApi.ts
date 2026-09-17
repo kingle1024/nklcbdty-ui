@@ -9,6 +9,11 @@ export interface AuthResponse {
   refreshToken: string;
   userId: string;
   nickname: string;
+  /**
+   * 관리자 이메일로 로그인했는지. 백엔드(AdminEmailPolicy)가 판정한다.
+   * 이 필드를 모르는 옛 백엔드가 떠 있을 수 있어 옵셔널이다 — 없으면 관리자가 아닌 것으로 본다.
+   */
+  isAdmin?: boolean;
 }
 
 /** 서버가 돌려준 사용자용 메세지를 꺼낸다. 없으면 기본 문구. */

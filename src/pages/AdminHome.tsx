@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   IonPage,
@@ -13,10 +13,31 @@ import { Helmet } from 'react-helmet';
 import CommonHeader from '../common/CommonHeader';
 import AdminSidebar from '../common/AdminSidebar';
 import adminApi, { setAdminAuth, clearAdminAuth, isAdminLoggedIn, getAdminDisplayName } from '../common/adminApi';
+import { useAuth } from '../common/AuthContextType';
 
 const AdminHome: React.FC = () => {
   const history = useHistory();
-  const [loggedIn, setLoggedIn] = useState<boolean>(isAdminLoggedIn());
+  const { user } = useAuth();
+  // 관리자 이메일로 평소 로그인을 해 둔 사람. 관리자 아이디/비밀번호를 따로 넣을 필요가 없다.
+  const emailAdmin = user?.isAdmin === true;
+  // 관리자 이메일로 로그인해 뒀다면 로그인 폼이 잠깐 스쳐 보이지 않도록 처음부터 로그인 상태로 둔다.
+  const [loggedIn, setLoggedIn] = useState<boolean>(
+    () => isAdminLoggedIn() || (emailAdmin && !!localStorage.getItem('jwtToken'))
+  );
+
+  useEffect(() => {
+    // 관리자 토큰이 비어 있어도(다른 탭에서 관리자 로그아웃, 저장소 정리 등)
+    // 로그인해 둔 사용자 토큰에 role=ADMIN 이 실려 있으므로 그대로 되살린다.
+    if (isAdminLoggedIn() || !emailAdmin) {
+      return;
+    }
+    const token = localStorage.getItem('jwtToken');
+    if (token) {
+      setAdminAuth(token, user?.name);
+      setLoggedIn(true);
+    }
+  }, [emailAdmin, user?.name]);
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -123,10 +144,13 @@ const AdminHome: React.FC = () => {
                   {getAdminDisplayName() ?? '관리자'}님, 환영합니다.
                 </p>
               </div>
-              <IonButton fill="outline" color="medium" size="default" onClick={handleLogout}>
-                <IonIcon slot="start" icon={logOutOutline} />
-                로그아웃
-              </IonButton>
+              {/* 관리자 이메일로 로그인한 경우엔 관리자 전용 세션이 따로 없다. 로그아웃은 헤더에서 한다. */}
+              {!emailAdmin && (
+                <IonButton fill="outline" color="medium" size="default" onClick={handleLogout}>
+                  <IonIcon slot="start" icon={logOutOutline} />
+                  로그아웃
+                </IonButton>
+              )}
             </header>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>

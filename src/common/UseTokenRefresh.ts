@@ -4,6 +4,7 @@
 // 로그아웃하면 사용자는 아무 이유 없이 로그인이 풀린 것처럼 보인다.
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { useAuth } from './AuthContextType';
+import { setAdminAuth } from './adminToken';
 import API_URL from '../config';
 
 type RefreshResult = 'ok' | 'invalid' | 'error';
@@ -45,6 +46,11 @@ const requestTokenRefresh = async (): Promise<RefreshResult> => {
 
     localStorage.setItem('jwtToken', tokenResponse.data.accessToken);
     localStorage.setItem('refreshToken', tokenResponse.data.refreshToken);
+    // 관리자 이메일로 로그인한 사용자는 갱신된 토큰에도 role=ADMIN 이 실려 온다.
+    // 관리자 저장소의 복사본도 같이 바꿔 줘야 관리자 화면이 1시간마다 튕기지 않는다.
+    if (tokenResponse.data.isAdmin === true) {
+      setAdminAuth(tokenResponse.data.accessToken);
+    }
     return 'ok';
   } catch (refreshError) {
     console.error('Error refreshing token:', refreshError);
