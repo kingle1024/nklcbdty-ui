@@ -24,6 +24,7 @@ import CommonHeader from '../common/CommonHeader';
 import Sidebar from '../common/Sidebar';
 import API_URL from "../config";
 import UseTokenRefresh from '../common/UseTokenRefresh';
+import ResumeMatch from '../components/ResumeMatch';
 
 const Mypage: React.FC = () => {
   const history = useHistory();
@@ -322,7 +323,14 @@ const Mypage: React.FC = () => {
               </IonButton>
             )}
 
-          </div>          
+            {/*
+              구독 설정과는 독립적인 기능이라 "저장" 버튼 아래에 둔다.
+              위에 두면 이력서도 저장 버튼을 눌러야 반영되는 것처럼 보인다.
+            */}
+            <h1 style={{ fontSize: '2em', margin: '40px 0 16px 0' }}>이력서로 공고 찾기</h1>
+            <ResumeMatch />
+
+          </div>
         </div>
       </IonContent>
     </IonPage>

@@ -1,0 +1,207 @@
+.resume-match {
+  margin-top: 8px;
+}
+
+.resume-match-guide {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* 파일 선택은 IonButton 으로 받고, 실제 input 은 숨긴다.
+   display:none 은 일부 브라우저에서 click() 이 먹지 않으므로 화면 밖으로 밀어낸다. */
+.resume-match-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.resume-match-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.resume-match-actions ion-button {
+  text-transform: none;
+  font-weight: 600;
+  --border-radius: var(--radius-sm);
+  margin: 0;
+}
+
+.resume-match-file {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0 0 0;
+  padding: 10px 12px;
+  background-color: var(--surface-field);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* 파일명이 길어도 칸을 넘기지 않고 말줄임 */
+.resume-match-filename {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-body);
+  font-weight: 600;
+}
+
+.resume-match-filesize {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.resume-match-error {
+  margin: 12px 0 0 0;
+  padding: 12px;
+  background-color: var(--danger-tint);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--danger);
+}
+
+.resume-match-loading,
+.resume-match-empty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 0 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.resume-match-result-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 24px 0 8px 0;
+}
+
+.resume-match-result-head h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.resume-match-result-head ion-button {
+  text-transform: none;
+  margin: 0;
+  --padding-start: 4px;
+  --padding-end: 4px;
+}
+
+.resume-match-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resume-match-card {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.resume-match-rank {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--brand-primary-tint);
+  color: var(--brand-primary);
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.resume-match-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.resume-match-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.resume-match-company {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand-primary);
+}
+
+.resume-match-score {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.resume-match-title {
+  margin: 4px 0 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--text-strong);
+  /* 공고명은 띄어쓰기 없는 영단어가 섞여 들어온다 */
+  overflow-wrap: anywhere;
+}
+
+.resume-match-meta {
+  margin: 6px 0 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.resume-match-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--brand-primary);
+  text-decoration: none;
+}
+
+.resume-match-footnote {
+  margin: 12px 0 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .resume-match-actions ion-button {
+    flex: 1;
+  }
+
+  .resume-match-card {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .resume-match-title {
+    font-size: 14px;
+  }
+}
