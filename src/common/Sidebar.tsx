@@ -6,6 +6,7 @@ import { useHistory } from 'react-router-dom';
 const TABS = [
   { key: 'profile', label: '내 정보', path: '/mypage' },
   { key: 'calendar', label: '나의 캘린더', path: '/mypage/calendar' },
+  { key: 'resume', label: '이력서 매칭', path: '/mypage/resume' },
 ];
 
 interface SidebarProps {
