@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { IonButton, IonContent, IonFooter, IonIcon, IonModal, IonPage, IonSpinner, IonText, IonToolbar } from '@ionic/react';
+import { IonButton, IonContent, IonFooter, IonIcon, IonModal, IonPage, IonSearchbar, IonSpinner, IonText, IonToolbar } from '@ionic/react';
 import { closeOutline } from 'ionicons/icons';
 import { Helmet } from 'react-helmet';
 import API_URL from '../config';
@@ -45,6 +45,25 @@ interface TargetMonth {
   month: number;
 }
 
+/** 상단 필터 상태. 회사만 서버 조회 조건이고, 나머지는 받아 온 그 달 안에서 걸러낸다. */
+interface CalendarFilters {
+  keyword: string;
+  subJob: string;
+  empType: string;
+  status: JobStatus;
+}
+
+/** 진행여부. OPEN = 아직 마감 전, CLOSED = 이미 마감. */
+type JobStatus = 'ALL' | 'OPEN' | 'CLOSED';
+
+const STATUS_LABELS: { value: JobStatus; label: string }[] = [
+  { value: 'ALL', label: '전체' },
+  { value: 'OPEN', label: '진행 중' },
+  { value: 'CLOSED', label: '마감' },
+];
+
+const EMPTY_FILTERS: CalendarFilters = { keyword: '', subJob: '', empType: '', status: 'ALL' };
+
 /** 달력은 월요일 시작. 서버의 dayOfWeek(1=월 ~ 7=일)와 인덱스를 맞춘다. */
 const WEEKDAYS = ['월', '화', '수', '목', '금', '토', '일'];
 
@@ -86,6 +105,57 @@ const isClosed = (job: CalendarJob, nowMs: number): boolean => {
   return end !== null && end.getTime() < nowMs;
 };
 
+const isFilterActive = (filters: CalendarFilters): boolean =>
+  filters.keyword.trim() !== '' || filters.subJob !== '' || filters.empType !== '' || filters.status !== 'ALL';
+
+const matchesFilters = (job: CalendarJob, filters: CalendarFilters, nowMs: number): boolean => {
+  if (filters.subJob && job.subJobCdNm !== filters.subJob) return false;
+  if (filters.empType && job.empTypeCdNm !== filters.empType) return false;
+  if (filters.status !== 'ALL' && isClosed(job, nowMs) !== (filters.status === 'CLOSED')) return false;
+
+  const keyword = filters.keyword.trim().toLowerCase();
+  if (!keyword) return true;
+  return [job.annoSubject, job.companyNm, job.subJobCdNm, job.workplace]
+    .some((field) => field != null && field.toLowerCase().includes(keyword));
+};
+
+/**
+ * 필터를 통과한 공고만 남긴 달. 건수(day.count, totalCount)도 남은 공고 기준으로 다시 센다.
+ * 서버 조회 없이 받아 온 달 안에서만 걸러내므로 드롭다운을 바꿔도 화면이 바로 반응한다.
+ */
+const applyFilters = (month: CalendarMonth, filters: CalendarFilters, nowMs: number): CalendarMonth => {
+  if (!isFilterActive(filters)) {
+    return month;
+  }
+  const days = month.days
+    .map((day) => {
+      const jobs = day.jobs.filter((job) => matchesFilters(job, filters, nowMs));
+      return { ...day, jobs, count: jobs.length };
+    })
+    .filter((day) => day.count > 0);
+
+  return { ...month, days, totalCount: days.reduce((sum, day) => sum + day.count, 0) };
+};
+
+/**
+ * 드롭다운에 채울 값 목록. 그 달에 실제로 있는 값만 뽑는다.
+ * 고른 값이 이번 달에 없어도 목록에 남겨 둔다 — 달을 넘길 때마다 선택이 풀리면
+ * "프론트엔드 공고가 언제 마감되나" 를 달력으로 훑을 수가 없다.
+ */
+const collectOptions = (
+  month: CalendarMonth | null,
+  pick: (job: CalendarJob) => string | null,
+  selected: string,
+): string[] => {
+  const values = new Set<string>();
+  month?.days.forEach((day) => day.jobs.forEach((job) => {
+    const value = pick(job);
+    if (value) values.add(value);
+  }));
+  if (selected) values.add(selected);
+  return Array.from(values).sort((a, b) => a.localeCompare(b, 'ko'));
+};
+
 /**
  * 처음 열었을 때 펼쳐 둘 날짜.
  * 아직 지원할 수 있는 공고가 남은 가장 이른 날을 고른다. 오늘이라도 그날 마감이 이미
@@ -109,7 +179,9 @@ const Calendar: React.FC = () => {
   const isMobile = useIsMobile();
   const [target, setTarget] = useState<TargetMonth>(thisMonth);
   const [company, setCompany] = useState<string>('ALL');
+  const [filters, setFilters] = useState<CalendarFilters>(EMPTY_FILTERS);
   const [data, setData] = useState<CalendarMonth | null>(null);
+  const [nowMs, setNowMs] = useState<number>(() => Date.now());
   const [loading, setLoading] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -131,8 +203,10 @@ const Calendar: React.FC = () => {
           { year: String(target.year), month: String(target.month), company },
         );
         if (cancelled) return;
+        // 마감 판정 기준 시각을 여기서 한 번만 잡는다. 렌더마다 Date.now() 를 새로 부르면
+        // 아래 useMemo 들이 매 렌더 다시 돈다.
+        setNowMs(Date.now());
         setData(month);
-        setSelectedDate(pickDefaultDate(month, Date.now()));
       } catch (error) {
         if (cancelled) return;
         console.error('캘린더 조회 실패:', error);
@@ -149,21 +223,51 @@ const Calendar: React.FC = () => {
     };
   }, [target, company]);
 
+  // 화면에 그리는 건 필터를 통과한 달. 원본(data)은 "전체 N건 중" 안내와 드롭다운 목록에만 쓴다.
+  const filtered = useMemo(() => (data ? applyFilters(data, filters, nowMs) : null), [data, filters, nowMs]);
+  const filterActive = isFilterActive(filters);
+
+  const subJobOptions = useMemo(
+    () => collectOptions(data, (job) => job.subJobCdNm, filters.subJob),
+    [data, filters.subJob],
+  );
+  const empTypeOptions = useMemo(
+    () => collectOptions(data, (job) => job.empTypeCdNm, filters.empType),
+    [data, filters.empType],
+  );
+
   const daysByDate = useMemo(() => {
     const map = new Map<string, CalendarDay>();
-    data?.days.forEach((day) => map.set(day.date, day));
+    filtered?.days.forEach((day) => map.set(day.date, day));
     return map;
-  }, [data]);
+  }, [filtered]);
+
+  // 달이나 필터가 바뀌어 펼쳐 둔 날짜가 사라졌으면 남은 날짜로 옮긴다.
+  useEffect(() => {
+    setSelectedDate((prev) => {
+      if (!filtered) return null;
+      if (prev && filtered.days.some((day) => day.date === prev)) return prev;
+      return pickDefaultDate(filtered, nowMs);
+    });
+  }, [filtered, nowMs]);
 
   const selectedDay = selectedDate ? daysByDate.get(selectedDate) : undefined;
   const today = todayKey();
-  const nowMs = Date.now();
+
+  // 빈 화면일 때 "이 달에 없는 것"과 "필터에 걸러진 것"을 구분해 준다.
+  const emptyMessage = filtered && filtered.totalCount === 0
+    ? (filterActive ? '필터 조건에 맞는 공고가 없습니다.' : '이 달에 마감되는 공고가 없습니다.')
+    : '날짜를 선택하면 그날 마감되는 공고가 여기에 표시됩니다.';
 
   const handleDayClick = (dateKey: string) => {
     setSelectedDate(dateKey);
     if (isMobile) {
       setIsDetailOpen(true);
     }
+  };
+
+  const updateFilter = (patch: Partial<CalendarFilters>) => {
+    setFilters((prev) => ({ ...prev, ...patch }));
   };
 
   const goToMonth = (delta: number) => {
@@ -296,17 +400,80 @@ const Calendar: React.FC = () => {
             </IonButton>
           </div>
 
-          <div className="calendar-company-filter">
-            {Object.keys(COMPANY_NAMES).map((companyCd) => (
+          {/* 상단 필터. 회사만 서버에 넘기고(달마다 캐시된다) 나머지는 받아 온 달 안에서 걸러낸다. */}
+          <section className="calendar-filters" aria-label="공고 필터">
+            <div className="calendar-company-filter">
+              {Object.keys(COMPANY_NAMES).map((companyCd) => (
+                <IonButton
+                  key={companyCd}
+                  onClick={() => setCompany(companyCd)}
+                  color={company === companyCd ? 'primary' : 'medium'}
+                >
+                  {COMPANY_NAMES[companyCd]}
+                </IonButton>
+              ))}
+            </div>
+
+            <div className="calendar-filters__row">
+              <IonSearchbar
+                className="calendar-filters__search"
+                value={filters.keyword}
+                onIonInput={(e) => updateFilter({ keyword: e.detail.value || '' })}
+                placeholder="공고명, 직무, 근무지 검색"
+                debounce={0}
+              />
+
+              <label className="calendar-select">
+                <span className="calendar-select__label">직무</span>
+                <select
+                  value={filters.subJob}
+                  onChange={(e) => updateFilter({ subJob: e.target.value })}
+                  disabled={subJobOptions.length === 0}
+                >
+                  <option value="">전체</option>
+                  {subJobOptions.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="calendar-select">
+                <span className="calendar-select__label">채용형태</span>
+                <select
+                  value={filters.empType}
+                  onChange={(e) => updateFilter({ empType: e.target.value })}
+                  disabled={empTypeOptions.length === 0}
+                >
+                  <option value="">전체</option>
+                  {empTypeOptions.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="calendar-select">
+                <span className="calendar-select__label">진행여부</span>
+                <select
+                  value={filters.status}
+                  onChange={(e) => updateFilter({ status: e.target.value as JobStatus })}
+                >
+                  {STATUS_LABELS.map(({ value, label }) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+              </label>
+
               <IonButton
-                key={companyCd}
-                onClick={() => setCompany(companyCd)}
-                color={company === companyCd ? 'primary' : 'medium'}
+                size="small"
+                fill="clear"
+                className="calendar-filters__reset"
+                disabled={!filterActive}
+                onClick={() => setFilters(EMPTY_FILTERS)}
               >
-                {COMPANY_NAMES[companyCd]}
+                필터 초기화
               </IonButton>
-            ))}
-          </div>
+            </div>
+          </section>
 
           {loading && (
             <div className="calendar-status">
@@ -320,10 +487,11 @@ const Calendar: React.FC = () => {
             </div>
           )}
 
-          {!loading && !hasError && data && (
+          {!loading && !hasError && data && filtered && (
             <>
               <p className="calendar-summary">
-                {data.month}월에 마감되는 공고 <strong>{data.totalCount}건</strong>
+                {filtered.month}월에 마감되는 공고 <strong>{filtered.totalCount}건</strong>
+                {filterActive && <span className="calendar-summary__total">(필터 없이 {data.totalCount}건)</span>}
                 <span className="calendar-summary__note">상시채용(영입종료시) 공고는 마감일이 없어 캘린더에 표시되지 않습니다.</span>
               </p>
 
@@ -338,7 +506,7 @@ const Calendar: React.FC = () => {
                       {label}
                     </div>
                   ))}
-                  {renderCells(data)}
+                  {renderCells(filtered)}
                 </div>
 
                 {!isMobile && (
@@ -349,18 +517,14 @@ const Calendar: React.FC = () => {
                         {renderJobs(selectedDay)}
                       </>
                     ) : (
-                      <p className="calendar-detail__placeholder">
-                        {data.totalCount === 0
-                          ? '이 달에 마감되는 공고가 없습니다.'
-                          : '날짜를 선택하면 그날 마감되는 공고가 여기에 표시됩니다.'}
-                      </p>
+                      <p className="calendar-detail__placeholder">{emptyMessage}</p>
                     )}
                   </aside>
                 )}
               </div>
 
-              {isMobile && data.totalCount === 0 && (
-                <div className="calendar-status">이 달에 마감되는 공고가 없습니다.</div>
+              {isMobile && filtered.totalCount === 0 && (
+                <div className="calendar-status">{emptyMessage}</div>
               )}
             </>
           )}
