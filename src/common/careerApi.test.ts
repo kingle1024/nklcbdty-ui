@@ -1,4 +1,14 @@
-import { CareerEntry, careerToText, formatPeriod, formatTenure, groupCareer } from './careerApi';
+import {
+  CareerEntry,
+  careerToText,
+  emptyForm,
+  entryToForm,
+  formatPeriod,
+  formatTenure,
+  formToInput,
+  groupCareer,
+  validateForm,
+} from './careerApi';
 
 // 여기서 보는 건 순수 함수뿐이다. axios 1.x 는 ESM 이라 CRA jest 가 변환하지 못하고
 // 불러오는 순간 'Cannot use import statement' 로 죽으므로 통째로 막아 둔다.
@@ -74,4 +84,55 @@ it('복사 문서는 회사 → 프로젝트 순서로 제목 단계를 나눈�
   expect(text).toContain('## B사 (2021.03 ~ 현재)');
   expect(text.indexOf('### 백엔드')).toBeLessThan(text.indexOf('### 정산 개편'));
   expect(text).toContain('- 배치 50% 단축');
+});
+
+describe('편집 폼 변환', () => {
+  it('저장된 항목을 폼으로 열었다 그대로 저장하면 값이 바뀌지 않는다', () => {
+    const saved = entry({
+      entryType: 'company',
+      company: '더존비즈온',
+      title: '개발',
+      team: '회계개발Cell',
+      startedOn: '2023-05-01',
+      achievements: ['a', 'b'],
+      techStack: ['Java', 'Spring'],
+      referenceLinks: [
+        { label: 'PR', url: 'https://example.com/1' },
+        { label: 'https://example.com/2', url: 'https://example.com/2' },
+        { label: '커밋 abc1234', url: null },
+      ],
+    });
+
+    const input = formToInput(entryToForm(saved));
+
+    expect(input.startedOn).toBe('2023-05-01');
+    expect(input.endedOn).toBeNull();
+    expect(input.role).toBeNull();
+    expect(input.achievements).toEqual(['a', 'b']);
+    expect(input.techStack).toEqual(['Java', 'Spring']);
+    // 라벨 없이 주소만 있던 줄이 '주소: 주소' 로 불어나지 않아야 한다
+    expect(input.referenceLinks).toEqual([
+      'PR: https://example.com/1',
+      'https://example.com/2',
+      '커밋 abc1234',
+    ]);
+  });
+
+  it('빈 칸은 null·빈 배열로, 월은 1일로 보낸다', () => {
+    const input = formToInput(
+      emptyForm({ title: ' 정산 ', startedMonth: '2023-01', achievements: '\n a \n\n', tags: 'x, ,y' })
+    );
+
+    expect(input.title).toBe('정산');
+    expect(input.company).toBeNull();
+    expect(input.startedOn).toBe('2023-01-01');
+    expect(input.achievements).toEqual(['a']);
+    expect(input.tags).toEqual(['x', 'y']);
+  });
+
+  it('제목이 없거나 종료가 시작보다 빠르면 막는다', () => {
+    expect(validateForm(emptyForm({ title: ' ' }))).not.toBeNull();
+    expect(validateForm(emptyForm({ title: 'x', startedMonth: '2023-05', endedMonth: '2023-04' }))).not.toBeNull();
+    expect(validateForm(emptyForm({ title: 'x', startedMonth: '2023-05', endedMonth: '2023-05' }))).toBeNull();
+  });
 });
