@@ -64,6 +64,185 @@ export const fetchCareer = async (): Promise<CareerEntry[]> => {
   }
 };
 
+/** 추가·수정 요청 본문. 백엔드 CareerEntryRequest 와 짝이다 */
+export interface CareerEntryInput {
+  entryType: string;
+  company: string | null;
+  title: string;
+  team: string | null;
+  role: string | null;
+  startedOn: string | null;
+  endedOn: string | null;
+  summary: string | null;
+  description: string | null;
+  achievements: string[];
+  techStack: string[];
+  tags: string[];
+  /** 한 줄에 하나. "라벨: https://..." 또는 주소만 */
+  referenceLinks: string[];
+}
+
+/**
+ * 쓰기 요청의 오류를 사람이 읽을 문장으로 바꾼다. 서버가 준 message(검사 실패 등)가 있으면 그대로 쓴다.
+ *
+ * 404/405 이면서 message 가 없으면 편집 API 가 아직 없는 옛 서버다 — 프론트는 머지 즉시 뜨고
+ * 백엔드는 수동 재시작이라 그 사이에 이 화면이 먼저 열릴 수 있다.
+ */
+const writeErrorMessage = (error: unknown, fallback: string): string => {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { message?: string } | undefined;
+    if (data?.message) {
+      return data.message;
+    }
+    const status = error.response?.status;
+    if (status === 404 || status === 405) {
+      return '서버에 경력 편집 기능이 아직 반영되지 않았습니다.';
+    }
+    if (!error.response) {
+      return '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.';
+    }
+  }
+  return fallback;
+};
+
+export const createCareer = async (input: CareerEntryInput): Promise<CareerEntry> => {
+  try {
+    const { data } = await adminApi.post<CareerEntry>(BASE, input);
+    return data;
+  } catch (error) {
+    throw new Error(writeErrorMessage(error, '저장하지 못했습니다.'));
+  }
+};
+
+export const updateCareer = async (id: number, input: CareerEntryInput): Promise<CareerEntry> => {
+  try {
+    const { data } = await adminApi.put<CareerEntry>(`${BASE}/${id}`, input);
+    return data;
+  } catch (error) {
+    throw new Error(writeErrorMessage(error, '저장하지 못했습니다.'));
+  }
+};
+
+export const deleteCareer = async (id: number): Promise<void> => {
+  try {
+    await adminApi.delete(`${BASE}/${id}`);
+  } catch (error) {
+    throw new Error(writeErrorMessage(error, '삭제하지 못했습니다.'));
+  }
+};
+
+/** 종류 선택지. 저장된 값이 이 밖이어도 편집 폼이 그대로 보여준다 */
+export const ENTRY_TYPES: Array<{ value: string; label: string }> = [
+  { value: 'company', label: '회사' },
+  { value: 'project', label: '프로젝트 (경력기술서)' },
+  { value: 'education', label: '학력' },
+  { value: 'certificate', label: '자격증' },
+  { value: 'award', label: '수상' },
+  { value: 'etc', label: '기타' },
+];
+
+/**
+ * 편집 폼의 상태. 입력칸이 전부 문자열이라 목록 칸도 문자열로 들고 있다가 저장할 때 나눈다.
+ * 날짜는 <input type="month"> 값(YYYY-MM)이다 — 경력기술서는 월까지만 쓴다.
+ */
+export interface CareerForm {
+  entryType: string;
+  company: string;
+  title: string;
+  team: string;
+  role: string;
+  startedMonth: string;
+  endedMonth: string;
+  summary: string;
+  description: string;
+  /** 한 줄에 하나 */
+  achievements: string;
+  /** 쉼표 구분 */
+  techStack: string;
+  /** 쉼표 구분 */
+  tags: string;
+  /** 한 줄에 하나 */
+  referenceLinks: string;
+}
+
+export const emptyForm = (over: Partial<CareerForm> = {}): CareerForm => ({
+  entryType: 'project',
+  company: '',
+  title: '',
+  team: '',
+  role: '',
+  startedMonth: '',
+  endedMonth: '',
+  summary: '',
+  description: '',
+  achievements: '',
+  techStack: '',
+  tags: '',
+  referenceLinks: '',
+  ...over,
+});
+
+/** 저장된 항목 → 편집 폼. 참고 링크는 서버가 라벨/주소로 나눠 주므로 다시 한 줄로 붙인다 */
+export const entryToForm = (e: CareerEntry): CareerForm => ({
+  entryType: e.entryType,
+  company: e.company ?? '',
+  title: e.title,
+  team: e.team ?? '',
+  role: e.role ?? '',
+  startedMonth: e.startedOn ? e.startedOn.slice(0, 7) : '',
+  endedMonth: e.endedOn ? e.endedOn.slice(0, 7) : '',
+  summary: e.summary ?? '',
+  description: e.description ?? '',
+  achievements: e.achievements.join('\n'),
+  techStack: e.techStack.join(', '),
+  tags: e.tags.join(', '),
+  referenceLinks: e.referenceLinks
+    .map((l) => (!l.url ? l.label : l.label === l.url ? l.url : `${l.label}: ${l.url}`))
+    .join('\n'),
+});
+
+const lines = (value: string): string[] =>
+  value
+    .split(/\r?\n/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+const commas = (value: string): string[] =>
+  value
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+const orNull = (value: string): string | null => (value.trim() ? value.trim() : null);
+
+/** 편집 폼 → 요청 본문. 월은 1일로 채운다(서버는 날짜를 받는다) */
+export const formToInput = (f: CareerForm): CareerEntryInput => ({
+  entryType: f.entryType,
+  company: orNull(f.company),
+  title: f.title.trim(),
+  team: orNull(f.team),
+  role: orNull(f.role),
+  startedOn: f.startedMonth ? `${f.startedMonth}-01` : null,
+  endedOn: f.endedMonth ? `${f.endedMonth}-01` : null,
+  summary: orNull(f.summary),
+  description: orNull(f.description),
+  achievements: lines(f.achievements),
+  techStack: commas(f.techStack),
+  tags: commas(f.tags),
+  referenceLinks: lines(f.referenceLinks),
+});
+
+/** 저장 전에 화면에서 먼저 막는 것. 서버도 같은 검사를 하지만 왕복 없이 알려준다 */
+export const validateForm = (f: CareerForm): string | null => {
+  if (!f.title.trim()) {
+    return '제목을 입력해 주세요.';
+  }
+  if (f.startedMonth && f.endedMonth && f.endedMonth < f.startedMonth) {
+    return '종료가 시작보다 빠릅니다.';
+  }
+  return null;
+};
+
 /**
  * 회사별로 묶는다. 서버가 최근 것부터 주므로 순서는 그대로 둔다 —
  * 회사는 회사 행이 나온 순서, 회사 안의 프로젝트도 나온 순서다.

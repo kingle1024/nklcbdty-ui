@@ -96,3 +96,141 @@
   padding-bottom: 0;
   border-bottom: none;
 }
+
+/* ── 편집 ── */
+.cr-head-actions {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.cr-project-head .cr-edit-btn {
+  margin-left: auto;
+}
+
+.cr-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.cr-edit-btn:hover {
+  color: var(--brand-primary);
+  border-color: var(--brand-primary);
+}
+
+.cr-editor-modal {
+  --width: min(720px, 100vw);
+  --height: min(90vh, 900px);
+}
+
+.cr-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--surface);
+}
+
+.cr-editor-head,
+.cr-editor-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cr-editor-foot {
+  border-top: 1px solid var(--border);
+  border-bottom: none;
+}
+
+.cr-editor-foot-right {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.cr-editor-head h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.cr-editor-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cr-field-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cr-field-row .cr-field {
+  flex: 1 1 200px;
+}
+
+.cr-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.cr-field span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.cr-field input,
+.cr-field select,
+.cr-field textarea {
+  padding: 9px 11px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.6;
+  color: var(--text-body);
+  background-color: var(--surface-field);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.cr-field textarea {
+  resize: vertical;
+}
+
+.cr-field input:focus,
+.cr-field select:focus,
+.cr-field textarea:focus {
+  border-color: var(--brand-primary);
+}
+
+.cr-editor-error {
+  flex: 0 0 auto;
+  margin: 0 16px 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--danger);
+  background: var(--danger-tint);
+  border-radius: var(--radius-sm);
+}
