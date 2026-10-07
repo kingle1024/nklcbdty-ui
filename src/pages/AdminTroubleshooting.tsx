@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { IonPage, IonContent, IonButton, IonSpinner, IonIcon, IonAlert } from '@ionic/react';
-import { refreshOutline, linkOutline, copyOutline, checkmarkOutline } from 'ionicons/icons';
+import { refreshOutline, linkOutline, copyOutline, checkmarkOutline, addOutline } from 'ionicons/icons';
 import { Helmet } from 'react-helmet';
 import CommonHeader from '../common/CommonHeader';
 import AdminSidebar from '../common/AdminSidebar';
@@ -15,6 +15,7 @@ import {
   notesToText,
   severityMeta,
 } from '../common/troubleshootingApi';
+import AdminTroubleshootingEditor, { NoteEditTarget } from './AdminTroubleshootingEditor';
 import './AdminTroubleshooting.css';
 
 const PAGE_SIZE = 20;
@@ -36,8 +37,8 @@ const pageNumbers = (current: number, totalPages: number): number[] => {
 /**
  * 트러블슈팅 기록 목록.
  *
- * 기록은 로컬의 save-troubleshooting 스킬이 DB(troubleshooting_note)에 넣고, 이 화면은 읽기만 한다.
- * 그래서 글쓰기 버튼이 없다. 찾는 방법을 세 가지 둔 이유는 기록을 다시 꺼내는 실마리가
+ * 기록은 로컬의 save-troubleshooting 스킬이 DB(troubleshooting_note)에 넣거나, 여기 '추가' 로
+ * 직접 쓴다(AdminTroubleshootingEditor). 찾는 방법을 세 가지 둔 이유는 기록을 다시 꺼내는 실마리가
  * 그때그때 다르기 때문이다 — 프로젝트가 기억날 때, 태그가 기억날 때, 에러 메시지만 기억날 때.
  */
 const AdminTroubleshooting: React.FC = () => {
@@ -58,6 +59,7 @@ const AdminTroubleshooting: React.FC = () => {
   // 전체 복사: 서버에서 본문까지 받아오는 동안 기다려야 하므로 진행 상태를 따로 둔다
   const [copyState, setCopyState] = useState<'idle' | 'working' | 'done' | 'failed'>('idle');
   const [copiedCount, setCopiedCount] = useState(0);
+  const [editTarget, setEditTarget] = useState<NoteEditTarget | null>(null);
 
   // 미로그인 시 관리자 로그인(/admin)으로 보낸다
   useEffect(() => {
@@ -192,6 +194,14 @@ const AdminTroubleshooting: React.FC = () => {
                 </p>
               </div>
               <div className="ts-head-actions">
+                <IonButton
+                  size="default"
+                  onClick={() => setEditTarget({ preset: project ? { project } : {} })}
+                  disabled={isLoading}
+                >
+                  <IonIcon slot="start" icon={addOutline} />
+                  추가
+                </IonButton>
                 {/* 조건에 맞는 기록 전체를 본문까지 한 번에 복사한다. 상세를 열지 않고
                     Claude 에게 붙여 넣으려는 용도라 목록 화면에 둔다. */}
                 <IonButton
@@ -376,6 +386,21 @@ const AdminTroubleshooting: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* 새 기록을 저장하면 바로 그 상세로 간다 — 방금 쓴 것을 확인하는 게 다음 할 일이라서 */}
+        <AdminTroubleshootingEditor
+          target={editTarget}
+          projects={projects}
+          onClose={() => setEditTarget(null)}
+          onSaved={(saved) => {
+            setEditTarget(null);
+            if (saved) {
+              history.push(`/admin/troubleshooting/${saved.slug}`);
+            } else {
+              load();
+            }
+          }}
+        />
 
         <IonAlert
           isOpen={!!errorMessage}

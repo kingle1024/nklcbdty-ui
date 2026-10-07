@@ -1,7 +1,7 @@
-// 트러블슈팅 기록 열람 API. 백엔드 AdminTroubleshootingController(/api/admin/troubleshooting) 와 짝이다.
+// 트러블슈팅 기록 API. 백엔드 AdminTroubleshootingController(/api/admin/troubleshooting) 와 짝이다.
 //
-// 기록을 쓰는 쪽은 이 화면이 아니다 — 로컬의 save-troubleshooting 스킬이 DB 에 직접 넣고,
-// 여기서는 읽기만 한다. 그래서 create/update/delete 가 없다.
+// 기록은 두 군데서 들어온다 — 로컬의 save-troubleshooting 스킬이 DB 에 직접 넣고,
+// 관리자 화면에서도 추가·수정·삭제한다(아래 createNote/updateNote/deleteNote).
 //
 // 기록에 사내·고객사 시스템 이름과 로그 원문이 그대로 들어 있어 관리자 경로에 둔다.
 // adminApi 를 쓰므로 토큰이 자동으로 붙고, 401 이면 /admin 으로 되돌아간다.
@@ -305,4 +305,207 @@ export const notesToText = (
   const body = notes.map((n) => noteToText(n).replace(/^#/gm, '##').trim()).join('\n\n---\n\n');
 
   return `${head}\n${body}\n`;
+};
+
+/** 추가·수정 요청 본문. 백엔드 TroubleshootingNoteRequest 와 짝이다 */
+export interface TroubleshootingInput {
+  /** 추가할 때만. 비우면 서버가 만든다 */
+  slug: string | null;
+  occurredOn: string;
+  project: string;
+  component: string | null;
+  title: string;
+  severity: string | null;
+  errorCode: string | null;
+  symptom: string;
+  rootCause: string;
+  resolution: string;
+  verification: string | null;
+  prevention: string | null;
+  lesson: string | null;
+  techStack: string[];
+  tags: string[];
+  /** 한 줄에 하나. "라벨: https://..." 또는 주소만 */
+  referenceLinks: string[];
+}
+
+/**
+ * 쓰기 요청의 오류 문장. 서버가 준 message(검사 실패 등)가 있으면 그대로 쓴다.
+ * 404/405 인데 message 가 없으면 편집 API 가 아직 없는 옛 서버다 — 프론트는 머지 즉시 뜨고
+ * 백엔드는 수동 재시작이라 그 사이에 이 화면이 먼저 열릴 수 있다.
+ */
+const writeErrorMessage = (error: unknown, fallback: string): string => {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { message?: string } | undefined;
+    if (data?.message) {
+      return data.message;
+    }
+    const status = error.response?.status;
+    if (status === 404 || status === 405) {
+      return '서버에 트러블슈팅 편집 기능이 아직 반영되지 않았습니다.';
+    }
+    if (!error.response) {
+      return '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.';
+    }
+  }
+  return fallback;
+};
+
+export const createNote = async (input: TroubleshootingInput): Promise<TroubleshootingDetail> => {
+  try {
+    const { data } = await adminApi.post<TroubleshootingDetail>(BASE, input);
+    return data;
+  } catch (error) {
+    throw new Error(writeErrorMessage(error, '저장하지 못했습니다.'));
+  }
+};
+
+export const updateNote = async (
+  slug: string,
+  input: TroubleshootingInput
+): Promise<TroubleshootingDetail> => {
+  try {
+    const { data } = await adminApi.put<TroubleshootingDetail>(
+      `${BASE}/${encodeURIComponent(slug)}`,
+      input
+    );
+    return data;
+  } catch (error) {
+    throw new Error(writeErrorMessage(error, '저장하지 못했습니다.'));
+  }
+};
+
+export const deleteNote = async (slug: string): Promise<void> => {
+  try {
+    await adminApi.delete(`${BASE}/${encodeURIComponent(slug)}`);
+  } catch (error) {
+    throw new Error(writeErrorMessage(error, '삭제하지 못했습니다.'));
+  }
+};
+
+/** 편집 폼 상태. 입력칸이 전부 문자열이라 목록 칸도 문자열로 들고 있다가 저장할 때 나눈다 */
+export interface NoteForm {
+  slug: string;
+  /** YYYY-MM-DD (<input type="date">) */
+  occurredOn: string;
+  project: string;
+  component: string;
+  title: string;
+  severity: string;
+  errorCode: string;
+  symptom: string;
+  rootCause: string;
+  resolution: string;
+  verification: string;
+  prevention: string;
+  lesson: string;
+  /** 쉼표 구분 */
+  techStack: string;
+  /** 쉼표 구분 */
+  tags: string;
+  /** 한 줄에 하나 */
+  referenceLinks: string;
+}
+
+/** 오늘 날짜(로컬 기준 YYYY-MM-DD). toISOString 은 UTC 라 새벽에 하루 전으로 나온다 */
+const today = (): string => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
+export const emptyNoteForm = (over: Partial<NoteForm> = {}): NoteForm => ({
+  slug: '',
+  occurredOn: today(),
+  project: '',
+  component: '',
+  title: '',
+  severity: 'medium',
+  errorCode: '',
+  symptom: '',
+  rootCause: '',
+  resolution: '',
+  verification: '',
+  prevention: '',
+  lesson: '',
+  techStack: '',
+  tags: '',
+  referenceLinks: '',
+  ...over,
+});
+
+/** 참고 링크를 저장할 때의 한 줄 모양으로 되돌린다. 라벨 없이 주소만 있던 줄이 '주소: 주소' 로 불지 않게 */
+export const linkToLine = (link: ReferenceLink): string =>
+  !link.url ? link.label : link.label === link.url ? link.url : `${link.label}: ${link.url}`;
+
+/** 저장된 기록 → 편집 폼 */
+export const noteToForm = (n: TroubleshootingDetail): NoteForm => ({
+  slug: n.slug,
+  occurredOn: n.occurredOn,
+  project: n.project,
+  component: n.component ?? '',
+  title: n.title,
+  severity: n.severity ?? '',
+  errorCode: n.errorCode ?? '',
+  symptom: n.symptom ?? '',
+  rootCause: n.rootCause ?? '',
+  resolution: n.resolution ?? '',
+  verification: n.verification ?? '',
+  prevention: n.prevention ?? '',
+  lesson: n.lesson ?? '',
+  techStack: n.techStack.join(', '),
+  tags: n.tags.join(', '),
+  referenceLinks: n.referenceLinks.map(linkToLine).join('\n'),
+});
+
+const splitLines = (value: string): string[] =>
+  value
+    .split(/\r?\n/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+const splitCommas = (value: string): string[] =>
+  value
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+const orNull = (value: string): string | null => (value.trim() ? value.trim() : null);
+
+/** 편집 폼 → 요청 본문. 본문 칸은 앞뒤 공백만 걷는다(에러 메시지 원문을 다듬지 않는다) */
+export const noteFormToInput = (f: NoteForm): TroubleshootingInput => ({
+  slug: orNull(f.slug),
+  occurredOn: f.occurredOn,
+  project: f.project.trim(),
+  component: orNull(f.component),
+  title: f.title.trim(),
+  severity: orNull(f.severity),
+  errorCode: orNull(f.errorCode),
+  symptom: f.symptom.trim(),
+  rootCause: f.rootCause.trim(),
+  resolution: f.resolution.trim(),
+  verification: orNull(f.verification),
+  prevention: orNull(f.prevention),
+  lesson: orNull(f.lesson),
+  techStack: splitCommas(f.techStack),
+  tags: splitCommas(f.tags),
+  referenceLinks: splitLines(f.referenceLinks),
+});
+
+/** 저장 전에 화면에서 먼저 막는 것. 필수 칸은 서버·스킬과 같다 */
+export const validateNoteForm = (f: NoteForm): string | null => {
+  const required: Array<[keyof NoteForm, string]> = [
+    ['occurredOn', '발생일'],
+    ['project', '프로젝트'],
+    ['title', '제목'],
+    ['symptom', '증상'],
+    ['rootCause', '원인'],
+    ['resolution', '해결'],
+  ];
+  for (const [key, label] of required) {
+    if (!f[key].trim()) {
+      return `${label}을(를) 입력해 주세요.`;
+    }
+  }
+  return null;
 };

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { IonPage, IonContent, IonButton, IonSpinner, IonIcon } from '@ionic/react';
-import { arrowBackOutline, copyOutline, checkmarkOutline } from 'ionicons/icons';
+import { arrowBackOutline, copyOutline, checkmarkOutline, createOutline } from 'ionicons/icons';
 import { Helmet } from 'react-helmet';
 import CommonHeader from '../common/CommonHeader';
 import AdminSidebar from '../common/AdminSidebar';
@@ -15,6 +15,7 @@ import {
   noteToText,
   severityMeta,
 } from '../common/troubleshootingApi';
+import AdminTroubleshootingEditor, { NoteEditTarget } from './AdminTroubleshootingEditor';
 import './AdminTroubleshooting.css';
 
 /**
@@ -48,6 +49,7 @@ const AdminTroubleshootingDetail: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   // '복사됨' / '복사 실패' 중 어느 쪽인지. 잠깐 보여주고 되돌린다.
   const [copyState, setCopyState] = useState<'idle' | 'done' | 'failed'>('idle');
+  const [editTarget, setEditTarget] = useState<NoteEditTarget | null>(null);
 
   useEffect(() => {
     if (!isAdminLoggedIn()) {
@@ -86,6 +88,16 @@ const AdminTroubleshootingDetail: React.FC = () => {
     window.setTimeout(() => setCopyState('idle'), ok ? 1800 : 4000);
   };
 
+  /** 수정이면 다시 보여주고, 삭제면 목록으로 돌아간다(이 주소는 더 이상 없다) */
+  const handleSaved = (saved: TroubleshootingDetail | null) => {
+    setEditTarget(null);
+    if (saved) {
+      setNote(saved);
+    } else {
+      history.replace('/admin/troubleshooting');
+    }
+  };
+
   const sev = severityMeta(note?.severity ?? null);
 
   return (
@@ -110,18 +122,30 @@ const AdminTroubleshootingDetail: React.FC = () => {
                 목록으로
               </IonButton>
 
-              {/* 기록 전체를 마크다운 텍스트로 클립보드에 넣는다. Claude 에게 붙여 넣어
-                  참고시키는 용도라, 화면에 보이는 순서 그대로 절 제목을 붙여 뽑는다. */}
-              <IonButton
-                fill="outline"
-                size="small"
-                disabled={!note}
-                onClick={handleCopyAll}
-                color={copyState === 'failed' ? 'danger' : copyState === 'done' ? 'success' : undefined}
-              >
-                <IonIcon slot="start" icon={copyState === 'done' ? checkmarkOutline : copyOutline} />
-                {copyState === 'done' ? '복사됨' : copyState === 'failed' ? '복사 실패' : '전체 복사'}
-              </IonButton>
+              <div className="ts-detail-toolbar-right">
+                {/* 기록 전체를 마크다운 텍스트로 클립보드에 넣는다. Claude 에게 붙여 넣어
+                    참고시키는 용도라, 화면에 보이는 순서 그대로 절 제목을 붙여 뽑는다. */}
+                <IonButton
+                  fill="outline"
+                  size="small"
+                  disabled={!note}
+                  onClick={handleCopyAll}
+                  color={copyState === 'failed' ? 'danger' : copyState === 'done' ? 'success' : undefined}
+                >
+                  <IonIcon slot="start" icon={copyState === 'done' ? checkmarkOutline : copyOutline} />
+                  {copyState === 'done' ? '복사됨' : copyState === 'failed' ? '복사 실패' : '전체 복사'}
+                </IonButton>
+                {/* 삭제는 편집 창 안에 둔다 — 상세에서 한 번에 지워지지 않게 */}
+                <IonButton
+                  fill="outline"
+                  size="small"
+                  disabled={!note}
+                  onClick={() => note && setEditTarget({ note })}
+                >
+                  <IonIcon slot="start" icon={createOutline} />
+                  수정
+                </IonButton>
+              </div>
             </div>
 
             {isLoading ? (
@@ -239,6 +263,13 @@ const AdminTroubleshootingDetail: React.FC = () => {
             )}
           </div>
         </div>
+
+        <AdminTroubleshootingEditor
+          target={editTarget}
+          projects={note ? [note.project] : []}
+          onClose={() => setEditTarget(null)}
+          onSaved={handleSaved}
+        />
       </IonContent>
     </IonPage>
   );
