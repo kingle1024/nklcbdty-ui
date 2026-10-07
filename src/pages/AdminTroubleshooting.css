@@ -497,3 +497,27 @@
     width: 100%;
   }
 }
+
+/* ── 편집 모달 (칸·버튼은 AdminCareer.css 의 cr-editor 를 같이 쓴다) ── */
+.ts-editor-modal {
+  --width: min(860px, 100vw);
+  --height: min(94vh, 1000px);
+}
+
+/* 로그·에러 메시지를 붙여 넣는 칸이라 등폭으로. 줄 맞춤이 살아 있어야 읽힌다 */
+.cr-field textarea.ts-editor-body-text {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+.ts-editor-slug {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.ts-detail-toolbar-right {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
