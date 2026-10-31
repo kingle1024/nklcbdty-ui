@@ -8,6 +8,12 @@
 // 제목과 회사명이 구분자 없이 붙어 있어서 회사명이 어디서 시작하는지는 짐작해야 한다.
 // 짐작이 안 되면 회사명을 비워 두고 제목만 준다 — 억지로 자르면 엉뚱한 값이 들어가고,
 // 회사명은 사용자가 직접 고치면 되지만 잘린 제목은 되돌릴 수 없다.
+//
+// 블라인드 공유 글은 인사말 한 줄이 앞에 붙고, 대괄호에 회사명이 그대로 들어 있다:
+//
+//   [Blind] 블라인드에 올라온 채용 정보 보셨어요?
+//   [LINE PLUS] Platform Server QA Engineer (채용)
+//   https://m.jobkorea.co.kr/Recruit/GI_Read/50271598?...
 
 export interface ParsedJobText {
   /** 붙여넣은 글에서 찾은 첫 주소 */
@@ -37,6 +43,21 @@ const ENTITY_PREFIXES = [
 
 /** 제목 맨 앞의 대괄호. 잡코리아는 여기에 회사 이름을 넣어 준다. */
 const BRACKET_HEAD = /^\s*[[【]([^\]】]+)[\]】]/;
+
+/** 블라인드 공유 글의 첫 줄. 공고 내용이 아니라 인사말이다. */
+const BLIND_PREAMBLE = /^\[blind\]/i;
+
+/**
+ * 블라인드는 대괄호에 회사명을 넣는다(잡코리아처럼 브랜드·사업부가 아니다).
+ * 대괄호를 회사명으로 떼고, 제목에서는 겹치므로 뺀다.
+ */
+const splitBlindTitle = (line: string): { title: string; companyName: string } => {
+  const head = BRACKET_HEAD.exec(line);
+  if (!head) {
+    return { title: line, companyName: '' };
+  }
+  return { title: line.slice(head[0].length).trim(), companyName: head[1].trim() };
+};
 
 /** 법인격 표기가 시작하는 자리. 없으면 -1. */
 const byEntityPrefix = (line: string): number => {
@@ -102,11 +123,16 @@ export const parsePastedJobText = (raw: string): ParsedJobText | null => {
                    .map((line) => line.trim())
                    .filter(Boolean);
 
+  const fromBlind = lines.length > 0 && BLIND_PREAMBLE.test(lines[0]);
+  if (fromBlind) {
+    lines.shift();
+  }
+
   if (lines.length === 0) {
     return { url, companyName: '', title: '' };
   }
 
-  const { title, companyName } = splitCompany(lines[0]);
+  const { title, companyName } = fromBlind ? splitBlindTitle(lines[0]) : splitCompany(lines[0]);
   // 셋째 줄부터는 무엇인지 모른다. 버리지 말고 제목 뒤에 붙여 메모로 남긴다.
   return { url, companyName, title: [title, ...lines.slice(1)].filter(Boolean).join('\n') };
 };

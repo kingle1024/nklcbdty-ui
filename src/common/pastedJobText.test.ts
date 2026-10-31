@@ -69,4 +69,18 @@ describe('parsePastedJobText', () => {
     expect(parsePastedJobText('[토스] 서버 개발(주)비바리퍼블리카\nhttps://toss.im/career/1\n마감 9/30')?.title)
       .toBe('[토스] 서버 개발\n마감 9/30');
   });
+
+  it('블라인드 공유 글은 인사말 줄을 버리고 대괄호를 회사명으로 쓴다', () => {
+    const pasted = [
+      '[Blind] 블라인드에 올라온 채용 정보 보셨어요? ',
+      '[LINE PLUS] Platform Server QA Engineer (채용)',
+      'https://m.jobkorea.co.kr/Recruit/GI_Read/50271598?sc=248&utm_source=blind&utm_medium=posting&utm_content=post',
+    ].join('\n');
+
+    expect(parsePastedJobText(pasted)).toEqual({
+      url: 'https://m.jobkorea.co.kr/Recruit/GI_Read/50271598?sc=248&utm_source=blind&utm_medium=posting&utm_content=post',
+      companyName: 'LINE PLUS',
+      title: 'Platform Server QA Engineer (채용)',
+    });
+  });
 });
