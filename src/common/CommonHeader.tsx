@@ -20,7 +20,6 @@ import './CommonHeader.css';
 /** 상단 메뉴. 모바일에선 폭이 모자라 전부 못 넣으므로 햄버거 안으로 접는다. */
 const NAV_LINKS = [
   { label: '채용 캘린더', path: '/calendar' },
-  { label: '재택 회사', path: '/remote' },
   { label: '공지사항', path: '/notice' },
   { label: '자유게시판', path: '/board' },
   { label: '문의 및 건의사항', path: '/email' },

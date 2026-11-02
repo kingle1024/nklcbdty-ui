@@ -1,19 +1,25 @@
-import { highlightSegments, parseWelfareQuery, splitKeywords, toWelfareQuery } from './companyFeatureApi';
+import { WorkStyleCompany, highlightSegments, splitKeywords, visibleCompanyCodes } from './companyFeatureApi';
 
 // 여기서 보는 건 순수 함수뿐이다. axios 1.x 는 ESM 이라 CRA jest 가 변환하지 못하므로 막아 둔다
 // (adminApi 는 불러오는 순간 axios.create 를 부르므로 같이 막는다).
 jest.mock('axios', () => ({}));
 jest.mock('./adminApi', () => ({}));
 
-describe('parseWelfareQuery / toWelfareQuery', () => {
-  it('쉼표로 묶인 코드를 대문자로, 중복·빈 값 없이', () => {
-    expect(parseWelfareQuery('?welfare=meal,HEALTH,,meal')).toEqual(['MEAL', 'HEALTH']);
-    expect(parseWelfareQuery('?other=1')).toEqual([]);
+describe('visibleCompanyCodes', () => {
+  const company = (companyCd: string) => ({ companyCd } as WorkStyleCompany);
+  const all = ['NAVER', 'KAKAO', 'LINE', 'COUPANG'];
+
+  it('필터가 꺼져 있으면 탭 전부', () => {
+    expect(visibleCompanyCodes(all, null)).toEqual(all);
   });
 
-  it('선택이 없으면 쿼리도 없다', () => {
-    expect(toWelfareQuery([])).toBe('');
-    expect(toWelfareQuery(['MEAL', 'HEALTH'])).toBe('?welfare=MEAL,HEALTH');
+  it('조건에 맞는 회사만, 응답 순서가 아니라 탭 순서대로', () => {
+    expect(visibleCompanyCodes(all, [company('COUPANG'), company('LINE'), company('NAVER')]))
+      .toEqual(['NAVER', 'LINE', 'COUPANG']);
+  });
+
+  it('맞는 회사가 없으면 빈 목록', () => {
+    expect(visibleCompanyCodes(all, [])).toEqual([]);
   });
 });
 

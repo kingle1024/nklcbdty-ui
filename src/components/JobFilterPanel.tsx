@@ -2,6 +2,7 @@ import React from 'react';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import { Filters } from '../pages/Home';
+import { WelfareCategory } from '../common/companyFeatureApi';
 
 export interface CategoryDtl {
   id: number;
@@ -24,12 +25,15 @@ interface JobFilterPanelProps {
   onIncludeNoExperienceChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onExperienceInputChange: (event: React.ChangeEvent<HTMLInputElement>, field: 'start' | 'end') => void;
   onExperienceSliderChange: (range: number | number[]) => void;
+  welfareCategories: WelfareCategory[];
+  onRemoteOnlyChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onWelfareChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   /** 체크박스 id 가 문서 안에서 겹치지 않게 하는 접두어. PC 사이드바와 모바일 시트가 동시에 마운트될 수 있다. */
   idPrefix?: string;
 }
 
 /**
- * 직군·경력 필터 패널. PC 에서는 왼쪽 사이드바에, 모바일에서는 필터 버튼으로 여는 바텀 시트에 들어간다.
+ * 근무형태·직군·경력 필터 패널. PC 에서는 왼쪽 사이드바에, 모바일에서는 필터 버튼으로 여는 바텀 시트에 들어간다.
  * 상태는 Home 이 들고 있고 이 컴포넌트는 그리기만 한다.
  */
 const JobFilterPanel: React.FC<JobFilterPanelProps> = ({
@@ -41,9 +45,46 @@ const JobFilterPanel: React.FC<JobFilterPanelProps> = ({
   onIncludeNoExperienceChange,
   onExperienceInputChange,
   onExperienceSliderChange,
+  welfareCategories,
+  onRemoteOnlyChange,
+  onWelfareChange,
   idPrefix = '',
 }) => (
   <div className="job-filter-panel">
+    {/* 회사 단위 필터. 공고 본문에서 자동으로 찾은 근무형태·복지로 회사 탭을 거른다 */}
+    <div className="work-style-section">
+      <h2>근무 형태</h2>
+      <div className="work-style-option">
+        <input
+          type="checkbox"
+          id={`${idPrefix}remoteOnly`}
+          checked={filters.remoteOnly}
+          onChange={onRemoteOnlyChange}
+        />
+        <label htmlFor={`${idPrefix}remoteOnly`}>재택근무 회사만</label>
+      </div>
+      {filters.remoteOnly && welfareCategories.length > 0 && (
+        <div className="category-list welfare-list" role="group" aria-label="복지">
+          <span className="welfare-list__title">복지 (모두 있는 회사만)</span>
+          {welfareCategories.map((category) => {
+            const inputId = `${idPrefix}welfare-${category.code}`;
+            return (
+              <div key={category.code}>
+                <input
+                  type="checkbox"
+                  id={inputId}
+                  value={category.code}
+                  checked={filters.welfare.includes(category.code)}
+                  onChange={onWelfareChange}
+                />
+                <label htmlFor={inputId}>{category.name}</label>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+
     <h2>직군</h2>
     <form onSubmit={(e) => e.preventDefault()}>
       {categoriesData.map((categoryData) => {

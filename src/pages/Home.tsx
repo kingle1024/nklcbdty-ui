@@ -12,6 +12,12 @@ import { Autoplay, Navigation, Pagination } from 'swiper/modules'; // 필요한 
 import 'swiper/swiper-bundle.css'; // Swiper CSS import
 import './Home.css';
 import CommonHeader from '../common/CommonHeader';
+import {
+  WelfareCategory,
+  WorkStyleCompany,
+  fetchActiveWelfareCategories,
+  fetchWorkStyleCompanies,
+} from '../common/companyFeatureApi';
 
 // 필터 타입 정의
 export interface Filters {
@@ -25,9 +31,16 @@ export interface Filters {
     end: number;
   };
   includeNoExperience: boolean;
+  /** 공고에서 재택근무가 확인된 회사만 */
+  remoteOnly: boolean;
+  /** 복지 카테고리 코드. remoteOnly 일 때만 쓰고, 고른 것을 모두 가진 회사만(AND) */
+  welfare: string[];
 }
 
 const DEFAULT_EXPERIENCE = { start: 0, end: 10 };
+
+/** 지금은 재택만. 유연근무제(FLEXIBLE) 등이 생기면 근무형태 코드만 바꿔 쓴다. */
+const WORK_STYLE = 'REMOTE';
 
 /** 기본값과 다른 필터 항목 수. 모바일 필터 버튼의 배지에 쓴다. */
 export const countActiveFilters = (filters: Filters): number => {
@@ -35,7 +48,8 @@ export const countActiveFilters = (filters: Filters): number => {
   const experienceChanged =
     filters.personalHistory.start !== DEFAULT_EXPERIENCE.start ||
     filters.personalHistory.end !== DEFAULT_EXPERIENCE.end;
-  return selectedCategories + (experienceChanged ? 1 : 0) + (filters.includeNoExperience ? 0 : 1);
+  return selectedCategories + (experienceChanged ? 1 : 0) + (filters.includeNoExperience ? 0 : 1)
+    + (filters.remoteOnly ? 1 + filters.welfare.length : 0);
 };
 
 const Home: React.FC = () => {
@@ -49,7 +63,46 @@ const Home: React.FC = () => {
     categories: {},
     personalHistory: { start: 0, end: 10 },
     includeNoExperience: true,
+    remoteOnly: false,
+    welfare: [],
   });
+  const [welfareCategories, setWelfareCategories] = useState<WelfareCategory[]>([]);
+  // 재택 필터에 맞는 회사(근거 포함). 필터가 꺼져 있으면 null
+  const [featureCompanies, setFeatureCompanies] = useState<WorkStyleCompany[] | null>(null);
+  const [featureLoading, setFeatureLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    fetchActiveWelfareCategories()
+      .then(setWelfareCategories)
+      .catch((e) => console.error('복지 카테고리 조회 실패:', e));
+  }, []);
+
+  const welfareKey = filters.welfare.join(',');
+  useEffect(() => {
+    if (!filters.remoteOnly) {
+      setFeatureCompanies(null);
+      setFeatureLoading(false);
+      return;
+    }
+    // 체크를 빠르게 바꾸면 늦게 온 이전 응답이 덮지 않게
+    let cancelled = false;
+    setFeatureLoading(true);
+    fetchWorkStyleCompanies(WORK_STYLE, welfareKey ? welfareKey.split(',') : [])
+      .then((list) => {
+        if (!cancelled) setFeatureCompanies(list);
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        console.error('재택 회사 조회 실패:', e);
+        setFeatureCompanies([]);
+      })
+      .finally(() => {
+        if (!cancelled) setFeatureLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [filters.remoteOnly, welfareKey]);
 
   // 카테고리 데이터 로드
   useEffect(() => {
@@ -159,7 +212,27 @@ const Home: React.FC = () => {
   };
 
 
-  // 모든 필터를 기본값으로 되돌린다 (직군 선택 해제, 경력 0~10년, 경력 무관 포함)
+  // 재택을 끄면 그 아래 복지 선택도 같이 비운다
+  const handleRemoteOnlyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { checked } = event.target;
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      remoteOnly: checked,
+      welfare: checked ? prevFilters.welfare : [],
+    }));
+  };
+
+  const handleWelfareChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { value, checked } = event.target;
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      welfare: checked
+        ? [...prevFilters.welfare, value]
+        : prevFilters.welfare.filter((code) => code !== value),
+    }));
+  };
+
+  // 모든 필터를 기본값으로 되돌린다 (직군 선택 해제, 경력 0~10년, 경력 무관 포함, 재택·복지 해제)
   const resetFilters = () => {
     setFilters(prevFilters => ({
       ...prevFilters,
@@ -169,6 +242,8 @@ const Home: React.FC = () => {
       }, {}),
       personalHistory: { ...DEFAULT_EXPERIENCE },
       includeNoExperience: true,
+      remoteOnly: false,
+      welfare: [],
     }));
   };
 
@@ -241,6 +316,9 @@ const Home: React.FC = () => {
               onIncludeNoExperienceChange={handleIncludeNoExperienceChange}
               onExperienceInputChange={handleExperienceInputChange}
               onExperienceSliderChange={handleExperienceSliderChange}
+              welfareCategories={welfareCategories}
+              onRemoteOnlyChange={handleRemoteOnlyChange}
+              onWelfareChange={handleWelfareChange}
             />
           </aside>
           <main className="content">
@@ -248,6 +326,8 @@ const Home: React.FC = () => {
               filters={filters}
               onOpenFilter={isMobile ? () => setIsFilterOpen(true) : undefined}
               activeFilterCount={activeFilterCount}
+              featureCompanies={featureCompanies}
+              featureLoading={featureLoading}
             />
           </main>
           {/* <aside className="right-aside">
@@ -282,6 +362,9 @@ const Home: React.FC = () => {
               onIncludeNoExperienceChange={handleIncludeNoExperienceChange}
               onExperienceInputChange={handleExperienceInputChange}
               onExperienceSliderChange={handleExperienceSliderChange}
+              welfareCategories={welfareCategories}
+              onRemoteOnlyChange={handleRemoteOnlyChange}
+              onWelfareChange={handleWelfareChange}
               idPrefix="m-"
             />
           </div>

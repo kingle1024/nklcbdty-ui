@@ -105,15 +105,18 @@ export const errorMessage = (error: unknown, fallback: string): string => {
 
 // ---- 화면 헬퍼 ----
 
-/** URL 쿼리 ?welfare=MEAL,HEALTH → ['MEAL','HEALTH'] (공유한 링크로 같은 필터가 열리게) */
-export const parseWelfareQuery = (search: string): string[] => {
-  const raw = new URLSearchParams(search).get('welfare');
-  if (!raw) return [];
-  return Array.from(new Set(raw.split(',').map((c) => c.trim().toUpperCase()).filter(Boolean)));
+/**
+ * 메인 화면 회사 탭 중 보여 줄 것. 근무형태 필터가 꺼져 있으면(null) 전부,
+ * 켜져 있으면 조건에 맞는 회사만 탭 순서 그대로.
+ */
+export const visibleCompanyCodes = (
+  allCodes: string[],
+  featureCompanies: WorkStyleCompany[] | null,
+): string[] => {
+  if (!featureCompanies) return allCodes;
+  const matched = new Set(featureCompanies.map((c) => c.companyCd));
+  return allCodes.filter((code) => matched.has(code));
 };
-
-export const toWelfareQuery = (codes: string[]): string =>
-  codes.length ? `?welfare=${codes.join(',')}` : '';
 
 /** 관리자 입력 "식대, 식비\n점심" → ['식대','식비','점심'] (쉼표·줄바꿈 모두 구분자) */
 export const splitKeywords = (input: string): string[] =>
