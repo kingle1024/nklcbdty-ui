@@ -7,6 +7,8 @@ import './ListContainer.css';
 import { IonBadge, IonButton, IonIcon, IonSearchbar, IonSpinner } from '@ionic/react';
 import { optionsOutline } from 'ionicons/icons';
 import { Filters } from '../pages/Home';
+import { WorkStyleCompany, visibleCompanyCodes } from '../common/companyFeatureApi';
+import CompanyFeatureSummary from './CompanyFeatureSummary';
 
 interface Job_mst {
   id: number | null;
@@ -30,6 +32,9 @@ interface ListContainerProps {
   onOpenFilter?: () => void;
   /** 기본값과 다른 필터 항목 수. 0 이면 배지를 숨긴다. */
   activeFilterCount?: number;
+  /** 재택 필터에 맞는 회사. null 이면 필터가 꺼진 것이고 회사 탭을 전부 보여 준다. */
+  featureCompanies?: WorkStyleCompany[] | null;
+  featureLoading?: boolean;
 }
 
 // /api/company/list — 회사 코드별 채용 페이지 주소 ("채용 페이지로 가기" 버튼용)
@@ -39,7 +44,13 @@ interface CompanyInfo {
   careerPageUrl: string;
 }
 
-const ListContainer: React.FC<ListContainerProps> = ({ filters, onOpenFilter, activeFilterCount = 0 }) => {
+const ListContainer: React.FC<ListContainerProps> = ({
+  filters,
+  onOpenFilter,
+  activeFilterCount = 0,
+  featureCompanies = null,
+  featureLoading = false,
+}) => {
   const [products, setProducts] = useState<Job_mst[]>([]);
   const [company, setCompany] = useState<string>('NAVER');
   const [cache, setCache] = useState<{ [key: string]: Job_mst[] }>({});
@@ -147,6 +158,18 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters, onOpenFilter, ac
   // 회사 이름·색은 캘린더 화면과 공유한다 (common/companies.ts)
   const companies = COMPANY_NAMES;
   const companyColors = COMPANY_COLORS;
+
+  // 재택 필터가 켜져 있으면 조건에 맞는 회사 탭만. 고른 탭이 빠지면 남은 첫 탭으로 옮긴다.
+  const visibleCompanies = visibleCompanyCodes(Object.keys(companies), featureCompanies);
+  const noFeatureMatch = featureCompanies !== null && !featureLoading && visibleCompanies.length === 0;
+  const selectedFeature = featureCompanies?.find((c) => c.companyCd === company) ?? null;
+  const visibleKey = visibleCompanies.join(',');
+  useEffect(() => {
+    const codes = visibleKey ? visibleKey.split(',') : [];
+    if (codes.length > 0 && !codes.includes(company)) {
+      setCompany(codes[0]);
+    }
+  }, [visibleKey, company]);
 
   const filteredProducts = products.filter((item) => {
     // 1. 고용 형태 필터링
@@ -268,7 +291,7 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters, onOpenFilter, ac
             <IonButton
               fill="outline"
               className={`filter-open-btn${activeFilterCount > 0 ? ' filter-open-btn--active' : ''}`}
-              aria-label={activeFilterCount > 0 ? `직군·경력 필터 열기, ${activeFilterCount}개 적용 중` : '직군·경력 필터 열기'}
+              aria-label={activeFilterCount > 0 ? `필터 열기, ${activeFilterCount}개 적용 중` : '필터 열기'}
               onClick={onOpenFilter}
             >
               <IonIcon slot="start" icon={optionsOutline} />
@@ -279,8 +302,20 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters, onOpenFilter, ac
             </IonButton>
           )}
         </div>
+        {featureLoading ? (
+          <div className="list-loading">
+            <IonSpinner name="crescent" />
+            <p>재택근무 회사를 찾는 중입니다…</p>
+          </div>
+        ) : noFeatureMatch ? (
+          <div className="no-data-message">
+            {filters.welfare.length > 0
+              ? '고른 복지를 모두 가진 재택근무 회사가 없어요.'
+              : '아직 재택근무가 확인된 회사가 없어요.'}
+          </div>
+        ) : (<>
         <div className="button-section">         
-          {Object.keys(companies).map((comp) => (
+          {visibleCompanies.map((comp) => (
             <IonButton 
               key={comp}
               expand="full" 
@@ -307,6 +342,10 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters, onOpenFilter, ac
               {companies[company]} 채용 페이지로 가기
             </IonButton>
           </div>
+        )}
+
+        {selectedFeature && (
+          <CompanyFeatureSummary company={selectedFeature} selectedWelfare={filters.welfare} />
         )}
 
         <div className="card-container">
@@ -394,6 +433,7 @@ const ListContainer: React.FC<ListContainerProps> = ({ filters, onOpenFilter, ac
             </div>
           )}
         </div>
+        </>)}
       </div>
     </div>
   );
