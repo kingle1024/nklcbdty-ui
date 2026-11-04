@@ -1,4 +1,10 @@
-import { WorkStyleCompany, highlightSegments, splitKeywords, visibleCompanyCodes } from './companyFeatureApi';
+import {
+  WorkStyleCompany,
+  featureCompanyQuery,
+  highlightSegments,
+  splitKeywords,
+  visibleCompanyCodes,
+} from './companyFeatureApi';
 
 // 여기서 보는 건 순수 함수뿐이다. axios 1.x 는 ESM 이라 CRA jest 가 변환하지 못하므로 막아 둔다
 // (adminApi 는 불러오는 순간 axios.create 를 부르므로 같이 막는다).
@@ -20,6 +26,22 @@ describe('visibleCompanyCodes', () => {
 
   it('맞는 회사가 없으면 빈 목록', () => {
     expect(visibleCompanyCodes(all, [])).toEqual([]);
+  });
+});
+
+describe('featureCompanyQuery', () => {
+  it('재택 없이 복지만, 2개 이상이면 match 를 붙인다', () => {
+    expect(featureCompanyQuery({ workStyle: null, welfare: ['MEAL', 'HEALTH'], match: 'ANY' }))
+      .toBe('welfare=MEAL&welfare=HEALTH&match=ANY');
+  });
+
+  it('복지가 하나면 match 는 뺀다', () => {
+    expect(featureCompanyQuery({ workStyle: 'REMOTE', welfare: ['MEAL'], match: 'ANY' }))
+      .toBe('workStyle=REMOTE&welfare=MEAL');
+  });
+
+  it('재택만', () => {
+    expect(featureCompanyQuery({ workStyle: 'REMOTE', welfare: [], match: 'ALL' })).toBe('workStyle=REMOTE');
   });
 });
 

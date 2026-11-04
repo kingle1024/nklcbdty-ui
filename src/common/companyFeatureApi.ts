@@ -36,8 +36,10 @@ export interface WorkStyleCompany {
   companyCd: string;
   companyNm: string;
   careerPageUrl: string | null;
-  workStyle: string;
-  workStyleLabel: string;
+  /** 근무형태로 거르지 않고 복지로만 찾았으면 null */
+  workStyle: string | null;
+  workStyleLabel: string | null;
+  /** 근무형태로 찾았으면 그 근거 공고 수, 복지로만 찾았으면 (고른) 복지 근거 공고 수 */
   postingCount: number;
   evidences: FeatureEvidence[];
   welfares: CompanyWelfare[];
@@ -50,16 +52,30 @@ export interface WelfareCategoryInput {
   active?: boolean;
 }
 
-/** 재택 회사 목록. welfare 를 여러 개 고르면 모두 가진 회사만(AND). */
-export const fetchWorkStyleCompanies = async (
-  workStyle: string,
-  welfareCodes: string[],
-): Promise<WorkStyleCompany[]> => {
+/** 복지를 여러 개 골랐을 때: 모두 가진 회사(ALL) / 하나라도 가진 회사(ANY) */
+export type WelfareMatch = 'ALL' | 'ANY';
+
+export interface FeatureCompanyQuery {
+  /** 없으면 근무형태로 거르지 않는다(복지로만) */
+  workStyle: string | null;
+  welfare: string[];
+  match: WelfareMatch;
+}
+
+/** /api/company/features 쿼리스트링. match 는 복지를 2개 이상 골랐을 때만 의미가 있어 그때만 붙인다. */
+export const featureCompanyQuery = ({ workStyle, welfare, match }: FeatureCompanyQuery): string => {
   const params = new URLSearchParams();
-  welfareCodes.forEach((code) => params.append('welfare', code));
-  const query = params.toString();
+  if (workStyle) params.append('workStyle', workStyle);
+  welfare.forEach((code) => params.append('welfare', code));
+  if (welfare.length > 1) params.append('match', match);
+  return params.toString();
+};
+
+/** 근무형태·복지 조건에 맞는 회사 목록 */
+export const fetchFeatureCompanies = async (query: FeatureCompanyQuery): Promise<WorkStyleCompany[]> => {
+  const qs = featureCompanyQuery(query);
   const { data } = await axios.get<WorkStyleCompany[]>(
-    `${API_URL}/api/company/work-style/${workStyle}${query ? `?${query}` : ''}`,
+    `${API_URL}/api/company/features${qs ? `?${qs}` : ''}`,
   );
   return Array.isArray(data) ? data : [];
 };
