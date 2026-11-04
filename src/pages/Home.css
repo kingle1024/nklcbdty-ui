@@ -179,21 +179,48 @@ label {
   padding: 0 10px;
 }
 
-/* 복지 조건: 모두 / 하나라도 */
+/* 복지 조건: 모두 / 하나라도. 라디오는 숨기고 두 칸짜리 토글로 보여 준다 */
 .welfare-match {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-  padding: 0 10px 8px;
-  font-size: 13px;
-  color: var(--text-muted, #888);
+  gap: 2px;
+  margin: 0 10px 10px;
+  padding: 3px;
+  background-color: var(--surface-field);
+  border-radius: var(--radius-sm);
 }
 
 .welfare-match__option {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  flex: 1;
+  position: relative;
+  padding: 6px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--text-muted);
+  border-radius: calc(var(--radius-sm) - 2px);
   cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.welfare-match__option input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.welfare-match__option.is-selected {
+  color: var(--brand-primary);
+  background-color: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.welfare-match__option:has(input:focus-visible) {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 1px;
 }
 
 /* 경력 섹션 (사이드바·모바일 시트 공용) */
