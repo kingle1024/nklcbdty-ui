@@ -39,7 +39,7 @@ const CompanyFeatureSummary: React.FC<CompanyFeatureSummaryProps> = ({ company, 
   return (
     <section className="company-feature" aria-label={`${company.companyNm} 근무형태·복지`}>
       <div className="company-feature__head">
-        <span className="company-feature__badge">{company.workStyleLabel}</span>
+        {company.workStyleLabel && <span className="company-feature__badge">{company.workStyleLabel}</span>}
         <span className="company-feature__count">공고 {company.postingCount}건에서 확인</span>
         <button type="button" className="company-feature__toggle" onClick={() => setOpen((v) => !v)}>
           {open ? '근거 접기' : '어디서 찾았나요?'}
@@ -63,12 +63,16 @@ const CompanyFeatureSummary: React.FC<CompanyFeatureSummaryProps> = ({ company, 
 
       {open && (
         <div className="company-feature__details">
-          <h3>{company.workStyleLabel}</h3>
-          <ul>
-            {company.evidences.map((e) => (
-              <EvidenceLine key={`ws-${e.jobId}`} evidence={e} />
-            ))}
-          </ul>
+          {company.workStyleLabel && (
+            <>
+              <h3>{company.workStyleLabel}</h3>
+              <ul>
+                {company.evidences.map((e) => (
+                  <EvidenceLine key={`ws-${e.jobId}`} evidence={e} />
+                ))}
+              </ul>
+            </>
+          )}
           {company.welfares.map((w) => (
             <React.Fragment key={w.code}>
               <h3>{w.name}</h3>

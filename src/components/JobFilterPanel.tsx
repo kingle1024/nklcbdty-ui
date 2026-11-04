@@ -28,6 +28,7 @@ interface JobFilterPanelProps {
   welfareCategories: WelfareCategory[];
   onRemoteOnlyChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onWelfareChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onWelfareMatchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   /** 체크박스 id 가 문서 안에서 겹치지 않게 하는 접두어. PC 사이드바와 모바일 시트가 동시에 마운트될 수 있다. */
   idPrefix?: string;
 }
@@ -48,6 +49,7 @@ const JobFilterPanel: React.FC<JobFilterPanelProps> = ({
   welfareCategories,
   onRemoteOnlyChange,
   onWelfareChange,
+  onWelfareMatchChange,
   idPrefix = '',
 }) => (
   <div className="job-filter-panel">
@@ -63,9 +65,34 @@ const JobFilterPanel: React.FC<JobFilterPanelProps> = ({
         />
         <label htmlFor={`${idPrefix}remoteOnly`}>재택근무 회사만</label>
       </div>
-      {filters.remoteOnly && welfareCategories.length > 0 && (
+    </div>
+
+    {/* 재택과 따로 고른다. 재택도 켜면 재택 회사 중에서 거른다 */}
+    {welfareCategories.length > 0 && (
+      <div className="work-style-section">
+        <h2>복지</h2>
+        <div className="welfare-match" role="radiogroup" aria-label="복지 조건">
+          {([
+            ['ALL', '모두 있는 회사'],
+            ['ANY', '하나라도 있는 회사'],
+          ] as const).map(([value, label]) => {
+            const inputId = `${idPrefix}welfareMatch-${value}`;
+            return (
+              <label key={value} htmlFor={inputId} className="welfare-match__option">
+                <input
+                  type="radio"
+                  id={inputId}
+                  name={`${idPrefix}welfareMatch`}
+                  value={value}
+                  checked={filters.welfareMatch === value}
+                  onChange={onWelfareMatchChange}
+                />
+                {label}
+              </label>
+            );
+          })}
+        </div>
         <div className="category-list welfare-list" role="group" aria-label="복지">
-          <span className="welfare-list__title">복지 (모두 있는 회사만)</span>
           {welfareCategories.map((category) => {
             const inputId = `${idPrefix}welfare-${category.code}`;
             return (
@@ -82,8 +109,8 @@ const JobFilterPanel: React.FC<JobFilterPanelProps> = ({
             );
           })}
         </div>
-      )}
-    </div>
+      </div>
+    )}
 
     <h2>직군</h2>
     <form onSubmit={(e) => e.preventDefault()}>

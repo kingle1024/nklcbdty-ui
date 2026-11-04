@@ -14,9 +14,10 @@ import './Home.css';
 import CommonHeader from '../common/CommonHeader';
 import {
   WelfareCategory,
+  WelfareMatch,
   WorkStyleCompany,
   fetchActiveWelfareCategories,
-  fetchWorkStyleCompanies,
+  fetchFeatureCompanies,
 } from '../common/companyFeatureApi';
 
 // 필터 타입 정의
@@ -33,8 +34,10 @@ export interface Filters {
   includeNoExperience: boolean;
   /** 공고에서 재택근무가 확인된 회사만 */
   remoteOnly: boolean;
-  /** 복지 카테고리 코드. remoteOnly 일 때만 쓰고, 고른 것을 모두 가진 회사만(AND) */
+  /** 복지 카테고리 코드. 재택과 따로 고를 수 있고, 재택도 켜면 재택 회사 중에서 거른다 */
   welfare: string[];
+  /** 복지를 여러 개 골랐을 때 모두(ALL) / 하나라도(ANY) */
+  welfareMatch: WelfareMatch;
 }
 
 const DEFAULT_EXPERIENCE = { start: 0, end: 10 };
@@ -49,7 +52,7 @@ export const countActiveFilters = (filters: Filters): number => {
     filters.personalHistory.start !== DEFAULT_EXPERIENCE.start ||
     filters.personalHistory.end !== DEFAULT_EXPERIENCE.end;
   return selectedCategories + (experienceChanged ? 1 : 0) + (filters.includeNoExperience ? 0 : 1)
-    + (filters.remoteOnly ? 1 + filters.welfare.length : 0);
+    + (filters.remoteOnly ? 1 : 0) + filters.welfare.length;
 };
 
 const Home: React.FC = () => {
@@ -65,9 +68,10 @@ const Home: React.FC = () => {
     includeNoExperience: true,
     remoteOnly: false,
     welfare: [],
+    welfareMatch: 'ALL',
   });
   const [welfareCategories, setWelfareCategories] = useState<WelfareCategory[]>([]);
-  // 재택 필터에 맞는 회사(근거 포함). 필터가 꺼져 있으면 null
+  // 재택·복지 필터에 맞는 회사(근거 포함). 둘 다 꺼져 있으면 null
   const [featureCompanies, setFeatureCompanies] = useState<WorkStyleCompany[] | null>(null);
   const [featureLoading, setFeatureLoading] = useState<boolean>(false);
 
@@ -79,7 +83,7 @@ const Home: React.FC = () => {
 
   const welfareKey = filters.welfare.join(',');
   useEffect(() => {
-    if (!filters.remoteOnly) {
+    if (!filters.remoteOnly && !welfareKey) {
       setFeatureCompanies(null);
       setFeatureLoading(false);
       return;
@@ -87,13 +91,17 @@ const Home: React.FC = () => {
     // 체크를 빠르게 바꾸면 늦게 온 이전 응답이 덮지 않게
     let cancelled = false;
     setFeatureLoading(true);
-    fetchWorkStyleCompanies(WORK_STYLE, welfareKey ? welfareKey.split(',') : [])
+    fetchFeatureCompanies({
+      workStyle: filters.remoteOnly ? WORK_STYLE : null,
+      welfare: welfareKey ? welfareKey.split(',') : [],
+      match: filters.welfareMatch,
+    })
       .then((list) => {
         if (!cancelled) setFeatureCompanies(list);
       })
       .catch((e) => {
         if (cancelled) return;
-        console.error('재택 회사 조회 실패:', e);
+        console.error('재택·복지 회사 조회 실패:', e);
         setFeatureCompanies([]);
       })
       .finally(() => {
@@ -102,7 +110,7 @@ const Home: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [filters.remoteOnly, welfareKey]);
+  }, [filters.remoteOnly, welfareKey, filters.welfareMatch]);
 
   // 카테고리 데이터 로드
   useEffect(() => {
@@ -212,13 +220,20 @@ const Home: React.FC = () => {
   };
 
 
-  // 재택을 끄면 그 아래 복지 선택도 같이 비운다
+  // 재택과 복지는 따로 고른다. 재택을 꺼도 복지 선택은 남는다
   const handleRemoteOnlyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { checked } = event.target;
     setFilters(prevFilters => ({
       ...prevFilters,
       remoteOnly: checked,
-      welfare: checked ? prevFilters.welfare : [],
+    }));
+  };
+
+  const handleWelfareMatchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const match = event.target.value as WelfareMatch;
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      welfareMatch: match,
     }));
   };
 
@@ -244,6 +259,7 @@ const Home: React.FC = () => {
       includeNoExperience: true,
       remoteOnly: false,
       welfare: [],
+      welfareMatch: 'ALL',
     }));
   };
 
@@ -319,6 +335,7 @@ const Home: React.FC = () => {
               welfareCategories={welfareCategories}
               onRemoteOnlyChange={handleRemoteOnlyChange}
               onWelfareChange={handleWelfareChange}
+              onWelfareMatchChange={handleWelfareMatchChange}
             />
           </aside>
           <main className="content">
@@ -365,6 +382,7 @@ const Home: React.FC = () => {
               welfareCategories={welfareCategories}
               onRemoteOnlyChange={handleRemoteOnlyChange}
               onWelfareChange={handleWelfareChange}
+              onWelfareMatchChange={handleWelfareMatchChange}
               idPrefix="m-"
             />
           </div>

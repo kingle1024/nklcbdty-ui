@@ -32,10 +32,23 @@ interface ListContainerProps {
   onOpenFilter?: () => void;
   /** 기본값과 다른 필터 항목 수. 0 이면 배지를 숨긴다. */
   activeFilterCount?: number;
-  /** 재택 필터에 맞는 회사. null 이면 필터가 꺼진 것이고 회사 탭을 전부 보여 준다. */
+  /** 재택·복지 필터에 맞는 회사. null 이면 필터가 꺼진 것이고 회사 탭을 전부 보여 준다. */
   featureCompanies?: WorkStyleCompany[] | null;
   featureLoading?: boolean;
 }
+
+/** 재택·복지 조건에 맞는 회사가 없을 때 안내 문구 */
+const noFeatureMatchMessage = (filters: Filters): string => {
+  const welfare = filters.welfare.length === 0
+    ? ''
+    : filters.welfare.length === 1 || filters.welfareMatch === 'ALL'
+      ? '고른 복지를 모두 가진 '
+      : '고른 복지 중 하나라도 가진 ';
+  if (filters.remoteOnly) {
+    return welfare ? `${welfare}재택근무 회사가 없어요.` : '아직 재택근무가 확인된 회사가 없어요.';
+  }
+  return `${welfare}회사가 없어요.`;
+};
 
 // /api/company/list — 회사 코드별 채용 페이지 주소 ("채용 페이지로 가기" 버튼용)
 interface CompanyInfo {
@@ -305,14 +318,10 @@ const ListContainer: React.FC<ListContainerProps> = ({
         {featureLoading ? (
           <div className="list-loading">
             <IonSpinner name="crescent" />
-            <p>재택근무 회사를 찾는 중입니다…</p>
+            <p>{filters.remoteOnly ? '재택근무 회사를 찾는 중입니다…' : '복지 조건에 맞는 회사를 찾는 중입니다…'}</p>
           </div>
         ) : noFeatureMatch ? (
-          <div className="no-data-message">
-            {filters.welfare.length > 0
-              ? '고른 복지를 모두 가진 재택근무 회사가 없어요.'
-              : '아직 재택근무가 확인된 회사가 없어요.'}
-          </div>
+          <div className="no-data-message">{noFeatureMatchMessage(filters)}</div>
         ) : (<>
         <div className="button-section">         
           {visibleCompanies.map((comp) => (
