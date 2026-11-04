@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { IonButton, IonContent, IonIcon, IonPage, IonSpinner } from '@ionic/react';
-import { arrowDownOutline, arrowUpOutline, refreshOutline } from 'ionicons/icons';
+import { addOutline, arrowDownOutline, arrowUpOutline, refreshOutline } from 'ionicons/icons';
 import { Helmet } from 'react-helmet';
 import CommonHeader from '../common/CommonHeader';
 import AdminSidebar from '../common/AdminSidebar';
@@ -15,6 +15,8 @@ import {
   splitKeywords,
   updateWelfareCategory,
 } from '../common/companyFeatureApi';
+import './AdminTroubleshooting.css';
+import './AdminWelfareCategories.css';
 
 /** 행마다 편집 중인 값. 저장 전까지 서버 값과 따로 들고 있는다. */
 interface Draft {
@@ -23,17 +25,6 @@ interface Draft {
 }
 
 const toDraft = (c: WelfareCategory): Draft => ({ name: c.name, keywords: c.keywords.join(', ') });
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '6px 8px',
-  border: '1px solid #d0d5dd',
-  borderRadius: 6,
-  fontSize: 14,
-  boxSizing: 'border-box',
-};
-
-const cell: React.CSSProperties = { padding: '10px 8px', borderBottom: '1px solid #f0f0f0', verticalAlign: 'top' };
 
 const AdminWelfareCategories: React.FC = () => {
   const history = useHistory();
@@ -144,108 +135,138 @@ const AdminWelfareCategories: React.FC = () => {
       </Helmet>
       <CommonHeader />
       <IonContent>
-        <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+        <div className="ts-layout">
           <AdminSidebar />
-          <div style={{ flex: 1, minWidth: 0, maxWidth: 1000, margin: '0 auto', padding: 16 }}>
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div className="ts-main">
+            <header className="ts-head">
               <div>
-                <h1 style={{ margin: 0, fontSize: 22 }}>복지 카테고리</h1>
-                <p style={{ margin: '4px 0 0', color: '#888', fontSize: 13 }}>
+                <h1>복지 카테고리</h1>
+                <p>
                   배치가 채용공고 본문에서 키워드를 찾아 회사별 복지를 채웁니다. 키워드를 바꾸면 다음 배치 실행(매일 11시)부터 반영돼요.
-                  비활성화하면 재택 회사 화면의 필터와 태그에서 빠집니다.
+                  비활성화하면 메인 화면의 복지 필터와 태그에서 빠집니다.
                 </p>
               </div>
-              <IonButton fill="outline" onClick={load} disabled={loading}>
-                <IonIcon slot="start" icon={refreshOutline} />
-                새로고침
-              </IonButton>
+              <div className="ts-head-actions">
+                <IonButton fill="outline" size="default" onClick={load} disabled={loading}>
+                  <IonIcon slot="start" icon={refreshOutline} />
+                  새로고침
+                </IonButton>
+              </div>
             </header>
 
-            <form
-              onSubmit={create}
-              style={{ display: 'grid', gridTemplateColumns: '140px 140px 1fr auto', gap: 8, alignItems: 'center', marginBottom: 16 }}
-            >
-              <input
-                style={inputStyle}
-                placeholder="코드 (예: GYM)"
-                aria-label="새 카테고리 코드"
-                value={newCategory.code}
-                onChange={(e) => setNewCategory({ ...newCategory, code: e.target.value.toUpperCase() })}
-              />
-              <input
-                style={inputStyle}
-                placeholder="이름 (예: 운동)"
-                aria-label="새 카테고리 이름"
-                value={newCategory.name}
-                onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-              />
-              <input
-                style={inputStyle}
-                placeholder="키워드 (쉼표로 구분: 피트니스, 헬스장, 운동비)"
-                aria-label="새 카테고리 키워드"
-                value={newCategory.keywords}
-                onChange={(e) => setNewCategory({ ...newCategory, keywords: e.target.value })}
-              />
-              <IonButton type="submit" disabled={creating || !newCategory.code || !newCategory.name || !newCategory.keywords}>
-                추가
-              </IonButton>
+            <form onSubmit={create} className="ts-card wf-card wf-new">
+              <h2 className="wf-new-title">새 카테고리</h2>
+              <div className="wf-fields">
+                <label className="wf-field">
+                  <span>코드</span>
+                  <input
+                    placeholder="예: GYM"
+                    value={newCategory.code}
+                    onChange={(e) => setNewCategory({ ...newCategory, code: e.target.value.toUpperCase() })}
+                  />
+                </label>
+                <label className="wf-field">
+                  <span>이름</span>
+                  <input
+                    placeholder="예: 운동"
+                    value={newCategory.name}
+                    onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                  />
+                </label>
+                <label className="wf-field">
+                  <span>키워드 (쉼표로 구분)</span>
+                  <input
+                    placeholder="예: 피트니스, 헬스장, 운동비"
+                    value={newCategory.keywords}
+                    onChange={(e) => setNewCategory({ ...newCategory, keywords: e.target.value })}
+                  />
+                </label>
+              </div>
+              <div className="wf-new-foot">
+                <IonButton type="submit" disabled={creating || !newCategory.code || !newCategory.name || !newCategory.keywords}>
+                  <IonIcon slot="start" icon={addOutline} />
+                  추가
+                </IonButton>
+              </div>
             </form>
 
             {loading ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}><IonSpinner /></div>
+              <div className="ts-loading">
+                <IonSpinner name="crescent" />
+                <span>카테고리를 불러오는 중...</span>
+              </div>
+            ) : categories.length === 0 ? (
+              <div className="ts-empty">등록된 복지 카테고리가 없습니다.</div>
             ) : (
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-                <thead>
-                  <tr style={{ textAlign: 'left', color: '#888', fontSize: 12 }}>
-                    <th style={{ ...cell, width: 70 }}>순서</th>
-                    <th style={{ ...cell, width: 110 }}>코드</th>
-                    <th style={{ ...cell, width: 130 }}>이름</th>
-                    <th style={cell}>키워드 (쉼표로 구분)</th>
-                    <th style={{ ...cell, width: 170 }} />
-                  </tr>
-                </thead>
-                <tbody>
-                  {categories.map((c, i) => {
-                    const draft = drafts[c.id] ?? toDraft(c);
-                    const busy = busyId === c.id;
-                    return (
-                      <tr key={c.id} style={{ opacity: c.active ? 1 : 0.5 }} data-testid={`welfare-row-${c.code}`}>
-                        <td style={cell}>
-                          <button type="button" aria-label={`${c.name} 위로`} disabled={i === 0 || busyId !== null} onClick={() => move(i, -1)}>
+              <div className="ts-list">
+                {categories.map((c, i) => {
+                  const draft = drafts[c.id] ?? toDraft(c);
+                  const busy = busyId === c.id;
+                  return (
+                    <section
+                      key={c.id}
+                      className={`ts-card wf-card${c.active ? '' : ' inactive'}`}
+                      data-testid={`welfare-row-${c.code}`}
+                    >
+                      <div className="wf-card-head">
+                        <span className="wf-order">
+                          <button
+                            type="button"
+                            className="wf-icon-btn"
+                            aria-label={`${c.name} 위로`}
+                            disabled={i === 0 || busyId !== null}
+                            onClick={() => move(i, -1)}
+                          >
                             <IonIcon icon={arrowUpOutline} />
                           </button>
-                          <button type="button" aria-label={`${c.name} 아래로`} disabled={i === categories.length - 1 || busyId !== null} onClick={() => move(i, 1)}>
+                          <button
+                            type="button"
+                            className="wf-icon-btn"
+                            aria-label={`${c.name} 아래로`}
+                            disabled={i === categories.length - 1 || busyId !== null}
+                            onClick={() => move(i, 1)}
+                          >
                             <IonIcon icon={arrowDownOutline} />
                           </button>
-                        </td>
-                        <td style={{ ...cell, fontFamily: 'monospace' }}>{c.code}</td>
-                        <td style={cell}>
+                        </span>
+                        <span className="wf-name-preview">{c.name}</span>
+                        <span className="ts-mono">{c.code}</span>
+                        {!c.active && <span className="wf-badge">비활성</span>}
+                        <span className="wf-head-actions">
+                          <IonButton size="small" disabled={busy || !isDirty(c)} onClick={() => save(c)}>저장</IonButton>
+                          <IonButton
+                            size="small"
+                            fill="outline"
+                            color={c.active ? 'medium' : 'success'}
+                            disabled={busy}
+                            onClick={() => toggleActive(c)}
+                          >
+                            {c.active ? '비활성화' : '활성화'}
+                          </IonButton>
+                        </span>
+                      </div>
+                      <div className="wf-fields">
+                        <label className="wf-field">
+                          <span>이름</span>
                           <input
-                            style={inputStyle}
                             aria-label={`${c.code} 이름`}
                             value={draft.name}
                             onChange={(e) => setDrafts({ ...drafts, [c.id]: { ...draft, name: e.target.value } })}
                           />
-                        </td>
-                        <td style={cell}>
+                        </label>
+                        <label className="wf-field">
+                          <span>키워드 (쉼표로 구분)</span>
                           <textarea
-                            style={{ ...inputStyle, minHeight: 54, resize: 'vertical' }}
                             aria-label={`${c.code} 키워드`}
                             value={draft.keywords}
                             onChange={(e) => setDrafts({ ...drafts, [c.id]: { ...draft, keywords: e.target.value } })}
                           />
-                        </td>
-                        <td style={{ ...cell, whiteSpace: 'nowrap' }}>
-                          <IonButton size="small" disabled={busy || !isDirty(c)} onClick={() => save(c)}>저장</IonButton>
-                          <IonButton size="small" fill="outline" color={c.active ? 'medium' : 'success'} disabled={busy} onClick={() => toggleActive(c)}>
-                            {c.active ? '비활성화' : '활성화'}
-                          </IonButton>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                        </label>
+                      </div>
+                    </section>
+                  );
+                })}
+              </div>
             )}
           </div>
         </div>

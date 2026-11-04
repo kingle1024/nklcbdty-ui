@@ -1,0 +1,168 @@
+/* 복지 카테고리 관리. 레이아웃·머리말·카드는 AdminTroubleshooting.css 의 ts- 클래스를 같이 쓰고,
+   여기에는 편집 칸과 행 버튼에만 필요한 것을 둔다. 색·모양은 theme.css 토큰. */
+
+.wf-card {
+  cursor: default;
+}
+
+.wf-card:hover {
+  box-shadow: var(--shadow-card);
+}
+
+.wf-card.inactive {
+  background: var(--surface-field);
+  box-shadow: none;
+}
+
+.wf-card.inactive .wf-name-preview {
+  color: var(--text-muted);
+}
+
+.wf-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.wf-name-preview {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.wf-badge {
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.wf-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.wf-head-actions ion-button {
+  margin: 0;
+}
+
+/* 순서 바꾸기 */
+.wf-order {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.wf-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 15px;
+  color: var(--text-secondary);
+  background: var(--surface-field);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.wf-icon-btn:hover:not(:disabled) {
+  color: var(--brand-primary);
+  border-color: var(--brand-primary);
+}
+
+.wf-icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* 이름 + 키워드. 좁으면 위아래로 */
+.wf-fields {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 10px;
+}
+
+.wf-new .wf-fields {
+  grid-template-columns: 140px 160px 1fr;
+}
+
+.wf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.wf-field > span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.wf-field input,
+.wf-field textarea {
+  width: 100%;
+  padding: 9px 11px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-body);
+  background-color: var(--surface-field);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.wf-field textarea {
+  min-height: 60px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.wf-field input:focus,
+.wf-field textarea:focus {
+  border-color: var(--brand-primary);
+  background-color: var(--surface);
+}
+
+.wf-new {
+  margin-bottom: 16px;
+}
+
+.wf-new-title {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.wf-new-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.wf-new-foot ion-button {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .wf-fields,
+  .wf-new .wf-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .wf-head-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

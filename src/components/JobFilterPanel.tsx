@@ -73,18 +73,23 @@ const JobFilterPanel: React.FC<JobFilterPanelProps> = ({
         <h2>복지</h2>
         <div className="welfare-match" role="radiogroup" aria-label="복지 조건">
           {([
-            ['ALL', '모두 있는 회사'],
-            ['ANY', '하나라도 있는 회사'],
+            ['ALL', '모두 있음'],
+            ['ANY', '하나라도 있음'],
           ] as const).map(([value, label]) => {
             const inputId = `${idPrefix}welfareMatch-${value}`;
+            const selected = filters.welfareMatch === value;
             return (
-              <label key={value} htmlFor={inputId} className="welfare-match__option">
+              <label
+                key={value}
+                htmlFor={inputId}
+                className={`welfare-match__option${selected ? ' is-selected' : ''}`}
+              >
                 <input
                   type="radio"
                   id={inputId}
                   name={`${idPrefix}welfareMatch`}
                   value={value}
-                  checked={filters.welfareMatch === value}
+                  checked={selected}
                   onChange={onWelfareMatchChange}
                 />
                 {label}
