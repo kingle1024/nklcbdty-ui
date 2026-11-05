@@ -1,0 +1,463 @@
+.resume-review {
+  margin-top: 8px;
+  max-width: 860px;
+}
+
+.rr-guide {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.rr-step {
+  margin-bottom: 20px;
+}
+
+.rr-step-title {
+  margin: 0 0 10px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.rr-hint {
+  margin: 6px 0 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.rr-inline-hint {
+  margin-left: 8px;
+}
+
+/* 공고 입력 방식 · 본문 보기 전환 */
+.rr-segment {
+  display: inline-flex;
+  padding: 3px;
+  margin-bottom: 10px;
+  background-color: var(--surface-field);
+  border-radius: var(--radius-pill);
+}
+
+.rr-segment-option {
+  padding: 6px 14px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.rr-segment-option.is-selected {
+  background-color: var(--surface);
+  color: var(--brand-primary);
+  box-shadow: var(--shadow-card);
+}
+
+.rr-segment-option:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 1px;
+}
+
+.rr-segment--small {
+  margin-bottom: 0;
+}
+
+.rr-segment--small .rr-segment-option {
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+.rr-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface);
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-body);
+}
+
+.rr-input:focus {
+  outline: none;
+  border-color: var(--brand-primary);
+}
+
+.rr-textarea {
+  resize: vertical;
+  min-height: 140px;
+  line-height: 1.6;
+}
+
+/* 실제 input 은 숨기고 버튼으로 연다. display:none 이면 일부 브라우저에서 click() 이 안 먹는다. */
+.rr-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.resume-review ion-button {
+  text-transform: none;
+  font-weight: 600;
+  --border-radius: var(--radius-sm);
+  margin: 0;
+}
+
+.rr-files {
+  list-style: none;
+  margin: 10px 0 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rr-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 12px;
+  background-color: var(--surface-field);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.rr-file-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--text-body);
+}
+
+.rr-file-size {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.rr-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.rr-icon-btn:hover {
+  background-color: var(--surface);
+  color: var(--text-body);
+}
+
+.rr-submit {
+  margin: 4px 0 0 0;
+}
+
+.rr-error {
+  margin: 14px 0 0 0;
+  padding: 12px;
+  background-color: var(--danger-tint);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--danger);
+}
+
+.rr-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 0 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* 결과 */
+.rr-result {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rr-result-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.rr-notice {
+  margin: 0;
+  padding: 10px 12px;
+  background-color: var(--brand-primary-tint);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-body);
+}
+
+.rr-card {
+  padding: 18px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+.rr-card h4 {
+  margin: 0 0 12px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.rr-badge {
+  display: inline-block;
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.rr-badge--matched {
+  background-color: var(--success-tint);
+  color: var(--success);
+}
+
+.rr-badge--partial {
+  background-color: var(--brand-primary-tint);
+  color: var(--brand-primary);
+}
+
+.rr-badge--missing {
+  background-color: var(--danger-tint);
+  color: var(--danger);
+}
+
+.rr-fit-list,
+.rr-changes,
+.rr-suggestions {
+  margin: 0;
+  padding: 0;
+}
+
+.rr-fit-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rr-fit {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.rr-fit-req {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text-body);
+}
+
+.rr-fit-evidence {
+  margin: 2px 0 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.rr-doc-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rr-doc-head .rr-doc-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.rr-doc-count {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--brand-primary);
+}
+
+.rr-doc-summary {
+  margin: 0 0 14px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.rr-changes {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rr-change {
+  padding: 12px;
+  background-color: var(--surface-field);
+  border-radius: var(--radius-sm);
+}
+
+.rr-change.is-pending {
+  opacity: 0.85;
+  border: 1px dashed var(--border);
+}
+
+.rr-change-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.rr-change-no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--brand-primary);
+  color: #fff;
+  font-weight: 700;
+}
+
+.rr-change-section {
+  font-weight: 700;
+  color: var(--text-body);
+}
+
+.rr-change-type {
+  color: var(--text-muted);
+}
+
+.rr-diff {
+  display: flex;
+  gap: 6px;
+  margin: 4px 0 0 0;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.rr-diff-mark {
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.rr-diff--before {
+  background-color: var(--danger-tint);
+  color: var(--danger);
+}
+
+.rr-diff--before del {
+  text-decoration-thickness: 1px;
+}
+
+.rr-diff--after {
+  background-color: var(--success-tint);
+  color: var(--text-body);
+}
+
+.rr-diff--after .rr-diff-mark {
+  color: var(--success);
+}
+
+.rr-diff--after ins {
+  text-decoration: none;
+}
+
+.rr-diff--anchor {
+  padding: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.rr-change-reason {
+  margin: 8px 0 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.rr-doc-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 18px 0 8px 0;
+}
+
+.rr-doc-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.rr-doc-text {
+  margin: 0;
+  max-height: 420px;
+  overflow: auto;
+  padding: 14px;
+  background-color: var(--surface-field);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-body);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.rr-suggestions {
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-body);
+}
+
+@media (max-width: 640px) {
+  .rr-card {
+    padding: 14px;
+  }
+
+  .rr-inline-hint {
+    display: block;
+    margin: 6px 0 0 0;
+  }
+}
