@@ -14,6 +14,10 @@
 //   [Blind] 블라인드에 올라온 채용 정보 보셨어요?
 //   [LINE PLUS] Platform Server QA Engineer (채용)
 //   https://m.jobkorea.co.kr/Recruit/GI_Read/50271598?...
+//
+// 원티드 공유 글은 한 문장에 회사명·공고명·주소가 다 들어 있다. 대괄호는 회사명이 아니라 공고명의 일부다:
+//
+//   에스케이그룹 (SK)에서 채용 중인 [SK inc․(AX)] Application 구축/운영 전문가에 지원해 보세요. http://wntd.co/57094502
 
 export interface ParsedJobText {
   /** 붙여넣은 글에서 찾은 첫 주소 */
@@ -57,6 +61,18 @@ const splitBlindTitle = (line: string): { title: string; companyName: string } =
     return { title: line, companyName: '' };
   }
   return { title: line.slice(head[0].length).trim(), companyName: head[1].trim() };
+};
+
+/** 원티드 공유 문장. "{회사명}에서 채용 중인 {공고명}에 지원해 보세요." */
+const WANTED_SENTENCE = /^(.+?)에서 채용 중인 (.+)에 지원해 보세요[.!]?$/;
+
+/** 원티드 문장이면 회사명과 공고명을 꺼낸다. 아니면 null. */
+const splitWantedSentence = (line: string): { title: string; companyName: string } | null => {
+  const match = WANTED_SENTENCE.exec(line);
+  if (!match) {
+    return null;
+  }
+  return { companyName: match[1].trim(), title: match[2].trim() };
 };
 
 /** 법인격 표기가 시작하는 자리. 없으면 -1. */
@@ -132,7 +148,9 @@ export const parsePastedJobText = (raw: string): ParsedJobText | null => {
     return { url, companyName: '', title: '' };
   }
 
-  const { title, companyName } = fromBlind ? splitBlindTitle(lines[0]) : splitCompany(lines[0]);
+  const { title, companyName } = fromBlind
+    ? splitBlindTitle(lines[0])
+    : splitWantedSentence(lines[0]) ?? splitCompany(lines[0]);
   // 셋째 줄부터는 무엇인지 모른다. 버리지 말고 제목 뒤에 붙여 메모로 남긴다.
   return { url, companyName, title: [title, ...lines.slice(1)].filter(Boolean).join('\n') };
 };

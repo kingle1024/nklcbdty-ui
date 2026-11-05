@@ -70,6 +70,24 @@ describe('parsePastedJobText', () => {
       .toBe('[토스] 서버 개발\n마감 9/30');
   });
 
+  it('원티드 공유 문장은 회사명·공고명·주소로 나눈다', () => {
+    const pasted = '에스케이그룹 (SK)에서 채용 중인 [SK inc․(AX)] Application 구축/운영 전문가에 지원해 보세요. http://wntd.co/57094502';
+
+    expect(parsePastedJobText(pasted)).toEqual({
+      url: 'http://wntd.co/57094502',
+      companyName: '에스케이그룹 (SK)',
+      title: '[SK inc․(AX)] Application 구축/운영 전문가',
+    });
+  });
+
+  it('원티드 문장이 주소와 다른 줄에 있어도 나눈다', () => {
+    expect(parsePastedJobText('토스에서 채용 중인 Server Developer에 지원해 보세요.\nhttps://wntd.co/1')).toEqual({
+      url: 'https://wntd.co/1',
+      companyName: '토스',
+      title: 'Server Developer',
+    });
+  });
+
   it('블라인드 공유 글은 인사말 줄을 버리고 대괄호를 회사명으로 쓴다', () => {
     const pasted = [
       '[Blind] 블라인드에 올라온 채용 정보 보셨어요? ',
