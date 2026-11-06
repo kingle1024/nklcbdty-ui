@@ -29,6 +29,7 @@ import './theme.css';
 import Mypage from './pages/Mypage';
 import MyCalendar from './pages/MyCalendar';
 import ResumeMatchPage from './pages/ResumeMatchPage';
+import ResumeReviewPage from './pages/ResumeReviewPage';
 import Calendar from './pages/Calendar';
 import Login from './pages/Login';
 import Email from './pages/EmailInquiry';
@@ -67,6 +68,7 @@ const App: React.FC = () => {
               {/* 마이페이지 안의 나의 캘린더. 로그인해야 쓸 수 있다. */}
               <Route path='/mypage/calendar' component={MyCalendar} exact={true} />
               <Route path='/mypage/resume' component={ResumeMatchPage} exact={true} />
+              <Route path='/mypage/resume-review' component={ResumeReviewPage} exact={true} />
               <Route path='/login' component={Login} exact={true} />
               <Route path='/email' component={Email} exact={true} />
               <Route path='/admin' component={AdminHome} exact={true} />
