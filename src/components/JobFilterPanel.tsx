@@ -34,7 +34,7 @@ interface JobFilterPanelProps {
 }
 
 /**
- * 근무형태·직군·경력 필터 패널. PC 에서는 왼쪽 사이드바에, 모바일에서는 필터 버튼으로 여는 바텀 시트에 들어간다.
+ * 직군·근무형태·복지·경력 필터 패널. PC 에서는 왼쪽 사이드바에, 모바일에서는 필터 버튼으로 여는 바텀 시트에 들어간다.
  * 상태는 Home 이 들고 있고 이 컴포넌트는 그리기만 한다.
  */
 const JobFilterPanel: React.FC<JobFilterPanelProps> = ({
@@ -53,6 +53,47 @@ const JobFilterPanel: React.FC<JobFilterPanelProps> = ({
   idPrefix = '',
 }) => (
   <div className="job-filter-panel">
+    <h2>직군</h2>
+    <form onSubmit={(e) => e.preventDefault()}>
+      {categoriesData.map((categoryData) => {
+        const isVisible = visibleCategories[categoryData.name] !== undefined
+          ? visibleCategories[categoryData.name]
+          : categoryData.visible;
+        const filterKey = categoryData.name.toLowerCase();
+
+        return (
+          <div key={categoryData.id}>
+            <span
+              onClick={() => onToggleCategory(categoryData.name)}
+              className="category-toggle"
+            >
+              {categoryData.name}
+            </span>
+            {isVisible && (
+              <div className="category-list">
+                {categoryData.categoryDtls.map((categoryDtl) => {
+                  const inputId = `${idPrefix}${categoryDtl.name}`;
+                  return (
+                    <div key={categoryDtl.id}>
+                      <input
+                        type="checkbox"
+                        id={inputId}
+                        value={categoryDtl.name}
+                        name={filterKey}
+                        checked={filters.categories[filterKey]?.includes(categoryDtl.name) || false}
+                        onChange={onCategoryChange}
+                      />
+                      <label htmlFor={inputId}>{categoryDtl.name}</label>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </form>
+
     {/* 회사 단위 필터. 공고 본문에서 자동으로 찾은 근무형태·복지로 회사 탭을 거른다 */}
     <div className="work-style-section">
       <h2>근무 형태</h2>
@@ -116,47 +157,6 @@ const JobFilterPanel: React.FC<JobFilterPanelProps> = ({
         </div>
       </div>
     )}
-
-    <h2>직군</h2>
-    <form onSubmit={(e) => e.preventDefault()}>
-      {categoriesData.map((categoryData) => {
-        const isVisible = visibleCategories[categoryData.name] !== undefined
-          ? visibleCategories[categoryData.name]
-          : categoryData.visible;
-        const filterKey = categoryData.name.toLowerCase();
-
-        return (
-          <div key={categoryData.id}>
-            <span
-              onClick={() => onToggleCategory(categoryData.name)}
-              className="category-toggle"
-            >
-              {categoryData.name}
-            </span>
-            {isVisible && (
-              <div className="category-list">
-                {categoryData.categoryDtls.map((categoryDtl) => {
-                  const inputId = `${idPrefix}${categoryDtl.name}`;
-                  return (
-                    <div key={categoryDtl.id}>
-                      <input
-                        type="checkbox"
-                        id={inputId}
-                        value={categoryDtl.name}
-                        name={filterKey}
-                        checked={filters.categories[filterKey]?.includes(categoryDtl.name) || false}
-                        onChange={onCategoryChange}
-                      />
-                      <label htmlFor={inputId}>{categoryDtl.name}</label>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </form>
 
     <div className="experience-section">
       <div className="experience-header">
