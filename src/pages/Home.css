@@ -168,6 +168,7 @@ label {
 
 /* 근무 형태(재택)·복지 섹션 (사이드바·모바일 시트 공용) */
 .work-style-section {
+  margin-top: 24px; /* 직군 목록 바로 아래에 붙으므로 위쪽 간격 */
   margin-bottom: 24px;
 }
 
