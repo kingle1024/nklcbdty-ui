@@ -8,7 +8,7 @@ import {
   IonSpinner,
   IonIcon,
 } from '@ionic/react';
-import { lockClosedOutline, peopleOutline, trashOutline, logOutOutline, bugOutline, briefcaseOutline } from 'ionicons/icons';
+import { lockClosedOutline, peopleOutline, trashOutline, logOutOutline, bugOutline, briefcaseOutline, pulseOutline } from 'ionicons/icons';
 import { Helmet } from 'react-helmet';
 import CommonHeader from '../common/CommonHeader';
 import AdminSidebar from '../common/AdminSidebar';
@@ -159,6 +159,13 @@ const AdminHome: React.FC = () => {
                 <div>
                   <div style={{ fontWeight: 700 }}>구독 관리</div>
                   <div style={{ fontSize: 13, color: '#888' }}>구독자 현황 조회·관리</div>
+                </div>
+              </div>
+              <div style={cardStyle} onClick={() => history.push('/admin/visitors')}>
+                <IonIcon icon={pulseOutline} style={{ fontSize: 28, color: '#0891b2' }} />
+                <div>
+                  <div style={{ fontWeight: 700 }}>접속 로그</div>
+                  <div style={{ fontSize: 13, color: '#888' }}>사용자 접속 기록·국내 접속만 보기</div>
                 </div>
               </div>
               <div style={cardStyle} onClick={() => history.push('/admin/job-delete-requests')}>
