@@ -1,7 +1,7 @@
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { IonIcon } from '@ionic/react';
-import { gridOutline, peopleOutline, trashOutline, homeOutline, logOutOutline, bugOutline, briefcaseOutline, giftOutline } from 'ionicons/icons';
+import { gridOutline, peopleOutline, trashOutline, homeOutline, logOutOutline, bugOutline, briefcaseOutline, giftOutline, pulseOutline } from 'ionicons/icons';
 import { clearAdminAuth } from './adminToken';
 import { useAuth } from './AuthContextType';
 
@@ -9,6 +9,7 @@ import { useAuth } from './AuthContextType';
 const MENU: Array<{ label: string; path: string; icon: string }> = [
   { label: '관리자 홈', path: '/admin', icon: gridOutline },
   { label: '구독 관리', path: '/admin/subscriptions', icon: peopleOutline },
+  { label: '접속 로그', path: '/admin/visitors', icon: pulseOutline },
   { label: '공고 삭제요청', path: '/admin/job-delete-requests', icon: trashOutline },
   { label: '트러블슈팅 기록', path: '/admin/troubleshooting', icon: bugOutline },
   { label: '내 경력', path: '/admin/career', icon: briefcaseOutline },
