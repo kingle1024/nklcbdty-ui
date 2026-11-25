@@ -21,7 +21,7 @@ import './AdminTroubleshooting.css';
 import './AdminCareer.css';
 
 /** 항목 하나의 본문. 회사 행과 프로젝트 행이 같은 모양을 쓴다 */
-const EntryBody: React.FC<{ entry: CareerEntry }> = ({ entry }) => (
+export const EntryBody: React.FC<{ entry: CareerEntry }> = ({ entry }) => (
   <>
     {entry.summary && <p className="cr-summary">{entry.summary}</p>}
     {/* 저장된 원문 그대로. 줄바꿈과 글머리표가 내용의 일부다 */}
@@ -59,7 +59,7 @@ const EntryBody: React.FC<{ entry: CareerEntry }> = ({ entry }) => (
 );
 
 /** 항목 옆에 붙는 작은 '수정' 버튼 */
-const EditButton: React.FC<{ onClick: () => void; label?: string; icon?: string }> = ({
+export const EditButton: React.FC<{ onClick: () => void; label?: string; icon?: string }> = ({
   onClick,
   label = '수정',
   icon = createOutline,
@@ -70,7 +70,7 @@ const EditButton: React.FC<{ onClick: () => void; label?: string; icon?: string 
   </button>
 );
 
-const ProjectItem: React.FC<{ entry: CareerEntry; onEdit: (entry: CareerEntry) => void }> = ({
+export const ProjectItem: React.FC<{ entry: CareerEntry; onEdit: (entry: CareerEntry) => void }> = ({
   entry,
   onEdit,
 }) => {

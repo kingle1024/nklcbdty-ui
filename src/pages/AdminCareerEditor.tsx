@@ -3,6 +3,7 @@ import { IonModal, IonButton, IonIcon, IonSpinner } from '@ionic/react';
 import { closeOutline, trashOutline } from 'ionicons/icons';
 import {
   CareerEntry,
+  CareerEntryInput,
   CareerForm,
   ENTRY_TYPES,
   createCareer,
@@ -17,7 +18,18 @@ import {
 /** 무엇을 편집하는지. entry 가 있으면 수정, 없으면 preset 으로 채운 새 항목 */
 export type EditTarget = { entry: CareerEntry } | { preset: Partial<CareerForm> };
 
+/** 저장·삭제를 어디로 보낼지. 관리자 화면은 /api/admin/career, 마이페이지는 /api/my-career */
+export interface CareerEditorApi {
+  create: (input: CareerEntryInput) => Promise<unknown>;
+  update: (id: number, input: CareerEntryInput) => Promise<unknown>;
+  remove: (id: number) => Promise<void>;
+}
+
+const ADMIN_API: CareerEditorApi = { create: createCareer, update: updateCareer, remove: deleteCareer };
+
 interface Props {
+  /** 빠지면 관리자 경력 API */
+  api?: CareerEditorApi;
   target: EditTarget | null;
   /** 회사 칸 자동완성. 오타로 회사가 둘로 갈라지는 걸 막는다(이름이 글자까지 같아야 묶인다) */
   companies: string[];
@@ -32,7 +44,7 @@ interface Props {
  * 확인 창은 ion-alert 대신 window.confirm 을 쓴다 — 모달 위에 alert 를 겹치면 포커스가
  * 엉키기 쉽고, 삭제 한 번 묻는 데에는 이걸로 충분하다.
  */
-const AdminCareerEditor: React.FC<Props> = ({ target, companies, onClose, onSaved }) => {
+const AdminCareerEditor: React.FC<Props> = ({ api = ADMIN_API, target, companies, onClose, onSaved }) => {
   const [form, setForm] = useState<CareerForm>(emptyForm());
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
@@ -62,9 +74,9 @@ const AdminCareerEditor: React.FC<Props> = ({ target, companies, onClose, onSave
     try {
       const input = formToInput(form);
       if (editing) {
-        await updateCareer(editing.id, input);
+        await api.update(editing.id, input);
       } else {
-        await createCareer(input);
+        await api.create(input);
       }
       onSaved();
     } catch (e) {
@@ -80,7 +92,7 @@ const AdminCareerEditor: React.FC<Props> = ({ target, companies, onClose, onSave
     setIsSaving(true);
     setError('');
     try {
-      await deleteCareer(editing.id);
+      await api.remove(editing.id);
       onSaved();
     } catch (e) {
       setError(e instanceof Error ? e.message : '삭제하지 못했습니다.');

@@ -5,6 +5,7 @@ import { useHistory } from 'react-router-dom';
 /** 마이페이지 안의 메뉴. activeTab 은 각 페이지가 자기 값을 넘긴다. */
 const TABS = [
   { key: 'profile', label: '내 정보', path: '/mypage' },
+  { key: 'career', label: '내 경력', path: '/mypage/career' },
   { key: 'calendar', label: '나의 캘린더', path: '/mypage/calendar' },
   { key: 'resume', label: '이력서 매칭', path: '/mypage/resume' },
   { key: 'resume-review', label: '이력서 첨삭', path: '/mypage/resume-review' },

@@ -1,0 +1,28 @@
+/* 마이페이지 "내 경력". 카드·본문은 AdminTroubleshooting.css / AdminCareer.css 의 ts-·cr- 클래스를 쓰고,
+   여기에는 마이페이지 본문 칸(.content) 안에 넣으며 달라지는 것만 둔다. */
+
+.my-career .ts-head h1 {
+  font-size: 20px;
+}
+
+.my-career .ts-head-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.my-career-empty div {
+  margin-top: 14px;
+}
+
+@media (max-width: 768px) {
+  /* 머리말 버튼이 제목 옆에 끼면 375px 에서 제목이 세로로 찌그러진다 */
+  .my-career .ts-head {
+    flex-direction: column;
+  }
+
+  .my-career .ts-head-actions {
+    justify-content: flex-start;
+  }
+}
