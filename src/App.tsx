@@ -27,6 +27,7 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme.css';
 import Mypage from './pages/Mypage';
+import MyCareer from './pages/MyCareer';
 import MyCalendar from './pages/MyCalendar';
 import ResumeMatchPage from './pages/ResumeMatchPage';
 import ResumeReviewPage from './pages/ResumeReviewPage';
@@ -68,6 +69,7 @@ const App: React.FC = () => {
               <Route path='/mypage' component={Mypage} exact={true} />
               {/* 마이페이지 안의 나의 캘린더. 로그인해야 쓸 수 있다. */}
               <Route path='/mypage/calendar' component={MyCalendar} exact={true} />
+              <Route path='/mypage/career' component={MyCareer} exact={true} />
               <Route path='/mypage/resume' component={ResumeMatchPage} exact={true} />
               <Route path='/mypage/resume-review' component={ResumeReviewPage} exact={true} />
               <Route path='/login' component={Login} exact={true} />

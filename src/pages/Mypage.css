@@ -79,6 +79,10 @@
     --inner-padding-end: 0;
     --inner-border-width: 0;
     text-align: center;
+    /* 탭이 5개라 375px 에서 한 칸이 60px 남짓이다. "캘린/더" 처럼 글자 중간에서 끊지 말고 띄어쓰기에서 끊는다 */
+    font-size: 13px;
+    word-break: keep-all;
+    line-height: 1.25;
   }
 
   .content {
